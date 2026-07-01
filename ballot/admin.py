@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
-from django.urls import path, reverse
 from django.utils.html import format_html
 
 from .models import (
@@ -99,7 +97,6 @@ class NomineeAdmin(admin.ModelAdmin):
         "is_active",
         "contact_email",
         "photo_preview",
-        "approval_buttons",
         "created_at",
     )
     list_filter = ("approval_status", "category", "is_active")
@@ -122,52 +119,6 @@ class NomineeAdmin(admin.ModelAdmin):
         ("Decision Times", {"fields": ("approved_at", "rejected_at")}),
         ("Meta", {"fields": ("created_at", "updated_at", "deleted_at")}),
     )
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                "<slug:nominee_id>/approve/",
-                self.admin_site.admin_view(self.approve_nominee_view),
-                name="ballot_nominee_approve",
-            ),
-            path(
-                "<slug:nominee_id>/reject/",
-                self.admin_site.admin_view(self.reject_nominee_view),
-                name="ballot_nominee_reject",
-            ),
-        ]
-        return custom_urls + urls
-
-    def approve_nominee_view(self, request, nominee_id):
-        nominee = self.get_object(request, nominee_id)
-        if nominee:
-            nominee.approve()
-            self.message_user(request, f"{nominee.name} approved and now appears on the ballot.", messages.SUCCESS)
-        return HttpResponseRedirect(reverse("admin:ballot_nominee_changelist"))
-
-    def reject_nominee_view(self, request, nominee_id):
-        nominee = self.get_object(request, nominee_id)
-        if nominee:
-            nominee.reject()
-            self.message_user(request, f"{nominee.name} rejected.", messages.WARNING)
-        return HttpResponseRedirect(reverse("admin:ballot_nominee_changelist"))
-
-    def approval_buttons(self, obj):
-        approve_url = reverse("admin:ballot_nominee_approve", args=[obj.pk])
-        reject_url = reverse("admin:ballot_nominee_reject", args=[obj.pk])
-
-        approve = format_html(
-            '<a class="button" style="background:#157347;color:white;padding:5px 9px;border-radius:6px;margin-right:4px;" href="{}">Approve</a>',
-            approve_url,
-        )
-        reject = format_html(
-            '<a class="button" style="background:#dc3545;color:white;padding:5px 9px;border-radius:6px;" href="{}">Reject</a>',
-            reject_url,
-        )
-        return format_html("{}{}", approve, reject)
-
-    approval_buttons.short_description = "Approve / Reject"
 
     def photo_preview(self, obj):
         if obj.photo:
