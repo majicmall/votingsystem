@@ -1,0 +1,13 @@
+{% extends "ballot/base.html" %}
+{% block title %}Nominee Signup | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Nominee Signup</h1>
+  <p>Submit a nominee in up to 5 categories.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn primary" type="submit">Submit Nominee</button>
+  </form>
+</section>
+{% endblock %}

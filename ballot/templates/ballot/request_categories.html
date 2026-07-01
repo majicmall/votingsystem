@@ -1,0 +1,14 @@
+{% extends "ballot/base.html" %}
+{% block title %}Request Categories | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Request More Categories</h1>
+  <p>Nominee: <strong>{{ nominee.name }}</strong></p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn primary" type="submit">Submit Request</button>
+    <a class="btn" href="{% url 'assoc_dashboard' %}">Cancel</a>
+  </form>
+</section>
+{% endblock %}

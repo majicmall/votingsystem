@@ -1,0 +1,87 @@
+{% extends "ballot/base.html" %}
+{% block title %}Staff Dashboard | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="hero small">
+  <h1>Staff Dashboard</h1>
+  <p>Review category requests and monitor vote tallies.</p>
+  <a class="btn primary" href="{% url 'export_votes_csv' %}">Export CSV</a>
+  <a class="btn" href="/admin/">Admin</a>
+</section>
+
+<section class="card">
+  <h2>Pending Category Requests</h2>
+  {% if pending_requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nominee</th>
+          <th>Target Category</th>
+          <th>Requester</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in pending_requests %}
+          <tr>
+            <td>{{ req.source_nominee.name }}</td>
+            <td>{{ req.target_category.name }}</td>
+            <td>{{ req.requester }}</td>
+            <td>
+              <form method="post" action="{% url 'staff_request_approve' req.id %}" class="inline-form">
+                {% csrf_token %}
+                <button class="btn primary" type="submit">Approve</button>
+              </form>
+              <form method="post" action="{% url 'staff_request_deny' req.id %}" class="inline-form">
+                {% csrf_token %}
+                <button class="btn danger" type="submit">Deny</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No pending category requests.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Pending Manager Access</h2>
+  {% if pending_memberships %}
+    <p>Approve these in Django Admin → Association memberships.</p>
+    <ul>
+      {% for membership in pending_memberships %}
+        <li>{{ membership.user }} requested {{ membership.nominee.name }} — {{ membership.nominee.category.name }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No pending manager access requests.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Vote Tallies</h2>
+  {% if tallies %}
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Nominee</th>
+          <th>Votes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in tallies %}
+          <tr>
+            <td>{{ row.category__name }}</td>
+            <td>{{ row.nominee__name }}</td>
+            <td>{{ row.count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No votes yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

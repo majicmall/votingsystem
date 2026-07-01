@@ -1,0 +1,13 @@
+{% extends "ballot/base.html" %}
+{% block title %}Edit Nominee | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Edit {{ nominee.name }}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn primary" type="submit">Save</button>
+    <a class="btn" href="{% url 'assoc_dashboard' %}">Cancel</a>
+  </form>
+</section>
+{% endblock %}

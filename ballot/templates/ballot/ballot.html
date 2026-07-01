@@ -1,0 +1,107 @@
+{% extends "ballot/base.html" %}
+{% block title %}Vote | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Official Ballot</p>
+  <h1>ATL’s Hottest Awards Voting</h1>
+  <p>Select your favorite nominee in each category. One vote per email per category.</p>
+</section>
+
+<section class="card">
+  {% if settings.status_label != "active" %}
+    <div class="alert">
+      Voting is currently <strong>{{ settings.status_label|title }}</strong>.
+      {% if settings.start_at %}<br>Starts: {{ settings.start_at }}{% endif %}
+      {% if settings.end_at %}<br>Ends: {{ settings.end_at }}{% endif %}
+    </div>
+  {% endif %}
+
+  <form id="voteForm">
+    {% csrf_token %}
+
+    <label class="field-label" for="email">Your email</label>
+    <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+    {% if categories_display %}
+      {% for block in categories_display %}
+        <section class="category-block">
+          <h2>{{ block.category.name }}</h2>
+          {% if block.category.description %}
+            <p>{{ block.category.description }}</p>
+          {% endif %}
+
+          {% if block.nominees %}
+            <div class="nominee-grid">
+              {% for nominee in block.nominees %}
+                <label class="nominee-card">
+                  <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
+                  {% if nominee.photo %}
+                    <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+                  {% else %}
+                    <div class="photo-placeholder">ATL</div>
+                  {% endif %}
+                  <span>{{ nominee.name }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="muted">No nominees have been added yet.</p>
+          {% endif %}
+        </section>
+      {% endfor %}
+
+      <button class="btn primary" type="submit">Submit Votes</button>
+    {% else %}
+      <p class="muted">No active categories yet. Add categories in admin or run the seed command.</p>
+    {% endif %}
+  </form>
+
+  <div id="voteResult" class="result"></div>
+</section>
+
+<script>
+const form = document.getElementById("voteForm");
+const result = document.getElementById("voteResult");
+
+if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
+    const selections = {};
+
+    form.querySelectorAll("input[type=radio]:checked").forEach((input) => {
+      selections[input.dataset.category] = input.value;
+    });
+
+    result.innerHTML = "Submitting...";
+
+    const response = await fetch("{% url 'submit_votes' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf
+      },
+      body: JSON.stringify({ email, selections })
+    });
+
+    const data = await response.json();
+    result.innerHTML = `<strong>${data.message || "Done."}</strong>`;
+
+    if (data.saved && data.saved.length) {
+      result.innerHTML += "<ul>" + data.saved.map(v => `<li>${v.category}: ${v.nominee}</li>`).join("") + "</ul>";
+    }
+
+    if (data.skipped && data.skipped.length) {
+      result.innerHTML += "<p>Skipped:</p><ul>" + data.skipped.map(v => `<li>${v.category}: ${v.message}</li>`).join("") + "</ul>";
+    }
+
+    if (data.errors && data.errors.length) {
+      result.innerHTML += "<p>Errors:</p><ul>" + data.errors.map(v => `<li>${v.category}: ${v.message}</li>`).join("") + "</ul>";
+    }
+  });
+}
+</script>
+{% endblock %}

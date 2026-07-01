@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}ATL’s Hottest{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'ballot/site.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest</a>
+    <nav>
+      <a href="{% url 'ballot' %}">Vote</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'nominee_signup' %}">Nominee Signup</a>
+        <a href="{% url 'assoc_dashboard' %}">Dashboard</a>
+        {% if user.is_staff %}
+          <a href="{% url 'staff_dashboard' %}">Staff</a>
+          <a href="/admin/">Admin</a>
+        {% endif %}
+        <a href="{% url 'logout_then_home' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Create Account</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if BALLOT.announcement %}
+    <div class="ribbon">{{ BALLOT.announcement }}</div>
+  {% elif BALLOT.status != "active" %}
+    <div class="ribbon warning">Ballot status: {{ BALLOT.status|title }}</div>
+  {% endif %}
+
+  {% if messages %}
+    <section class="messages">
+      {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

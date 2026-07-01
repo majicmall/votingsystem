@@ -1,0 +1,13 @@
+{% extends "ballot/base.html" %}
+{% block title %}Login | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Login</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn primary" type="submit">Login</button>
+  </form>
+  <p><a href="{% url 'signup' %}">Create an account</a></p>
+</section>
+{% endblock %}

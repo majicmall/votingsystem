@@ -1,0 +1,25 @@
+{% extends "ballot/base.html" %}
+{% block title %}Join Association | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Request Nominee Manager Access</h1>
+
+  {% if not user.is_authenticated %}
+    <p>Please log in or create an account first.</p>
+    <a class="btn primary" href="{% url 'login' %}">Login</a>
+    <a class="btn" href="{% url 'signup' %}">Create Account</a>
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      <label class="field-label">Choose nominee</label>
+      <select name="nominee_id" required>
+        <option value="">Select nominee</option>
+        {% for nominee in nominees %}
+          <option value="{{ nominee.id }}">{{ nominee.name }} — {{ nominee.category.name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn primary" type="submit">Request Access</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "ballot/base.html" %}
+{% block title %}Upload Complete | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Upload Complete</h1>
+  <p>Thank you. The nominee photo for <strong>{{ nominee.name }}</strong> has been uploaded.</p>
+  <a class="btn primary" href="{% url 'ballot' %}">Back to Ballot</a>
+</section>
+{% endblock %}

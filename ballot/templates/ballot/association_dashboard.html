@@ -1,0 +1,61 @@
+{% extends "ballot/base.html" %}
+{% block title %}Dashboard | ATL’s Hottest{% endblock %}
+{% block content %}
+<section class="hero small">
+  <h1>Nominee Manager Dashboard</h1>
+  <p>Manage approved nominees, upload links, and category requests.</p>
+  <a class="btn primary" href="{% url 'nominee_signup' %}">Submit Nominee</a>
+  <a class="btn" href="{% url 'assoc_join' %}">Request Existing Nominee Access</a>
+</section>
+
+{% if pending_memberships %}
+<section class="card">
+  <h2>Pending Access Requests</h2>
+  <ul>
+    {% for membership in pending_memberships %}
+      <li>{{ membership.nominee.name }} — {{ membership.nominee.category.name }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>Approved Nominees</h2>
+
+  {% if active_memberships %}
+    <div class="dashboard-grid">
+      {% for membership in active_memberships %}
+        {% with nominee=membership.nominee %}
+          <article class="manager-card">
+            {% if nominee.photo %}
+              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+            {% else %}
+              <div class="photo-placeholder large">ATL</div>
+            {% endif %}
+            <h3>{{ nominee.name }}</h3>
+            <p>{{ nominee.category.name }}</p>
+
+            <label class="field-label">Public upload link</label>
+            <input readonly value="{{ request.scheme }}://{{ request.get_host }}{{ nominee.get_upload_url }}">
+
+            <div class="actions">
+              <a class="btn" href="{% url 'assoc_nominee_edit' nominee.id %}">Edit Profile</a>
+              <a class="btn" href="{% url 'request_categories' nominee.id %}">Request Categories</a>
+              <form method="post" action="{% url 'assoc_nominee_regen_link' nominee.id %}">
+                {% csrf_token %}
+                <button class="btn" type="submit">Regenerate Link</button>
+              </form>
+              <form method="post" action="{% url 'assoc_nominee_delete' nominee.id %}" onsubmit="return confirm('Archive this nominee?');">
+                {% csrf_token %}
+                <button class="btn danger" type="submit">Archive</button>
+              </form>
+            </div>
+          </article>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No approved nominees yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
