@@ -10,9 +10,7 @@
   --line: rgba(255,255,255,0.17);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -118,9 +116,7 @@ h1 {
   margin: 0 0 16px;
 }
 
-h2 {
-  color: var(--gold);
-}
+h2 { color: var(--gold); }
 
 .card {
   background: var(--panel);
@@ -152,9 +148,7 @@ h2 {
   margin: 14px 0 8px;
 }
 
-input,
-select,
-textarea {
+input, select, textarea {
   width: 100%;
   padding: 13px 14px;
   border: 1px solid var(--line);
@@ -163,8 +157,7 @@ textarea {
   color: #fff;
 }
 
-input[type="radio"],
-input[type="checkbox"] {
+input[type="radio"], input[type="checkbox"] {
   width: auto;
 }
 
@@ -173,15 +166,13 @@ input[type="checkbox"] {
   border-top: 1px solid var(--line);
 }
 
-.nominee-grid,
-.dashboard-grid {
+.nominee-grid, .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
 }
 
-.nominee-card,
-.manager-card {
+.nominee-card, .manager-card {
   display: block;
   background: var(--panel-strong);
   border: 1px solid var(--line);
@@ -189,12 +180,9 @@ input[type="checkbox"] {
   padding: 14px;
 }
 
-.nominee-card {
-  cursor: pointer;
-}
+.nominee-card { cursor: pointer; }
 
-.nominee-card img,
-.manager-card img {
+.nominee-card img, .manager-card img {
   width: 100%;
   height: 190px;
   object-fit: cover;
@@ -236,9 +224,7 @@ input[type="checkbox"] {
   color: #120806;
 }
 
-.btn.danger {
-  background: var(--danger);
-}
+.btn.danger { background: var(--danger); }
 
 .actions {
   display: flex;
@@ -246,9 +232,7 @@ input[type="checkbox"] {
   gap: 6px;
 }
 
-.inline-form {
-  display: inline-block;
-}
+.inline-form { display: inline-block; }
 
 .result {
   margin-top: 20px;
@@ -257,17 +241,14 @@ input[type="checkbox"] {
   background: rgba(0,0,0,0.25);
 }
 
-.muted {
-  color: var(--muted);
-}
+.muted { color: var(--muted); }
 
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th,
-td {
+th, td {
   padding: 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
@@ -279,11 +260,7 @@ td {
     flex-direction: column;
   }
 
-  h1 {
-    font-size: 2.5rem;
-  }
+  h1 { font-size: 2.5rem; }
 
-  .card {
-    padding: 18px;
-  }
+  .card { padding: 18px; }
 }
