@@ -25,28 +25,39 @@
 
     {% if categories_display %}
       {% for block in categories_display %}
-        <section class="category-block">
-          <h2>{{ block.category.name }}</h2>
-          {% if block.category.description %}
-            <p>{{ block.category.description }}</p>
-          {% endif %}
+        <section class="category-block" data-category-block>
+          <div class="category-heading-row">
+            <div>
+              <h2>{{ block.category.name }}</h2>
+              {% if block.category.description %}
+                <p>{{ block.category.description }}</p>
+              {% endif %}
+            </div>
+            <span class="nominee-count">{{ block.nominees|length }} nominee{{ block.nominees|length|pluralize }}</span>
+          </div>
 
           {% if block.nominees %}
             <div class="nominee-grid">
               {% for nominee in block.nominees %}
-                <label class="nominee-card">
+                <label class="nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}">
                   <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
-                  {% if nominee.photo %}
-                    <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
-                  {% else %}
-                    <div class="photo-placeholder">ATL</div>
-                  {% endif %}
-                  <span>{{ nominee.name }}</span>
+                  <div class="nominee-photo-frame">
+                    {% if nominee.photo %}
+                      <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+                    {% else %}
+                      <div class="photo-placeholder">ATL</div>
+                    {% endif %}
+                  </div>
+                  <span class="nominee-name">{{ nominee.name }}</span>
                 </label>
               {% endfor %}
             </div>
+
+            {% if block.nominees|length > 5 %}
+              <button type="button" class="btn see-more-btn" data-see-more>See More</button>
+            {% endif %}
           {% else %}
-            <p class="muted">No nominees have been added yet.</p>
+            <p class="muted">No approved nominees have been added yet.</p>
           {% endif %}
         </section>
       {% endfor %}
@@ -61,6 +72,16 @@
 </section>
 
 <script>
+document.querySelectorAll("[data-see-more]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const block = button.closest("[data-category-block]");
+    const hiddenCards = block.querySelectorAll(".nominee-extra.hidden");
+
+    hiddenCards.forEach((card) => card.classList.remove("hidden"));
+    button.remove();
+  });
+});
+
 const form = document.getElementById("voteForm");
 const result = document.getElementById("voteResult");
 

@@ -325,6 +325,7 @@ def nominee_signup(request):
                     "contact_email": form.cleaned_data.get("contact_email", ""),
                     "photo": photo,
                     "photo_submitted_at": timezone.now() if photo else None,
+                    "approval_status": Nominee.APPROVAL_PENDING,
                     "is_active": True,
                 },
             )

@@ -155,13 +155,29 @@ class Category(models.Model):
 
 class NomineeQuerySet(models.QuerySet):
     def active(self):
-        return self.filter(is_active=True)
+        return self.filter(is_active=True, approval_status=Nominee.APPROVAL_APPROVED)
+
+    def pending(self):
+        return self.filter(is_active=True, approval_status=Nominee.APPROVAL_PENDING)
+
+    def rejected(self):
+        return self.filter(approval_status=Nominee.APPROVAL_REJECTED)
 
     def for_ballot(self):
         return self.active().select_related("category").order_by("category__name", "name")
 
 
 class Nominee(models.Model):
+    APPROVAL_PENDING = "pending"
+    APPROVAL_APPROVED = "approved"
+    APPROVAL_REJECTED = "rejected"
+
+    APPROVAL_CHOICES = (
+        (APPROVAL_PENDING, "Pending"),
+        (APPROVAL_APPROVED, "Approved"),
+        (APPROVAL_REJECTED, "Rejected"),
+    )
+
     id = models.SlugField(primary_key=True, max_length=64)
     name = models.CharField(max_length=160)
     category = models.ForeignKey(
@@ -178,6 +194,15 @@ class Nominee(models.Model):
     contact_email = models.EmailField(blank=True, default="")
 
     upload_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_CHOICES,
+        default=APPROVAL_APPROVED,
+        help_text="Only approved nominees appear on the public ballot.",
+    )
+    approved_at = models.DateTimeField(blank=True, null=True)
+    rejected_at = models.DateTimeField(blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
