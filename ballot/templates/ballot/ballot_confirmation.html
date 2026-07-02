@@ -1,0 +1,75 @@
+{% extends "ballot/base.html" %}
+{% block title %}Ballot Confirmed | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<section class="confirmation-hero">
+  <p class="eyebrow">Ballot Received</p>
+  <h1>Thank You for Voting!</h1>
+
+  {% if confirmation %}
+    <p>
+      Your ATL’s Hottest Awards ballot confirmation has been sent to
+      <strong>{{ confirmation.email }}</strong>.
+    </p>
+  {% else %}
+    <p>Your ballot confirmation will appear here after you submit your votes.</p>
+  {% endif %}
+</section>
+
+<section class="card confirmation-card">
+  {% if confirmation %}
+    <div class="section-title-row">
+      <div>
+        <p class="eyebrow">Recorded Ballot</p>
+        <h2>Your Vote Summary</h2>
+      </div>
+      <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
+    </div>
+
+    {% if confirmation.submitted_votes %}
+      <div class="review-vote-list">
+        {% for item in confirmation.submitted_votes %}
+          <div class="review-vote-row">
+            <div>
+              <strong>{{ item.category }}</strong>
+              <span>{{ item.nominee }}</span>
+            </div>
+            <span class="status-pill status-live">Recorded</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if confirmation.duplicate_votes %}
+      <div class="duplicate-vote-panel">
+        <h3>Previously Recorded Votes</h3>
+        <p>These categories already had a vote recorded for this email address.</p>
+
+        <div class="review-vote-list">
+          {% for item in confirmation.duplicate_votes %}
+            <div class="review-vote-row">
+              <div>
+                <strong>{{ item.category }}</strong>
+                <span>{{ item.nominee }}</span>
+              </div>
+              <span class="status-pill">Already Voted</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="muted">No ballot confirmation is currently available.</p>
+    <a class="btn primary" href="{% url 'ballot' %}">Start Voting</a>
+  {% endif %}
+</section>
+
+<section class="card chosen-panel">
+  <p class="eyebrow">Special Message</p>
+  <h2>You’ve Been Chosen...</h2>
+  <p>
+    Watch for red carpet updates, event announcements, nominee highlights, sponsor offers,
+    winner announcements, and special prize opportunities when applicable.
+  </p>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "ballot/base.html" %}
+{% block title %}Review Ballot | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<section class="hero small ballot-review-hero">
+  <p class="eyebrow">Final Review</p>
+  <h1>Review Your Votes</h1>
+  <p>Confirm your selections, change any category if needed, then submit your final ballot.</p>
+</section>
+
+<section class="card ballot-review-card">
+  <div class="section-title-row">
+    <div>
+      <p class="eyebrow">Your Ballot</p>
+      <h2>Selected Nominees</h2>
+    </div>
+    <a class="btn" href="{% url 'ballot' %}">Continue Voting</a>
+  </div>
+
+  {% if review_items %}
+    <div class="review-vote-list">
+      {% for item in review_items %}
+        <div class="review-vote-row">
+          <div>
+            <strong>{{ item.category.name }}</strong>
+            <span>{{ item.nominee.name }}</span>
+          </div>
+
+          <a class="btn" href="{% url 'ballot_category' item.category.slug %}">Change Vote</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'submit_final_ballot' %}" class="final-ballot-form">
+      {% csrf_token %}
+
+      <label class="field-label" for="final_vote_email">Email Address</label>
+      <input id="final_vote_email" name="email" type="email" required placeholder="you@example.com">
+
+      <p class="muted">
+        Each email address may vote once per category. Your confirmation email will be sent here.
+      </p>
+
+      {% if settings.status_label == "active" %}
+        <button class="btn primary final-submit-btn" type="submit">Submit Final Ballot</button>
+      {% else %}
+        <button class="btn primary final-submit-btn" type="button" disabled>Voting Not Active Yet</button>
+      {% endif %}
+    </form>
+  {% else %}
+    <div class="empty-nominee-access">
+      <h3>No votes selected yet.</h3>
+      <p>Choose a category and select your favorite nominee to begin building your ballot.</p>
+      <a class="btn primary" href="{% url 'ballot' %}">Choose a Category</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

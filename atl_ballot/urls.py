@@ -16,6 +16,11 @@ urlpatterns = [
 
     # Ballot
     path("ballot/", ballot_views.ballot_view, name="ballot"),
+    path("ballot/category/<slug:category_slug>/", ballot_views.ballot_category_view, name="ballot_category"),
+    path("ballot/select/<slug:category_slug>/<slug:nominee_id>/", ballot_views.select_ballot_nominee, name="select_ballot_nominee"),
+    path("ballot/review/", ballot_views.ballot_review, name="ballot_review"),
+    path("ballot/submit-final/", ballot_views.submit_final_ballot, name="submit_final_ballot"),
+    path("ballot/confirmation/", ballot_views.ballot_confirmation, name="ballot_confirmation"),
     path("submit-votes/", ballot_views.submit_votes, name="submit_votes"),
 
     # Accounts

@@ -168,31 +168,38 @@ def landing_page(request):
 @require_http_methods(["GET"])
 def ballot_view(request):
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+
     categories = (
         Category.objects.filter(is_active=True)
-        .prefetch_related("nominees")
         .order_by("sort_order", "name")
     )
 
+    selections = request.session.get("ballot_selections", {})
+
     category_blocks = []
-
     for category in categories:
-        nominees = [
-            nominee
-            for nominee in category.nominees.all()
-            if nominee.is_active and nominee.approval_status == Nominee.APPROVAL_APPROVED
-        ]
+        approved_count = Nominee.objects.filter(
+            category=category,
+            is_active=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).count()
 
-        visible_nominees = nominees[:6]
-        placeholder_count = max(0, 6 - len(visible_nominees))
+        selected_nominee = None
+        selected_nominee_id = selections.get(category.slug)
+
+        if selected_nominee_id:
+            selected_nominee = Nominee.objects.filter(
+                id=selected_nominee_id,
+                category=category,
+                is_active=True,
+                approval_status=Nominee.APPROVAL_APPROVED,
+            ).first()
 
         category_blocks.append(
             {
                 "category": category,
-                "nominees": visible_nominees,
-                "total_nominees": len(nominees),
-                "placeholder_count": placeholder_count,
-                "placeholders": range(placeholder_count),
+                "approved_count": approved_count,
+                "selected_nominee": selected_nominee,
             }
         )
 
@@ -202,6 +209,7 @@ def ballot_view(request):
         {
             "settings": settings_obj,
             "category_blocks": category_blocks,
+            "selections": selections,
         },
     )
 
@@ -683,3 +691,305 @@ def logout_then_home(request):
 
 def healthz(request):
     return JsonResponse({"status": "ok", "app": "atlshottestawards"})
+
+
+@require_http_methods(["GET"])
+def ballot_category_view(request, category_slug):
+    settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+
+    category = get_object_or_404(Category, slug=category_slug, is_active=True)
+
+    nominees = list(
+        Nominee.objects.filter(
+            category=category,
+            is_active=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).order_by("name")
+    )
+
+    placeholder_count = max(0, 6 - len(nominees))
+    selections = request.session.get("ballot_selections", {})
+    selected_nominee_id = selections.get(category.slug)
+
+    return render(
+        request,
+        "ballot/ballot_category.html",
+        {
+            "settings": settings_obj,
+            "category": category,
+            "nominees": nominees,
+            "placeholder_count": placeholder_count,
+            "placeholders": range(placeholder_count),
+            "selected_nominee_id": selected_nominee_id,
+        },
+    )
+
+
+@require_http_methods(["POST"])
+@csrf_protect
+def select_ballot_nominee(request, category_slug, nominee_id):
+    category = get_object_or_404(Category, slug=category_slug, is_active=True)
+    nominee = get_object_or_404(
+        Nominee,
+        id=nominee_id,
+        category=category,
+        is_active=True,
+        approval_status=Nominee.APPROVAL_APPROVED,
+    )
+
+    selections = request.session.get("ballot_selections", {})
+    selections[category.slug] = nominee.id
+    request.session["ballot_selections"] = selections
+    request.session.modified = True
+
+    messages.success(request, f"You selected {nominee.name} for {category.name}.")
+
+    action = request.POST.get("next_action", "review")
+
+    if action == "continue":
+        return redirect("ballot")
+
+    return redirect("ballot_review")
+
+
+@require_http_methods(["GET"])
+def ballot_review(request):
+    settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+
+    selections = request.session.get("ballot_selections", {})
+    review_items = []
+
+    categories = Category.objects.filter(is_active=True).order_by("sort_order", "name")
+
+    for category in categories:
+        nominee_id = selections.get(category.slug)
+        if not nominee_id:
+            continue
+
+        nominee = Nominee.objects.filter(
+            id=nominee_id,
+            category=category,
+            is_active=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).first()
+
+        if nominee:
+            review_items.append(
+                {
+                    "category": category,
+                    "nominee": nominee,
+                }
+            )
+
+    return render(
+        request,
+        "ballot/ballot_review.html",
+        {
+            "settings": settings_obj,
+            "review_items": review_items,
+        },
+    )
+
+
+@require_http_methods(["POST"])
+@csrf_protect
+def submit_final_ballot(request):
+    settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+
+    if settings_obj.status_label() != "active":
+        messages.error(request, "Voting is not active yet. Please return when official voting opens.")
+        return redirect("ballot_review")
+
+    voter_email = request.POST.get("email", "").strip().lower()
+
+    if not voter_email:
+        messages.error(request, "Please enter your email address before submitting your final ballot.")
+        return redirect("ballot_review")
+
+    selections = request.session.get("ballot_selections", {})
+
+    if not selections:
+        messages.error(request, "Please select at least one nominee before submitting your final ballot.")
+        return redirect("ballot")
+
+    submitted_votes = []
+    duplicate_votes = []
+    unavailable_votes = []
+
+    for category_slug, nominee_id in selections.items():
+        category = Category.objects.filter(slug=category_slug, is_active=True).first()
+
+        if not category:
+            continue
+
+        nominee = Nominee.objects.filter(
+            id=nominee_id,
+            category=category,
+            is_active=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).first()
+
+        if not nominee:
+            unavailable_votes.append(category.name)
+            continue
+
+        vote, created = Vote.objects.get_or_create(
+            email=voter_email,
+            category=category,
+            defaults={"nominee": nominee},
+        )
+
+        if created:
+            submitted_votes.append(
+                {
+                    "category": category,
+                    "nominee": nominee,
+                }
+            )
+        else:
+            duplicate_votes.append(
+                {
+                    "category": category,
+                    "nominee": vote.nominee,
+                }
+            )
+
+    confirmation_payload = {
+        "email": voter_email,
+        "submitted_votes": [
+            {"category": item["category"].name, "nominee": item["nominee"].name}
+            for item in submitted_votes
+        ],
+        "duplicate_votes": [
+            {"category": item["category"].name, "nominee": item["nominee"].name}
+            for item in duplicate_votes
+        ],
+        "unavailable_votes": unavailable_votes,
+    }
+
+    request.session["ballot_confirmation"] = confirmation_payload
+    request.session["ballot_selections"] = {}
+    request.session.modified = True
+
+    if submitted_votes or duplicate_votes:
+        _send_final_ballot_confirmation(voter_email, submitted_votes, duplicate_votes)
+
+    return redirect("ballot_confirmation")
+
+
+@require_http_methods(["GET"])
+def ballot_confirmation(request):
+    confirmation = request.session.get("ballot_confirmation")
+
+    return render(
+        request,
+        "ballot/ballot_confirmation.html",
+        {
+            "confirmation": confirmation,
+        },
+    )
+
+
+def _send_final_ballot_confirmation(voter_email, submitted_votes, duplicate_votes=None):
+    duplicate_votes = duplicate_votes or []
+
+    submitted_lines = "\n".join(
+        f"- {item['category'].name}: {item['nominee'].name}"
+        for item in submitted_votes
+    ) or "- No new votes were recorded."
+
+    duplicate_lines = "\n".join(
+        f"- {item['category'].name}: already recorded for {item['nominee'].name}"
+        for item in duplicate_votes
+    )
+
+    duplicate_section = (
+        f"\nPreviously recorded votes:\n{duplicate_lines}\n"
+        if duplicate_lines
+        else ""
+    )
+
+    subject = "Your ATL's Hottest Awards ballot was received"
+
+    text_body = f"""ATL's Hottest Awards
+
+Thank you for voting.
+
+Your final ballot has been received for:
+{submitted_lines}
+{duplicate_section}
+Important voting rule:
+Each voter may vote once per category per email address.
+
+Awards information:
+Watch for red carpet updates, event announcements, sponsor offers, nominee highlights, and winner announcements from ATL's Hottest Awards.
+
+Special message:
+You've Been Chosen...
+
+Some voters may be selected for special acknowledgements, prize opportunities, promotional offers, or awards-related updates when applicable.
+
+Thank you for supporting ATL's Hottest Awards.
+"""
+
+    submitted_html = "".join(
+        f"<li><strong>{item['category'].name}</strong>: {item['nominee'].name}</li>"
+        for item in submitted_votes
+    ) or "<li>No new votes were recorded.</li>"
+
+    duplicate_html = "".join(
+        f"<li><strong>{item['category'].name}</strong>: already recorded for {item['nominee'].name}</li>"
+        for item in duplicate_votes
+    )
+
+    duplicate_html_section = (
+        f"""
+        <div style="margin:20px 0;padding:18px;border:1px solid rgba(255,215,106,0.35);border-radius:18px;background:rgba(0,0,0,0.3);">
+          <h2 style="margin:0 0 12px;color:#ffd76a;">Previously Recorded Votes</h2>
+          <ul style="margin:0;padding-left:20px;color:#ffffff;line-height:1.7;">{duplicate_html}</ul>
+        </div>
+        """
+        if duplicate_html
+        else ""
+    )
+
+    html_body = f"""
+    <div style="margin:0;padding:0;background:#050505;color:#ffffff;font-family:Georgia,serif;">
+      <div style="max-width:720px;margin:0 auto;padding:28px;">
+        <div style="border:1px solid #ffd76a;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#000000,#3a0610);box-shadow:0 0 28px rgba(255,215,106,0.25);">
+          <div style="padding:28px;background:linear-gradient(135deg,#000000,#7d0616 55%,#000000);border-bottom:1px solid rgba(255,215,106,0.55);">
+            <p style="margin:0 0 8px;color:#ffd76a;letter-spacing:3px;text-transform:uppercase;font-weight:bold;">Official Ballot Confirmation</p>
+            <h1 style="margin:0;color:#ffffff;font-size:34px;line-height:1.05;">ATL's Hottest Awards</h1>
+          </div>
+
+          <div style="padding:28px;">
+            <p style="font-size:18px;line-height:1.6;color:#ffffff;">Thank you for voting. Your final ballot has been received.</p>
+
+            <div style="margin:20px 0;padding:18px;border:1px solid rgba(255,215,106,0.45);border-radius:18px;background:rgba(0,0,0,0.38);">
+              <h2 style="margin:0 0 12px;color:#ffd76a;">Your Recorded Ballot</h2>
+              <ul style="margin:0;padding-left:20px;color:#ffffff;line-height:1.7;">{submitted_html}</ul>
+            </div>
+
+            {duplicate_html_section}
+
+            <div style="margin:20px 0;padding:18px;border:1px solid rgba(215,25,53,0.7);border-radius:18px;background:linear-gradient(135deg,rgba(215,25,53,0.24),rgba(0,0,0,0.35));">
+              <p style="margin:0 0 8px;color:#ffd76a;letter-spacing:2px;text-transform:uppercase;font-weight:bold;">You've Been Chosen...</p>
+              <p style="margin:0;color:#ffffff;line-height:1.6;">Some voters may be selected for special acknowledgements, prize opportunities, promotional offers, or awards-related updates when applicable.</p>
+            </div>
+
+            <p style="color:#f5dca0;line-height:1.6;"><strong>Voting rule:</strong> each voter may vote once per category per email address.</p>
+            <p style="color:#ffffff;">Watch for red carpet updates, event announcements, sponsor offers, nominee highlights, and winner announcements.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=getattr(django_settings, "DEFAULT_FROM_EMAIL", "noreply@localhost"),
+        to=[voter_email],
+    )
+    email.attach_alternative(html_body, "text/html")
+    email.send(fail_silently=True)
