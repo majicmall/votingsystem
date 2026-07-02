@@ -37,10 +37,11 @@
           </div>
 
           {% if block.nominees %}
-            <div class="nominee-grid">
+            <div class="nominee-grid ballot-five-grid">
               {% for nominee in block.nominees %}
-                <label class="nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}">
+                <label class="nominee-card ballot-nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}">
                   <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
+
                   <div class="nominee-photo-frame">
                     {% if nominee.photo %}
                       <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
@@ -48,6 +49,7 @@
                       <div class="photo-placeholder">ATL</div>
                     {% endif %}
                   </div>
+
                   <span class="nominee-name">{{ nominee.name }}</span>
                 </label>
               {% endfor %}
@@ -62,7 +64,7 @@
         </section>
       {% endfor %}
 
-      <button class="btn primary" type="submit">Submit Votes</button>
+      <button class="btn primary submit-vote-btn" type="submit">Submit Votes</button>
     {% else %}
       <p class="muted">No active categories yet. Add categories in admin or run the seed command.</p>
     {% endif %}

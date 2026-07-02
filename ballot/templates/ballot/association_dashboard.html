@@ -1,50 +1,92 @@
 {% extends "ballot/base.html" %}
 {% block title %}Dashboard | ATL’s Hottest{% endblock %}
+
 {% block content %}
 <section class="hero small">
-  <h1>Nominee Manager Dashboard</h1>
-  <p>Manage approved nominees, upload links, and category requests.</p>
+  <p class="eyebrow">Nominee Manager</p>
+  <h1>Your Nominee Dashboard</h1>
+  <p>Each nominee has their own card, upload link, category tools, and approval status.</p>
   <a class="btn primary" href="{% url 'nominee_signup' %}">Submit Nominee</a>
   <a class="btn" href="{% url 'assoc_join' %}">Request Existing Nominee Access</a>
 </section>
 
 {% if pending_memberships %}
 <section class="card">
-  <h2>Pending Access Requests</h2>
-  <ul>
+  <div class="section-title-row">
+    <h2>Pending Access Requests</h2>
+    <span class="nominee-count">{{ pending_memberships|length }} pending</span>
+  </div>
+
+  <div class="mini-list">
     {% for membership in pending_memberships %}
-      <li>{{ membership.nominee.name }} — {{ membership.nominee.category.name }}</li>
+      <div class="mini-list-item">
+        <strong>{{ membership.nominee.name }}</strong>
+        <span>{{ membership.nominee.category.name }}</span>
+        <em>Waiting for staff approval</em>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 </section>
 {% endif %}
 
 <section class="card">
-  <h2>Approved Nominees</h2>
+  <div class="section-title-row">
+    <h2>Approved Nominee Cards</h2>
+    <span class="nominee-count">{{ active_memberships|length }} active</span>
+  </div>
 
   {% if active_memberships %}
-    <div class="dashboard-grid">
+    <div class="dashboard-grid nominee-dashboard-grid">
       {% for membership in active_memberships %}
         {% with nominee=membership.nominee %}
-          <article class="manager-card">
-            {% if nominee.photo %}
-              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
-            {% else %}
-              <div class="photo-placeholder large">ATL</div>
-            {% endif %}
+          <article class="manager-card nominee-dashboard-card">
+            <div class="status-row">
+              <span class="status-pill status-{{ nominee.approval_status }}">{{ nominee.approval_status|title }}</span>
+              {% if nominee.is_active %}
+                <span class="status-pill status-live">Live</span>
+              {% else %}
+                <span class="status-pill status-archived">Archived</span>
+              {% endif %}
+            </div>
+
+            <div class="dashboard-photo-frame">
+              {% if nominee.photo %}
+                <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+              {% else %}
+                <div class="photo-placeholder large">ATL</div>
+              {% endif %}
+            </div>
+
             <h3>{{ nominee.name }}</h3>
-            <p>{{ nominee.category.name }}</p>
+            <p class="category-chip">{{ nominee.category.name }}</p>
+
+            <div class="profile-details">
+              {% if nominee.website %}
+                <a href="{{ nominee.website }}" target="_blank" rel="noopener">Website</a>
+              {% endif %}
+              {% if nominee.social_link %}
+                <a href="{{ nominee.social_link }}" target="_blank" rel="noopener">Social</a>
+              {% endif %}
+              {% if nominee.contact_email %}
+                <span>{{ nominee.contact_email }}</span>
+              {% endif %}
+            </div>
 
             <label class="field-label">Public upload link</label>
-            <input readonly value="{{ request.scheme }}://{{ request.get_host }}{{ nominee.get_upload_url }}">
+            <div class="copy-row">
+              <input id="upload_{{ nominee.id }}" readonly value="{{ request.scheme }}://{{ request.get_host }}{{ nominee.get_upload_url }}">
+              <button class="btn copy-btn" type="button" data-copy-target="upload_{{ nominee.id }}">Copy</button>
+            </div>
 
             <div class="actions">
               <a class="btn" href="{% url 'assoc_nominee_edit' nominee.id %}">Edit Profile</a>
               <a class="btn" href="{% url 'request_categories' nominee.id %}">Request Categories</a>
+
               <form method="post" action="{% url 'assoc_nominee_regen_link' nominee.id %}">
                 {% csrf_token %}
                 <button class="btn" type="submit">Regenerate Link</button>
               </form>
+
               <form method="post" action="{% url 'assoc_nominee_delete' nominee.id %}" onsubmit="return confirm('Archive this nominee?');">
                 {% csrf_token %}
                 <button class="btn danger" type="submit">Archive</button>
@@ -55,7 +97,27 @@
       {% endfor %}
     </div>
   {% else %}
-    <p class="muted">No approved nominees yet.</p>
+    <p class="muted">No approved nominee dashboard cards yet.</p>
   {% endif %}
 </section>
+
+<script>
+document.querySelectorAll("[data-copy-target]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const input = document.getElementById(button.dataset.copyTarget);
+    if (!input) return;
+
+    try {
+      await navigator.clipboard.writeText(input.value);
+      const original = button.textContent;
+      button.textContent = "Copied!";
+      setTimeout(() => button.textContent = original, 1200);
+    } catch (error) {
+      input.select();
+      document.execCommand("copy");
+      button.textContent = "Copied!";
+    }
+  });
+});
+</script>
 {% endblock %}
