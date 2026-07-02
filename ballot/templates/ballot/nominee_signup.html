@@ -1,13 +1,75 @@
 {% extends "ballot/base.html" %}
-{% block title %}Nominee Signup | ATL’s Hottest{% endblock %}
+{% block title %}Submit Nominee | ATL’s Hottest{% endblock %}
+
 {% block content %}
-<section class="card narrow">
-  <h1>Nominee Signup</h1>
-  <p>Submit a nominee in up to 5 categories.</p>
-  <form method="post" enctype="multipart/form-data">
+<section class="hero small">
+  <p class="eyebrow">Nomination Form</p>
+  <h1>Submit a Nominee</h1>
+  <p>Select up to five categories. Each category has its own clear selection box beside the category name.</p>
+</section>
+
+<section class="card nomination-card">
+  <form class="nomination-form" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn primary" type="submit">Submit Nominee</button>
+
+    {% if form.non_field_errors %}
+      <div class="alert">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <label class="field-label" for="{{ form.nominee_name.id_for_label }}">Nominee Name</label>
+    {{ form.nominee_name }}
+    {{ form.nominee_name.errors }}
+
+    <label class="field-label" for="{{ form.website.id_for_label }}">Website</label>
+    {{ form.website }}
+    {{ form.website.errors }}
+
+    <label class="field-label" for="{{ form.social_link.id_for_label }}">Social Link</label>
+    {{ form.social_link }}
+    {{ form.social_link.errors }}
+
+    <label class="field-label" for="{{ form.contact_email.id_for_label }}">Contact Email</label>
+    {{ form.contact_email }}
+    {{ form.contact_email.errors }}
+
+    <label class="field-label" for="{{ form.photo.id_for_label }}">Photo</label>
+    {{ form.photo }}
+    {{ form.photo.errors }}
+
+    <div class="category-select-header">
+      <div>
+        <h2>Choose Categories</h2>
+        <p>Select up to five categories for this nominee.</p>
+      </div>
+      <span class="nominee-count">Max 5</span>
+    </div>
+
+    {% if form.categories.errors %}
+      <div class="alert">
+        {{ form.categories.errors }}
+      </div>
+    {% endif %}
+
+    <div class="category-choice-grid">
+      {% for checkbox in form.categories %}
+        <label class="category-choice-card" for="{{ checkbox.id_for_label }}">
+          <span class="category-choice-name">
+            {{ checkbox.choice_label }}
+          </span>
+
+          <span class="category-choice-box">
+            {{ checkbox.tag }}
+            <span class="fake-check"></span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <button class="btn primary nomination-submit-btn" type="submit">
+      Submit Nominee
+    </button>
   </form>
 </section>
 {% endblock %}
