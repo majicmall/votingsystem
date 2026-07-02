@@ -1,0 +1,46 @@
+{% extends "ballot/base.html" %}
+{% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<section class="nominee-detail-shell">
+  <article class="nominee-detail-card">
+    <div class="nominee-detail-photo">
+      {% if nominee.photo %}
+        <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+      {% else %}
+        <div class="photo-placeholder large">ATL</div>
+      {% endif %}
+    </div>
+
+    <div class="nominee-detail-info">
+      <p class="eyebrow">{{ nominee.category.name }}</p>
+      <h1>{{ nominee.name }}</h1>
+
+      <div class="detail-link-row">
+        {% if nominee.website %}
+          <a class="btn" href="{{ nominee.website }}" target="_blank" rel="noopener">Website</a>
+        {% endif %}
+        {% if nominee.social_link %}
+          <a class="btn" href="{{ nominee.social_link }}" target="_blank" rel="noopener">Social</a>
+        {% endif %}
+      </div>
+
+      <form class="detail-vote-form" method="post" action="{% url 'vote_nominee' nominee.id %}">
+        {% csrf_token %}
+        <label class="field-label" for="detail-email">Email address to confirm your vote</label>
+        <input id="detail-email" name="email" type="email" placeholder="you@example.com" required>
+
+        <button class="btn primary detail-vote-btn" type="submit">
+          Vote for {{ nominee.name }}
+        </button>
+      </form>
+
+      <p class="muted vote-rule">
+        One vote per category per email address. If this email has already voted in {{ nominee.category.name }}, another vote will not be counted.
+      </p>
+
+      <a class="btn" href="{% url 'ballot' %}">Back to Ballot</a>
+    </div>
+  </article>
+</section>
+{% endblock %}

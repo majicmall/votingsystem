@@ -5,11 +5,13 @@ import csv
 import json
 import uuid
 
+from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -27,6 +29,12 @@ from .models import (
     Vote,
 )
 from .services import approve_category_request, deny_category_request
+
+
+CONFIRMATION_AD_MESSAGE = """
+Sponsored Message:
+ATL's Hottest Awards supporters help keep the culture moving. Watch for featured offers, sponsor announcements, and red-carpet updates from ATL's Hottest Awards.
+"""
 
 
 def _client_ip(request):
@@ -48,17 +56,65 @@ def _user_can_manage_nominee(user, nominee):
     ).exists()
 
 
+def _send_vote_confirmation(email, saved_votes):
+    if not email or not saved_votes:
+        return
+
+    lines = [
+        "Thank you for voting in the ATL's Hottest Awards.",
+        "",
+        "Your vote has been recorded for:",
+    ]
+
+    for vote in saved_votes:
+        lines.append(f"- {vote['category']}: {vote['nominee']}")
+
+    lines += [
+        "",
+        "Important note: each voter may vote once per category per email address.",
+        "",
+        CONFIRMATION_AD_MESSAGE.strip(),
+        "",
+        "Thank you for supporting ATL's Hottest Awards.",
+    ]
+
+    try:
+        send_mail(
+            subject="Your ATL's Hottest Awards vote was received",
+            message="\n".join(lines),
+            from_email=django_settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+
+def _create_vote(email, category, nominee, request):
+    return Vote.objects.create(
+        email=email,
+        category=category,
+        nominee=nominee,
+        ip_address=_client_ip(request),
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+    )
+
+
 @require_http_methods(["GET"])
 def ballot_view(request):
     ballot_settings = BallotSettings.get_solo()
 
     categories_display = []
     for category in Category.objects.for_ballot():
-        nominees = getattr(category, "prefetched_nominees", [])
+        nominees = list(getattr(category, "prefetched_nominees", []))
+        visible_count = min(len(nominees), 5)
+        placeholder_count = max(0, 5 - visible_count)
+
         categories_display.append(
             {
                 "category": category,
                 "nominees": nominees,
+                "placeholder_slots": range(placeholder_count),
             }
         )
 
@@ -109,31 +165,82 @@ def submit_votes(request):
     for category_slug, nominee_id in selections.items():
         try:
             category = Category.objects.get(slug=category_slug, is_active=True)
-            nominee = Nominee.objects.get(id=nominee_id, category=category, is_active=True)
+            nominee = Nominee.objects.get(
+                id=nominee_id,
+                category=category,
+                is_active=True,
+                approval_status=Nominee.APPROVAL_APPROVED,
+            )
         except (Category.DoesNotExist, Nominee.DoesNotExist):
             errors.append({"category": category_slug, "message": "Invalid nominee selection."})
             continue
 
         try:
-            Vote.objects.create(
-                email=email,
-                category=category,
-                nominee=nominee,
-                ip_address=_client_ip(request),
-                user_agent=request.META.get("HTTP_USER_AGENT", ""),
-            )
+            _create_vote(email, category, nominee, request)
             saved.append({"category": category.name, "nominee": nominee.name})
         except IntegrityError:
             skipped.append({"category": category.name, "message": "Already voted in this category."})
 
+    if saved:
+        _send_vote_confirmation(email, saved)
+
     return JsonResponse(
         {
-            "message": "Your votes have been recorded.",
+            "message": "Your vote has been recorded." if saved else "No new votes were recorded.",
             "saved": saved,
             "skipped": skipped,
             "errors": errors,
         }
     )
+
+
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def nominee_detail(request, nominee_id):
+    nominee = get_object_or_404(
+        Nominee.objects.select_related("category"),
+        id=nominee_id,
+        is_active=True,
+        approval_status=Nominee.APPROVAL_APPROVED,
+    )
+
+    return render(request, "ballot/nominee_detail.html", {"nominee": nominee})
+
+
+@require_POST
+@csrf_protect
+def vote_nominee(request, nominee_id):
+    ballot_settings = BallotSettings.get_solo()
+
+    nominee = get_object_or_404(
+        Nominee.objects.select_related("category"),
+        id=nominee_id,
+        is_active=True,
+        approval_status=Nominee.APPROVAL_APPROVED,
+    )
+
+    email = (request.POST.get("email") or "").strip().lower()
+
+    if not ballot_settings.is_active():
+        messages.error(request, f"Voting is currently {ballot_settings.status_label()}.")
+        return redirect("nominee_detail", nominee_id=nominee.id)
+
+    if not email:
+        messages.error(request, "Email is required to vote.")
+        return redirect("nominee_detail", nominee_id=nominee.id)
+
+    try:
+        _create_vote(email, nominee.category, nominee, request)
+        saved = [{"category": nominee.category.name, "nominee": nominee.name}]
+        _send_vote_confirmation(email, saved)
+        messages.success(request, f"Thank you. Your vote for {nominee.name} has been recorded.")
+    except IntegrityError:
+        messages.warning(
+            request,
+            f"This email has already voted in {nominee.category.name}. One vote per category per email address.",
+        )
+
+    return redirect("nominee_detail", nominee_id=nominee.id)
 
 
 @require_http_methods(["GET", "POST"])
@@ -192,7 +299,7 @@ def association_join(request):
 
         return redirect("assoc_dashboard")
 
-    nominees = Nominee.objects.active().select_related("category").order_by("name")
+    nominees = Nominee.objects.filter(is_active=True).select_related("category").order_by("name")
     return render(request, "ballot/association_join.html", {"nominees": nominees})
 
 
@@ -313,7 +420,6 @@ def nominee_signup(request):
     if request.method == "POST" and form.is_valid():
         nominee_name = form.cleaned_data["nominee_name"].strip()
         photo = form.cleaned_data.get("photo")
-        created = []
 
         for category in form.cleaned_data["categories"]:
             nominee, _was_created = Nominee.objects.get_or_create(
@@ -335,12 +441,8 @@ def nominee_signup(request):
                 nominee=nominee,
                 defaults={"is_active": False},
             )
-            created.append(nominee)
 
-        messages.success(
-            request,
-            "Nominee signup submitted. Staff can approve dashboard access in admin.",
-        )
+        messages.success(request, "Nominee signup submitted. Staff can approve it in admin.")
         return redirect("assoc_dashboard")
 
     return render(request, "ballot/nominee_signup.html", {"form": form})

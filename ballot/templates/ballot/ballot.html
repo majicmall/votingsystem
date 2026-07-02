@@ -2,13 +2,13 @@
 {% block title %}Vote | ATL’s Hottest{% endblock %}
 
 {% block content %}
-<section class="hero">
+<section class="hero awards-hero">
   <p class="eyebrow">Official Ballot</p>
   <h1>ATL’s Hottest Awards Voting</h1>
-  <p>Select your favorite nominee in each category. One vote per email per category.</p>
+  <p>Select your favorite nominee. One vote per email per category.</p>
 </section>
 
-<section class="card">
+<section class="card awards-card">
   {% if settings.status_label != "active" %}
     <div class="alert">
       Voting is currently <strong>{{ settings.status_label|title }}</strong>.
@@ -33,38 +33,51 @@
                 <p>{{ block.category.description }}</p>
               {% endif %}
             </div>
-            <span class="nominee-count">{{ block.nominees|length }} nominee{{ block.nominees|length|pluralize }}</span>
+            <span class="nominee-count">{{ block.nominees|length }} approved nominee{{ block.nominees|length|pluralize }}</span>
           </div>
 
-          {% if block.nominees %}
-            <div class="nominee-grid ballot-five-grid">
-              {% for nominee in block.nominees %}
-                <label class="nominee-card ballot-nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}">
-                  <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
+          <div class="nominee-grid ballot-five-grid">
+            {% for nominee in block.nominees %}
+              <article class="nominee-card ballot-nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}" data-detail-url="{% url 'nominee_detail' nominee.id %}">
+                <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
 
-                  <div class="nominee-photo-frame">
-                    {% if nominee.photo %}
-                      <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
-                    {% else %}
-                      <div class="photo-placeholder">ATL</div>
-                    {% endif %}
-                  </div>
+                <div class="nominee-photo-frame">
+                  {% if nominee.photo %}
+                    <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+                  {% else %}
+                    <div class="photo-placeholder">ATL</div>
+                  {% endif %}
+                </div>
 
-                  <span class="nominee-name">{{ nominee.name }}</span>
-                </label>
-              {% endfor %}
-            </div>
+                <span class="nominee-name">{{ nominee.name }}</span>
 
-            {% if block.nominees|length > 5 %}
-              <button type="button" class="btn see-more-btn" data-see-more>See More</button>
-            {% endif %}
-          {% else %}
-            <p class="muted">No approved nominees have been added yet.</p>
+                <div class="card-actions">
+                  <button type="button" class="btn primary card-vote-btn" data-vote-card>Vote</button>
+                  <a class="btn about-btn" href="{% url 'nominee_detail' nominee.id %}">About Nominee</a>
+                </div>
+              </article>
+            {% endfor %}
+
+            {% for slot in block.placeholder_slots %}
+              <article class="nominee-card ballot-nominee-card placeholder-card">
+                <div class="nominee-photo-frame placeholder-frame">
+                  <div class="photo-placeholder">OPEN</div>
+                </div>
+                <span class="nominee-name">Nominee Spot Available</span>
+                <div class="card-actions">
+                  <a class="btn about-btn" href="{% url 'nominee_signup' %}">Submit Nominee</a>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+
+          {% if block.nominees|length > 5 %}
+            <button type="button" class="btn see-more-btn" data-see-more>See More</button>
           {% endif %}
         </section>
       {% endfor %}
 
-      <button class="btn primary submit-vote-btn" type="submit">Submit Votes</button>
+      <button class="btn primary submit-vote-btn" type="submit">Submit Selected Votes</button>
     {% else %}
       <p class="muted">No active categories yet. Add categories in admin or run the seed command.</p>
     {% endif %}
@@ -78,9 +91,31 @@ document.querySelectorAll("[data-see-more]").forEach((button) => {
   button.addEventListener("click", () => {
     const block = button.closest("[data-category-block]");
     const hiddenCards = block.querySelectorAll(".nominee-extra.hidden");
-
     hiddenCards.forEach((card) => card.classList.remove("hidden"));
     button.remove();
+  });
+});
+
+document.querySelectorAll(".ballot-nominee-card[data-detail-url]").forEach((card) => {
+  card.addEventListener("click", (event) => {
+    const interactive = event.target.closest("button, a, input");
+    if (interactive) return;
+    window.location.href = card.dataset.detailUrl;
+  });
+});
+
+document.querySelectorAll("[data-vote-card]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const card = button.closest(".ballot-nominee-card");
+    const radio = card.querySelector("input[type=radio]");
+    if (radio) {
+      radio.checked = true;
+    }
+
+    const form = document.getElementById("voteForm");
+    if (form) {
+      form.requestSubmit();
+    }
   });
 });
 
