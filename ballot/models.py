@@ -1,10 +1,15 @@
-# ballot/models.py
 from __future__ import annotations
+import secrets
+
+# ballot/models.py
 
 import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.conf import settings as django_settings
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMultiAlternatives
 from django.db import models
 from django.db.models import Count
 from django.urls import reverse
@@ -249,6 +254,164 @@ class Nominee(models.Model):
 
     def get_upload_url(self) -> str:
         return reverse("nominee_upload", kwargs={"token": self.upload_token})
+
+
+    def approve(self):
+        self.approval_status = self.APPROVAL_APPROVED
+        self.approved_at = timezone.now()
+        self.rejected_at = None
+        self.is_active = True
+        self.save(update_fields=["approval_status", "approved_at", "rejected_at", "is_active", "updated_at"])
+
+        self.send_approval_notice()
+
+    def reject(self):
+        self.approval_status = self.APPROVAL_REJECTED
+        self.rejected_at = timezone.now()
+        self.save(update_fields=["approval_status", "rejected_at", "updated_at"])
+
+    def send_approval_notice(self):
+        if not self.contact_email:
+            return
+
+        UserModel = get_user_model()
+        email = self.contact_email.strip().lower()
+
+        base_username = email.split("@")[0].replace(".", "_").replace("-", "_") or f"nominee_{self.pk}"
+        username = base_username[:120]
+        counter = 2
+
+        user = UserModel.objects.filter(email__iexact=email).first()
+        temporary_password = None
+        created = False
+
+        if user is None:
+            candidate = username
+            while UserModel.objects.filter(username=candidate).exists():
+                suffix = f"_{counter}"
+                candidate = f"{username[:120-len(suffix)]}{suffix}"
+                counter += 1
+
+            temporary_password = secrets.token_urlsafe(10)
+            user = UserModel.objects.create_user(
+                username=candidate,
+                email=email,
+                password=temporary_password,
+            )
+            created = True
+
+        membership, _created_membership = AssociationMembership.objects.get_or_create(
+            user=user,
+            nominee=self,
+            defaults={"is_active": True, "activated_at": timezone.now()},
+        )
+
+        if not membership.is_active:
+            membership.is_active = True
+            membership.activated_at = timezone.now()
+            membership.save(update_fields=["is_active", "activated_at"])
+
+        login_url = "/accounts/login/"
+        dashboard_url = "/association/dashboard/"
+
+        if created:
+            login_lines = [
+                f"Username: {user.username}",
+                f"Temporary password: {temporary_password}",
+                "",
+                "Please log in and complete your nominee dashboard profile.",
+            ]
+            login_html = f"""
+              <p><strong>Username:</strong> {user.username}</p>
+              <p><strong>Temporary password:</strong> {temporary_password}</p>
+              <p>Please log in and complete your nominee dashboard profile.</p>
+            """
+        else:
+            login_lines = [
+                f"Username: {user.username}",
+                "",
+                "An account already exists for this email. Please log in with your existing password.",
+            ]
+            login_html = f"""
+              <p><strong>Username:</strong> {user.username}</p>
+              <p>An account already exists for this email. Please log in with your existing password.</p>
+            """
+
+        text_message = "\n".join(
+            [
+                "Congratulations!",
+                "",
+                f"{self.name} has been approved for:",
+                self.category.name,
+                "",
+                "What to do next:",
+                "1. Log in to the approved nominee dashboard.",
+                "2. Complete your nominee profile.",
+                "3. Add/update your photo, website, social link, and contact details.",
+                "4. Get ready for the official voting period.",
+                "",
+                *login_lines,
+                "",
+                f"Login page: {login_url}",
+                f"Dashboard: {dashboard_url}",
+                "",
+                "ATL's Hottest Awards Association",
+            ]
+        )
+
+        html_message = f"""
+        <div style="margin:0;padding:0;background:#050505;color:#ffffff;font-family:Georgia,serif;">
+          <div style="max-width:700px;margin:0 auto;padding:28px;">
+            <div style="border:1px solid #ffd76a;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#000000,#650310);box-shadow:0 0 28px rgba(255,215,106,0.22);">
+              <div style="padding:28px;border-bottom:1px solid rgba(255,215,106,0.55);background:linear-gradient(135deg,#000,#7d0616,#000);">
+                <p style="margin:0 0 8px;color:#ffd76a;text-transform:uppercase;letter-spacing:3px;font-weight:bold;">Approved Nomination Notice</p>
+                <h1 style="margin:0;color:#fff;font-size:34px;line-height:1.05;">Congratulations!</h1>
+              </div>
+
+              <div style="padding:28px;">
+                <p style="font-size:18px;line-height:1.6;">
+                  <strong>{self.name}</strong> has been approved for:
+                </p>
+
+                <div style="margin:18px 0;padding:16px;border:1px solid rgba(255,215,106,0.55);border-radius:16px;background:rgba(0,0,0,0.35);">
+                  <p style="margin:0;color:#ffd76a;font-size:20px;font-weight:bold;">{self.category.name}</p>
+                </div>
+
+                <h2 style="color:#ffd76a;">What to do next</h2>
+                <ol style="line-height:1.8;">
+                  <li>Log in to the approved nominee dashboard.</li>
+                  <li>Complete your nominee profile.</li>
+                  <li>Add/update your photo, website, social link, and contact details.</li>
+                  <li>Get ready for the official voting period.</li>
+                </ol>
+
+                <div style="margin:20px 0;padding:16px;border:1px solid rgba(215,25,53,0.65);border-radius:16px;background:rgba(215,25,53,0.15);">
+                  {login_html}
+                </div>
+
+                <p>
+                  <strong>Login:</strong> {login_url}<br>
+                  <strong>Dashboard:</strong> {dashboard_url}
+                </p>
+
+                <p style="color:#ffd76a;font-weight:bold;">ATL's Hottest Awards Association</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        """
+
+        try:
+            msg = EmailMultiAlternatives(
+                subject=f"Approved: {self.name} for {self.category.name}",
+                body=text_message,
+                from_email=django_settings.DEFAULT_FROM_EMAIL,
+                to=[email],
+            )
+            msg.attach_alternative(html_message, "text/html")
+            msg.send(fail_silently=True)
+        except Exception:
+            pass
 
     def archive(self):
         self.is_active = False
