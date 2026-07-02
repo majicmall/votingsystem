@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import dj_database_url
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -200,3 +201,61 @@ USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# -------------------------------------------------------------------
+# Render / production overrides
+# -------------------------------------------------------------------
+
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
+
+SECRET_KEY = os.environ.get("SECRET_KEY", SECRET_KEY)
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
+ALLOWED_HOSTS += [
+    ".onrender.com",
+    "atlshottestawards.onrender.com",
+]
+
+CSRF_TRUSTED_ORIGINS += [
+    "https://*.onrender.com",
+    "https://atlshottestawards.onrender.com",
+]
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES["default"] = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True

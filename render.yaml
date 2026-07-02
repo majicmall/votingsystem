@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: atlshottestawards
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn atl_ballot.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.12.1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: atlshottestawards-db
+          property: connectionString
+
+databases:
+  - name: atlshottestawards-db
+    plan: free
