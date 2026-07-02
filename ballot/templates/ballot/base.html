@@ -3,45 +3,295 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}ATL’s Hottest{% endblock %}</title>
+  <title>{% block title %}ATL’s Hottest Awards{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'ballot/site.css' %}">
+
+  <link rel="stylesheet" href="{% static 'ballot/site.css' %}?v=atl-awards-red-gold-3">
+
+  <style>
+    :root {
+      --atl-black: #020202;
+      --atl-red: #d71935;
+      --atl-deep-red: #650310;
+      --atl-gold: #ffd76a;
+      --atl-gold-dark: #a7610d;
+      --atl-white: #ffffff;
+    }
+
+    html,
+    body {
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.32), transparent 30%),
+        radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.45), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.14), transparent 35%),
+        linear-gradient(135deg, #000000 0%, #160207 40%, #3a0610 62%, #050505 100%) !important;
+      color: #ffffff !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 52%),
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.12), transparent 45%);
+      opacity: 0.9;
+    }
+
+    .site-header {
+      background: linear-gradient(90deg, #000000 0%, #640412 48%, #000000 100%) !important;
+      border-bottom: 2px solid rgba(255, 215, 106, 0.75) !important;
+      box-shadow:
+        0 0 22px rgba(255, 215, 106, 0.28),
+        0 0 44px rgba(215, 25, 53, 0.2),
+        0 14px 40px rgba(0,0,0,0.55) !important;
+    }
+
+    .brand,
+    .site-header a,
+    nav a {
+      color: #ffffff !important;
+    }
+
+    .brand {
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.45),
+        0 0 22px rgba(255, 215, 106, 0.75),
+        0 0 44px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    nav a {
+      border: 1px solid rgba(255, 215, 106, 0.35) !important;
+      background: rgba(0,0,0,0.28) !important;
+    }
+
+    nav a:hover {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.85) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.35) !important;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero,
+    .card,
+    .nominee-card,
+    .manager-card,
+    .nominee-detail-card,
+    .stat-card {
+      border-color: rgba(255, 215, 106, 0.45) !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.14), transparent 36%),
+        linear-gradient(135deg, rgba(0,0,0,0.9), rgba(98, 4, 18, 0.72)) !important;
+      box-shadow:
+        0 26px 85px rgba(0,0,0,0.65),
+        0 0 30px rgba(255, 215, 106, 0.14),
+        0 0 50px rgba(215, 25, 53, 0.12),
+        inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+    }
+
+    .hero h1,
+    h1 {
+      color: #ffffff !important;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 28px rgba(255, 215, 106, 0.58),
+        0 0 55px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    h2,
+    .eyebrow,
+    .field-label,
+    .category-block h2 {
+      color: #ffd76a !important;
+      text-shadow:
+        0 0 12px rgba(255, 215, 106, 0.48),
+        0 0 25px rgba(215, 25, 53, 0.24) !important;
+    }
+
+    p,
+    .muted,
+    label,
+    span {
+      color: rgba(255,255,255,0.84);
+    }
+
+    .ballot-nominee-card {
+      border-color: rgba(255, 215, 106, 0.46) !important;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        linear-gradient(135deg, #050505, #5c0615 62%, #050505) !important;
+    }
+
+    .ballot-nominee-card:hover {
+      border-color: rgba(255, 215, 106, 0.95) !important;
+      box-shadow:
+        0 18px 45px rgba(0,0,0,0.62),
+        0 0 28px rgba(255, 215, 106, 0.28),
+        0 0 48px rgba(215, 25, 53, 0.2) !important;
+    }
+
+    .nominee-photo-frame,
+    .dashboard-photo-frame,
+    .nominee-detail-photo {
+      border-color: rgba(255,255,255,0.18) !important;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 215, 106, 0.18), transparent 40%),
+        rgba(0,0,0,0.66) !important;
+    }
+
+    .photo-placeholder {
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at top, rgba(255, 215, 106, 0.34), transparent 40%),
+        linear-gradient(135deg, rgba(215,25,53,0.48), rgba(0,0,0,0.72)) !important;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.65) !important;
+    }
+
+    .btn.primary,
+    button.primary,
+    .submit-vote-btn,
+    .detail-vote-btn,
+    input[type="submit"] {
+      color: #160704 !important;
+      border-color: rgba(255, 215, 106, 0.98) !important;
+      background:
+        linear-gradient(135deg, #fff9d6 0%, #ffd76a 35%, #d69628 68%, #8a4a09 100%) !important;
+      box-shadow:
+        0 0 18px rgba(255, 215, 106, 0.35),
+        0 0 34px rgba(255, 215, 106, 0.14),
+        inset 0 1px 0 rgba(255,255,255,0.65) !important;
+    }
+
+    .btn,
+    button,
+    .about-btn,
+    .see-more-btn {
+      color: #ffffff !important;
+      border-color: rgba(255,255,255,0.28) !important;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045)) !important;
+    }
+
+    .see-more-btn {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.72) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.16) !important;
+    }
+
+    input,
+    select,
+    textarea {
+      color: #ffffff !important;
+      background: rgba(0,0,0,0.72) !important;
+      border-color: rgba(255, 215, 106, 0.32) !important;
+    }
+
+    .messages {
+      display: grid;
+      gap: 16px;
+      margin: 0 0 24px;
+    }
+
+    .message,
+    .alert,
+    .result {
+      border: 1px solid rgba(255, 215, 106, 0.55) !important;
+      border-radius: 20px !important;
+      padding: 18px 20px !important;
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255, 215, 106, 0.18), transparent 38%),
+        linear-gradient(135deg, rgba(0,0,0,0.86), rgba(110, 5, 20, 0.75)) !important;
+      box-shadow:
+        0 0 24px rgba(255, 215, 106, 0.18),
+        0 16px 40px rgba(0,0,0,0.45) !important;
+    }
+
+    .vote-thank-you-panel {
+      position: relative;
+      overflow: hidden;
+      margin: 0 0 28px;
+      padding: clamp(22px, 4vw, 36px);
+      border: 1px solid rgba(255, 215, 106, 0.72);
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.24), transparent 36%),
+        linear-gradient(135deg, #000000, #7d0616 58%, #050505);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,0.66),
+        0 0 32px rgba(255, 215, 106, 0.24),
+        0 0 58px rgba(215, 25, 53, 0.18);
+    }
+
+    .vote-thank-you-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.12) 42%, transparent 54%);
+      pointer-events: none;
+    }
+
+    .vote-thank-you-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .vote-thank-you-panel h2 {
+      margin: 0 0 8px;
+      color: #ffffff !important;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: 1;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 26px rgba(255, 215, 106, 0.62),
+        0 0 55px rgba(215, 25, 53, 0.36) !important;
+    }
+
+    .vote-thank-you-panel .special-email {
+      color: #ffd76a !important;
+      font-weight: 1000;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.45);
+    }
+  </style>
 </head>
+
 <body>
   <header class="site-header">
-    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest</a>
+    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards</a>
+
     <nav>
-      <a href="{% url 'ballot' %}">Vote</a>
-      {% if user.is_authenticated %}
-        <a href="{% url 'nominee_signup' %}">Nominee Signup</a>
-        <a href="{% url 'assoc_dashboard' %}">Dashboard</a>
-        {% if user.is_staff %}
-          <a href="{% url 'staff_dashboard' %}">Staff</a>
-          <a href="/admin/">Admin</a>
-        {% endif %}
+      <a href="{% url 'ballot' %}">Ballot</a>
+      <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
+      <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
+      {% if request.user.is_staff %}
+        <a href="{% url 'staff_dashboard' %}">Staff</a>
+        <a href="{% url 'admin:index' %}">Admin</a>
+      {% endif %}
+      {% if request.user.is_authenticated %}
         <a href="{% url 'logout_then_home' %}">Logout</a>
       {% else %}
         <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'signup' %}">Create Account</a>
       {% endif %}
     </nav>
   </header>
 
-  {% if BALLOT.announcement %}
-    <div class="ribbon">{{ BALLOT.announcement }}</div>
-  {% elif BALLOT.status != "active" %}
-    <div class="ribbon warning">Ballot status: {{ BALLOT.status|title }}</div>
-  {% endif %}
+  <main>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
-  {% if messages %}
-    <section class="messages">
-      {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </section>
-  {% endif %}
-
-  <main class="page">
     {% block content %}{% endblock %}
   </main>
 </body>

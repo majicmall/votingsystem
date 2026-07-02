@@ -2,6 +2,25 @@
 {% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
 
 {% block content %}
+{% if request.session.vote_thank_you %}
+  {% with thanks=request.session.vote_thank_you %}
+    {% if thanks.nominee == nominee.name %}
+      <section class="vote-thank-you-panel">
+        <p class="eyebrow">Vote Recorded</p>
+        <h2>Thank You For Your Vote!</h2>
+        <p>
+          Your vote for <strong>{{ thanks.nominee }}</strong> in
+          <strong>{{ thanks.category }}</strong> has been officially recorded.
+        </p>
+        <p>
+          A special message is waiting for you at
+          <span class="special-email">{{ thanks.email }}</span>.
+        </p>
+      </section>
+    {% endif %}
+  {% endwith %}
+{% endif %}
+
 <section class="hero small">
   <p class="eyebrow">Nominee Spotlight</p>
   <h1>{{ nominee.name }}</h1>

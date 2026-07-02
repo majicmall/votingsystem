@@ -272,7 +272,15 @@ def vote_nominee(request, nominee_id):
         _create_vote(email, nominee.category, nominee, request)
         saved = [{"category": nominee.category.name, "nominee": nominee.name}]
         _send_vote_confirmation(email, saved)
-        messages.success(request, f"Thank you. Your vote for {nominee.name} has been recorded.")
+        request.session["vote_thank_you"] = {
+            "email": email,
+            "nominee": nominee.name,
+            "category": nominee.category.name,
+        }
+        messages.success(
+            request,
+            f"Thank you for your vote. A special message is waiting for you at {email}.",
+        )
     except IntegrityError:
         messages.warning(
             request,
