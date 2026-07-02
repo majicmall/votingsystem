@@ -795,3 +795,67 @@ form .errorlist {
   background: rgba(215, 25, 53, 0.16);
   color: #fff;
 }
+
+/* =======================================================
+   Nomination form category checkbox alignment
+======================================================= */
+
+.nomination-form ul,
+.nomination-form .category-checkbox-list,
+form ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0 22px;
+}
+
+.nomination-form li,
+form ul li {
+  margin: 0 0 10px;
+}
+
+.nomination-form li label,
+form ul li label {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.42);
+  color: #ffffff !important;
+  line-height: 1.3;
+}
+
+.nomination-form li label:hover,
+form ul li label:hover {
+  border-color: rgba(255, 215, 106, 0.72);
+  box-shadow: 0 0 16px rgba(255, 215, 106, 0.14);
+}
+
+.nomination-form input[type="checkbox"],
+form ul li input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 1px 0 0 !important;
+  accent-color: #ffd76a;
+}
+
+.nomination-form .helptext,
+form .helptext {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255,255,255,0.66);
+  font-size: 0.9rem;
+}
+
+.nomination-form .errorlist,
+form .errorlist {
+  padding: 12px 14px;
+  border: 1px solid rgba(215, 25, 53, 0.6);
+  border-radius: 14px;
+  background: rgba(215, 25, 53, 0.16);
+  color: #fff;
+}
