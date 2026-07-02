@@ -1,19 +1,139 @@
 {% extends "ballot/base.html" %}
-{% block title %}Dashboard | ATL’s Hottest{% endblock %}
+{% block title %}Association Dashboard | ATL’s Hottest{% endblock %}
 
 {% block content %}
-<section class="hero small">
-  <p class="eyebrow">Nominee Manager</p>
-  <h1>Your Nominee Dashboard</h1>
-  <p>Each nominee has their own card, upload link, category tools, and approval status.</p>
-  <a class="btn primary" href="{% url 'nominee_signup' %}">Submit Nominee</a>
-  <a class="btn" href="{% url 'assoc_join' %}">Request Existing Nominee Access</a>
+<section class="association-dashboard-hero">
+  <div>
+    <p class="eyebrow">Association Member Dashboard</p>
+    <h1>Welcome to the ATL’s Hottest Awards Association</h1>
+    <p>
+      Complete your professional member profile, manage your association information,
+      and access approved nominee tools when available.
+    </p>
+  </div>
+
+  <aside class="member-card-preview">
+    <div class="member-photo-frame">
+      {% if profile.profile_pic %}
+        <img src="{{ profile.profile_pic.url }}" alt="{{ profile.full_name }}">
+      {% else %}
+        <div class="photo-placeholder large">ATL</div>
+      {% endif %}
+    </div>
+
+    <h2>{{ profile.full_name|default:request.user.username }}</h2>
+    {% if profile.business_name %}
+      <p>{{ profile.business_name }}</p>
+    {% else %}
+      <p class="muted">Association Member</p>
+    {% endif %}
+
+    <div class="member-badge-row">
+      <span class="member-level-badge">Silver Member</span>
+      <span class="member-since-badge">Member Since {{ profile.member_since|date:"M Y" }}</span>
+    </div>
+  </aside>
+</section>
+
+<section class="association-dashboard-grid">
+  <article class="card association-profile-card">
+    <div class="section-title-row">
+      <div>
+        <p class="eyebrow">Professional Information</p>
+        <h2>Member Profile</h2>
+      </div>
+      <span class="member-level-badge">Level: Silver</span>
+    </div>
+
+    <form class="association-profile-form" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="form_name" value="association_profile">
+
+      {% if profile_form.non_field_errors %}
+        <div class="alert">{{ profile_form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="profile-form-grid">
+        <div>
+          <label class="field-label" for="{{ profile_form.full_name.id_for_label }}">Name</label>
+          {{ profile_form.full_name }}
+          {{ profile_form.full_name.errors }}
+        </div>
+
+        <div>
+          <label class="field-label" for="{{ profile_form.business_name.id_for_label }}">Business Name</label>
+          {{ profile_form.business_name }}
+          {{ profile_form.business_name.errors }}
+        </div>
+
+        <div>
+          <label class="field-label" for="{{ profile_form.social_media.id_for_label }}">Social Media</label>
+          {{ profile_form.social_media }}
+          {{ profile_form.social_media.errors }}
+        </div>
+
+        <div>
+          <label class="field-label" for="{{ profile_form.website.id_for_label }}">Website</label>
+          {{ profile_form.website }}
+          {{ profile_form.website.errors }}
+        </div>
+
+        <div>
+          <label class="field-label" for="{{ profile_form.notification_email.id_for_label }}">Email for Push Notifications</label>
+          {{ profile_form.notification_email }}
+          {{ profile_form.notification_email.errors }}
+        </div>
+
+        <div>
+          <label class="field-label" for="{{ profile_form.profile_pic.id_for_label }}">Profile Picture</label>
+          {{ profile_form.profile_pic }}
+          {{ profile_form.profile_pic.errors }}
+        </div>
+      </div>
+
+      <label class="field-label" for="{{ profile_form.special_interest.id_for_label }}">Special Interest</label>
+      {{ profile_form.special_interest }}
+      {{ profile_form.special_interest.errors }}
+
+      <button class="btn primary profile-save-btn" type="submit">Save Member Profile</button>
+    </form>
+  </article>
+
+  <aside class="card member-status-card">
+    <p class="eyebrow">Membership</p>
+    <h2>Silver Level</h2>
+    <p>
+      All new association members begin at Silver level unless they upgrade their membership.
+    </p>
+
+    <div class="member-status-list">
+      <div>
+        <strong>Member Since</strong>
+        <span>{{ profile.member_since|date:"F j, Y" }}</span>
+      </div>
+
+      <div>
+        <strong>Nominee Dashboards</strong>
+        <span>{{ active_memberships|length }} approved</span>
+      </div>
+
+      <div>
+        <strong>Pending Access</strong>
+        <span>{{ pending_memberships|length }} pending</span>
+      </div>
+    </div>
+
+    <a class="btn primary" href="{% url 'nominee_signup' %}">Nominate ATL’s Hottest 2026</a>
+  </aside>
 </section>
 
 {% if pending_memberships %}
 <section class="card">
   <div class="section-title-row">
-    <h2>Pending Access Requests</h2>
+    <div>
+      <p class="eyebrow">Pending</p>
+      <h2>Pending Nominee Access</h2>
+    </div>
     <span class="nominee-count">{{ pending_memberships|length }} pending</span>
   </div>
 
@@ -31,7 +151,10 @@
 
 <section class="card">
   <div class="section-title-row">
-    <h2>Approved Nominee Cards</h2>
+    <div>
+      <p class="eyebrow">Approved Nominee Tools</p>
+      <h2>Nominee Dashboard Access</h2>
+    </div>
     <span class="nominee-count">{{ active_memberships|length }} active</span>
   </div>
 
@@ -97,7 +220,13 @@
       {% endfor %}
     </div>
   {% else %}
-    <p class="muted">No approved nominee dashboard cards yet.</p>
+    <div class="empty-nominee-access">
+      <h3>No approved nominee dashboards yet.</h3>
+      <p>
+        Once a nominee is approved and connected to your account, nominee tools will appear here.
+      </p>
+      <a class="btn primary" href="{% url 'nominee_signup' %}">Submit a Nominee</a>
+    </div>
   {% endif %}
 </section>
 

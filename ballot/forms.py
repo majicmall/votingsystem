@@ -56,3 +56,22 @@ class NomineeSignupForm(forms.Form):
         if cats.count() > 5:
             raise forms.ValidationError("Choose up to 5 categories.")
         return cats
+
+
+class AssociationProfileForm(forms.ModelForm):
+    class Meta:
+        from .models import AssociationProfile
+
+        model = AssociationProfile
+        fields = [
+            "full_name",
+            "business_name",
+            "social_media",
+            "website",
+            "notification_email",
+            "profile_pic",
+            "special_interest",
+        ]
+        widgets = {
+            "special_interest": forms.Textarea(attrs={"rows": 5}),
+        }

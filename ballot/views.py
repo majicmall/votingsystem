@@ -19,9 +19,10 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .forms import CategoryRequestForm, NomineePhotoForm, NomineeProfileForm, NomineeSignupForm
+from .forms import AssociationProfileForm, CategoryRequestForm, NomineePhotoForm, NomineeProfileForm, NomineeSignupForm
 from .models import (
     AssociationMembership,
+    AssociationProfile,
     BallotSettings,
     Category,
     NominationCategoryRequest,
@@ -381,8 +382,29 @@ def association_join(request):
 
 
 @login_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
+@csrf_protect
 def association_dashboard(request):
+    profile, _created = AssociationProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "full_name": request.user.get_full_name() or request.user.get_username(),
+            "notification_email": request.user.email,
+        },
+    )
+
+    profile_form = AssociationProfileForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=profile,
+    )
+
+    if request.method == "POST" and request.POST.get("form_name") == "association_profile":
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, "Your association member profile has been updated.")
+            return redirect("assoc_dashboard")
+
     memberships = (
         AssociationMembership.objects.filter(user=request.user)
         .select_related("nominee", "nominee__category")
@@ -396,6 +418,8 @@ def association_dashboard(request):
         request,
         "ballot/association_dashboard.html",
         {
+            "profile": profile,
+            "profile_form": profile_form,
             "active_memberships": active_memberships,
             "pending_memberships": pending_memberships,
         },

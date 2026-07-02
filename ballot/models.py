@@ -471,6 +471,40 @@ class Vote(models.Model):
 # Association / nominee management
 # ---------------------------------------------------------------------
 
+
+class AssociationProfile(models.Model):
+    LEVEL_SILVER = "silver"
+    LEVEL_GOLD = "gold"
+    LEVEL_PLATINUM = "platinum"
+
+    LEVEL_CHOICES = (
+        (LEVEL_SILVER, "Silver"),
+        (LEVEL_GOLD, "Gold"),
+        (LEVEL_PLATINUM, "Platinum"),
+    )
+
+    user = models.OneToOneField("auth.User", on_delete=models.CASCADE, related_name="association_profile")
+    full_name = models.CharField(max_length=160, blank=True)
+    business_name = models.CharField(max_length=180, blank=True)
+    social_media = models.URLField(blank=True)
+    website = models.URLField(blank=True)
+    notification_email = models.EmailField(blank=True)
+    profile_pic = models.ImageField(upload_to="association_profiles/", blank=True, null=True)
+    special_interest = models.TextField(
+        blank=True,
+        help_text="Tell us what you are most interested in: entertainment, events, media, business, venues, creative work, sponsorship, community, etc.",
+    )
+    member_level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default=LEVEL_SILVER)
+    member_since = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("user__username",)
+
+    def __str__(self):
+        return self.full_name or self.user.get_username()
+
+
 class AssociationMembership(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

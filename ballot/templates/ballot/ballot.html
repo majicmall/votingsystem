@@ -5,23 +5,31 @@
 <section class="hero awards-hero">
   <p class="eyebrow">Official Ballot</p>
   <h1>ATL’s Hottest Awards Voting</h1>
-  <p>Select your favorite nominee. One vote per email per category.</p>
+  {% if settings.status_label == "active" %}
+    <p>Select your favorite nominee. One vote per email per category.</p>
+  {% else %}
+    <p>Voting is not active yet. Nomination season is open for approved nominee submissions.</p>
+  {% endif %}
 </section>
 
 <section class="card awards-card">
   {% if settings.status_label != "active" %}
     <div class="alert">
-      Voting is currently <strong>{{ settings.status_label|title }}</strong>.
-      {% if settings.start_at %}<br>Starts: {{ settings.start_at }}{% endif %}
-      {% if settings.end_at %}<br>Ends: {{ settings.end_at }}{% endif %}
+      <strong>Voting is currently {{ settings.status_label|title }}.</strong><br>
+      During the nomination period, visitors may nominate ATL’s Hottest 2026.
+      Vote buttons will activate when the official voting period begins.
+      {% if settings.start_at %}<br>Voting starts: {{ settings.start_at }}{% endif %}
+      {% if settings.end_at %}<br>Voting ends: {{ settings.end_at }}{% endif %}
     </div>
   {% endif %}
 
   <form id="voteForm">
     {% csrf_token %}
 
-    <label class="field-label" for="email">Your email</label>
-    <input id="email" name="email" type="email" placeholder="you@example.com" required>
+    {% if settings.status_label == "active" %}
+      <label class="field-label" for="email">Your email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+    {% endif %}
 
     {% if categories_display %}
       {% for block in categories_display %}
@@ -33,13 +41,23 @@
                 <p>{{ block.category.description }}</p>
               {% endif %}
             </div>
-            <span class="nominee-count">{{ block.nominees|length }} approved nominee{{ block.nominees|length|pluralize }}</span>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+              <span class="nominee-count">{{ block.nominees|length }} approved nominee{{ block.nominees|length|pluralize }}</span>
+              {% if block.nominees|length > 6 %}
+                <button type="button" class="btn see-more-btn" data-see-more>
+                  More Nominees
+                </button>
+              {% endif %}
+            </div>
           </div>
 
-          <div class="nominee-grid ballot-five-grid">
+          <div class="nominee-grid ballot-six-grid">
             {% for nominee in block.nominees %}
-              <article class="nominee-card ballot-nominee-card {% if forloop.counter > 5 %}nominee-extra hidden{% endif %}" data-detail-url="{% url 'nominee_detail' nominee.id %}">
-                <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
+              <article class="nominee-card ballot-nominee-card {% if forloop.counter > 6 %}nominee-extra hidden{% endif %}" data-detail-url="{% url 'nominee_detail' nominee.id %}">
+                {% if settings.status_label == "active" %}
+                  <input type="radio" name="cat_{{ block.category.slug }}" value="{{ nominee.id }}" data-category="{{ block.category.slug }}">
+                {% endif %}
 
                 <div class="nominee-photo-frame">
                   {% if nominee.photo %}
@@ -52,7 +70,11 @@
                 <span class="nominee-name">{{ nominee.name }}</span>
 
                 <div class="card-actions">
-                  <button type="button" class="btn primary card-vote-btn" data-vote-card>Vote</button>
+                  {% if settings.status_label == "active" %}
+                    <button type="button" class="btn primary card-vote-btn" data-vote-card>Vote</button>
+                  {% else %}
+                    <a class="btn primary" href="{% url 'nominee_signup' %}">Nominate 2026</a>
+                  {% endif %}
                   <a class="btn about-btn" href="{% url 'nominee_detail' nominee.id %}">About Nominee</a>
                 </div>
               </article>
@@ -70,14 +92,12 @@
               </article>
             {% endfor %}
           </div>
-
-          {% if block.nominees|length > 5 %}
-            <button type="button" class="btn see-more-btn" data-see-more>See More Nominees</button>
-          {% endif %}
         </section>
       {% endfor %}
 
-      <button class="btn primary submit-vote-btn" type="submit">Submit Selected Votes</button>
+      {% if settings.status_label == "active" %}
+        <button class="btn primary submit-vote-btn" type="submit">Submit Selected Votes</button>
+      {% endif %}
     {% else %}
       <p class="muted">No active categories yet. Add categories in admin or run the seed command.</p>
     {% endif %}
@@ -110,8 +130,8 @@ document.querySelectorAll("[data-vote-card]").forEach((button) => {
     const radio = card.querySelector("input[type=radio]");
     const email = document.getElementById("email");
 
-    if (!email.value.trim()) {
-      email.focus();
+    if (!email || !email.value.trim()) {
+      if (email) email.focus();
       document.getElementById("voteResult").innerHTML = "<strong>Please enter your email before voting.</strong>";
       return;
     }
@@ -126,7 +146,7 @@ document.querySelectorAll("[data-vote-card]").forEach((button) => {
 const form = document.getElementById("voteForm");
 const result = document.getElementById("voteResult");
 
-if (form) {
+if (form && document.getElementById("email")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
