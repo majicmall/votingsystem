@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
@@ -665,3 +665,8 @@ def upload_test(request):
 def logout_then_home(request):
     logout(request)
     return redirect("/")
+
+
+
+def healthz(request):
+    return JsonResponse({"status": "ok", "app": "atlshottestawards"})

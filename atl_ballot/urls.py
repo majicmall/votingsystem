@@ -4,10 +4,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.views.generic import RedirectView
 
 from ballot import views as ballot_views
 
 urlpatterns = [
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "ballot/favicon.svg", permanent=True)),
+    path("healthz/", ballot_views.healthz, name="healthz"),
     # Landing page
     path("", ballot_views.landing_page, name="home"),
 
