@@ -167,19 +167,32 @@ def landing_page(request):
 
 @require_http_methods(["GET"])
 def ballot_view(request):
-    ballot_settings = BallotSettings.get_solo()
+    settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+    categories = (
+        Category.objects.filter(is_active=True)
+        .prefetch_related("nominees")
+        .order_by("sort_order", "name")
+    )
 
-    categories_display = []
-    for category in Category.objects.for_ballot():
-        nominees = list(getattr(category, "prefetched_nominees", []))
-        visible_count = min(len(nominees), 6)
-        placeholder_count = max(0, 6 - visible_count)
+    category_blocks = []
 
-        categories_display.append(
+    for category in categories:
+        nominees = [
+            nominee
+            for nominee in category.nominees.all()
+            if nominee.is_active and nominee.approval_status == Nominee.APPROVAL_APPROVED
+        ]
+
+        visible_nominees = nominees[:6]
+        placeholder_count = max(0, 6 - len(visible_nominees))
+
+        category_blocks.append(
             {
                 "category": category,
-                "nominees": nominees,
-                "placeholder_slots": range(placeholder_count),
+                "nominees": visible_nominees,
+                "total_nominees": len(nominees),
+                "placeholder_count": placeholder_count,
+                "placeholders": range(placeholder_count),
             }
         )
 
@@ -187,8 +200,8 @@ def ballot_view(request):
         request,
         "ballot/ballot.html",
         {
-            "settings": ballot_settings,
-            "categories_display": categories_display,
+            "settings": settings_obj,
+            "category_blocks": category_blocks,
         },
     )
 
