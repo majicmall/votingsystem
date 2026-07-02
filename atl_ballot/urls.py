@@ -8,7 +8,10 @@ from django.urls import path
 from ballot import views as ballot_views
 
 urlpatterns = [
-    path("", ballot_views.ballot_view, name="home"),
+    # Landing page
+    path("", ballot_views.landing_page, name="home"),
+
+    # Ballot
     path("ballot/", ballot_views.ballot_view, name="ballot"),
     path("submit-votes/", ballot_views.submit_votes, name="submit_votes"),
 
@@ -25,6 +28,7 @@ urlpatterns = [
     path("u/<uuid:token>/", ballot_views.nominee_upload, name="nominee_upload"),
 
     # Association / nominee manager
+    path("association/signup/", ballot_views.association_signup, name="association_signup"),
     path("association/join/", ballot_views.association_join, name="assoc_join"),
     path("association/dashboard/", ballot_views.association_dashboard, name="assoc_dashboard"),
     path("association/nominee/<slug:nominee_id>/edit/", ballot_views.association_nominee_edit, name="assoc_nominee_edit"),

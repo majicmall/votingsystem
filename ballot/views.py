@@ -140,14 +140,39 @@ def _create_vote(email, category, nominee, request):
 
 
 @require_http_methods(["GET"])
+def landing_page(request):
+    ballot_settings = BallotSettings.get_solo()
+
+    featured_categories = []
+    for category in Category.objects.for_ballot()[:6]:
+        nominees = list(getattr(category, "prefetched_nominees", []))
+        featured_categories.append(
+            {
+                "category": category,
+                "nominee_count": len(nominees),
+                "preview_nominees": nominees[:3],
+            }
+        )
+
+    return render(
+        request,
+        "ballot/landing.html",
+        {
+            "settings": ballot_settings,
+            "featured_categories": featured_categories,
+        },
+    )
+
+
+@require_http_methods(["GET"])
 def ballot_view(request):
     ballot_settings = BallotSettings.get_solo()
 
     categories_display = []
     for category in Category.objects.for_ballot():
         nominees = list(getattr(category, "prefetched_nominees", []))
-        visible_count = min(len(nominees), 5)
-        placeholder_count = max(0, 5 - visible_count)
+        visible_count = min(len(nominees), 6)
+        placeholder_count = max(0, 6 - visible_count)
 
         categories_display.append(
             {
@@ -319,6 +344,11 @@ def nominee_upload(request, token):
         return render(request, "ballot/nominee_upload_success.html", {"nominee": nominee})
 
     return render(request, "ballot/nominee_upload.html", {"nominee": nominee, "form": form})
+
+
+@require_http_methods(["GET"])
+def association_signup(request):
+    return render(request, "ballot/association_signup.html")
 
 
 @require_http_methods(["GET", "POST"])

@@ -998,3 +998,174 @@ form .errorlist {
     flex-direction: column;
   }
 }
+
+/* =======================================================
+   Six-card ballot preview
+======================================================= */
+
+.ballot-six-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.ballot-six-grid .ballot-nominee-card {
+  min-height: 330px;
+}
+
+.ballot-six-grid .nominee-photo-frame {
+  height: 185px;
+}
+
+@media (max-width: 1250px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ballot-six-grid .nominee-photo-frame {
+    height: 160px;
+  }
+}
+
+/* =======================================================
+   ATL's Hottest Awards Association signup page
+======================================================= */
+
+.association-join-hero {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: clamp(22px, 5vw, 54px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(26px, 6vw, 72px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 215, 106, 0.28), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(215, 25, 53, 0.38), transparent 34%),
+    linear-gradient(135deg, #000 0%, #25040b 48%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 38px rgba(255, 215, 106, 0.18),
+    0 0 62px rgba(215, 25, 53, 0.14);
+}
+
+.association-join-copy h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 7vw, 6.4rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.36),
+    0 0 30px rgba(255, 215, 106, 0.52),
+    0 0 58px rgba(215, 25, 53, 0.36);
+}
+
+.association-join-copy p {
+  color: rgba(255,255,255,0.86);
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.association-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.association-billboard {
+  min-height: 350px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+  text-align: center;
+  border: 2px solid rgba(255, 215, 106, 0.7);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 215, 106, 0.2), transparent 42%),
+    linear-gradient(135deg, rgba(0,0,0,0.95), rgba(108,4,20,0.76));
+  box-shadow:
+    inset 0 0 28px rgba(255,255,255,0.06),
+    0 0 28px rgba(255, 215, 106, 0.22),
+    0 0 58px rgba(215, 25, 53, 0.14);
+}
+
+.association-billboard span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.association-billboard h2 {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1;
+}
+
+.association-audience-grid,
+.association-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.association-audience-grid article,
+.benefit-row {
+  padding: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.36);
+}
+
+.association-audience-grid h3,
+.benefit-row strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffd76a;
+  font-size: 1.15rem;
+}
+
+.benefit-row span {
+  color: rgba(255,255,255,0.78);
+  line-height: 1.55;
+}
+
+.association-final-cta {
+  margin-top: 26px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.16), transparent 42%),
+    rgba(0,0,0,0.38);
+}
+
+.association-final-cta h2 {
+  color: #fff;
+}
+
+@media (max-width: 980px) {
+  .association-join-hero,
+  .association-audience-grid,
+  .association-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}

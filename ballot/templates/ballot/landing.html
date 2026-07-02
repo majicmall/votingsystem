@@ -1,0 +1,341 @@
+{% extends "ballot/base.html" %}
+{% block title %}ATL’s Hottest Awards Association{% endblock %}
+
+{% block content %}
+<style>
+  .landing-shell {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .landing-hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 620px;
+    display: grid;
+    align-items: center;
+    padding: clamp(28px, 6vw, 76px);
+    border: 1px solid rgba(255, 215, 106, 0.58);
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 215, 106, 0.34), transparent 30%),
+      radial-gradient(circle at 88% 12%, rgba(215, 25, 53, 0.44), transparent 34%),
+      linear-gradient(135deg, #000 0%, #25040b 48%, #050505 100%);
+    box-shadow:
+      0 32px 100px rgba(0,0,0,0.68),
+      0 0 38px rgba(255, 215, 106, 0.22),
+      0 0 62px rgba(215, 25, 53, 0.16);
+  }
+
+  .landing-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.10) 42%, transparent 54%),
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,0.09), transparent 45%);
+    pointer-events: none;
+  }
+
+  .landing-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(24px, 5vw, 58px);
+    align-items: center;
+  }
+
+  .landing-copy h1 {
+    margin: 0;
+    max-width: 780px;
+    color: #fff;
+    font-size: clamp(3rem, 7vw, 7.2rem);
+    line-height: 0.88;
+    letter-spacing: -0.06em;
+    text-shadow:
+      0 0 10px rgba(255,255,255,0.36),
+      0 0 30px rgba(255, 215, 106, 0.58),
+      0 0 58px rgba(215, 25, 53, 0.42);
+  }
+
+  .landing-copy p {
+    max-width: 720px;
+    color: rgba(255,255,255,0.86);
+    font-size: 1.18rem;
+    line-height: 1.7;
+  }
+
+  .ad-billboard {
+    position: relative;
+    overflow: hidden;
+    min-height: 360px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(255, 215, 106, 0.72);
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at 50% 25%, rgba(255, 215, 106, 0.18), transparent 38%),
+      linear-gradient(135deg, rgba(0,0,0,0.94), rgba(92, 4, 18, 0.74));
+    box-shadow:
+      inset 0 0 32px rgba(255,255,255,0.06),
+      0 0 28px rgba(255, 215, 106, 0.26),
+      0 0 58px rgba(215, 25, 53, 0.16);
+  }
+
+  .ad-billboard::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.12) 48%, transparent 56%);
+    transform: rotate(8deg);
+    animation: billboardSweep 6s linear infinite;
+  }
+
+  @keyframes billboardSweep {
+    0% { translate: -45% 0; }
+    100% { translate: 45% 0; }
+  }
+
+  .ad-content {
+    position: relative;
+    z-index: 1;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .ad-content .ad-label {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 215, 106, 0.55);
+    border-radius: 999px;
+    color: #ffd76a;
+    font-weight: 1000;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  .ad-content h2 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: 1;
+    text-shadow:
+      0 0 18px rgba(255, 215, 106, 0.5),
+      0 0 36px rgba(215, 25, 53, 0.28);
+  }
+
+  .ad-content p {
+    color: rgba(255,255,255,0.78);
+  }
+
+  .landing-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 30px;
+  }
+
+  .landing-btn {
+    min-height: 78px;
+    border-radius: 18px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .landing-btn.primary {
+    font-size: 1rem;
+  }
+
+  .rolling-banner {
+    overflow: hidden;
+    margin: 22px 0;
+    border: 1px solid rgba(255, 215, 106, 0.45);
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,0.86), rgba(121,5,24,0.62), rgba(0,0,0,0.86));
+    box-shadow: 0 0 22px rgba(255, 215, 106, 0.12);
+  }
+
+  .rolling-track {
+    display: flex;
+    width: max-content;
+    animation: rollBanner 28s linear infinite;
+  }
+
+  .rolling-track span {
+    padding: 12px 28px;
+    color: #ffd76a;
+    font-weight: 1000;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  @keyframes rollBanner {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .landing-section-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .landing-info-card {
+    padding: 20px;
+    border: 1px solid rgba(255, 215, 106, 0.34);
+    border-radius: 22px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035)),
+      rgba(0,0,0,0.48);
+  }
+
+  .landing-info-card h3 {
+    margin: 0 0 8px;
+    color: #ffd76a;
+  }
+
+  .category-preview-strip {
+    display: grid;
+    gap: 14px;
+    margin-top: 26px;
+  }
+
+  .category-preview-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid rgba(255, 215, 106, 0.28);
+    border-radius: 18px;
+    background: rgba(0,0,0,0.34);
+  }
+
+  .category-preview-row strong {
+    color: #fff;
+  }
+
+  .category-preview-row span {
+    color: #ffd76a;
+    font-weight: 1000;
+  }
+
+  @media (max-width: 980px) {
+    .landing-grid,
+    .landing-buttons,
+    .landing-section-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .landing-hero {
+      min-height: auto;
+    }
+  }
+</style>
+
+<div class="landing-shell">
+  <section class="landing-hero">
+    <div class="landing-grid">
+      <div class="landing-copy">
+        <p class="eyebrow">ATL’s Hottest Awards Association</p>
+        <h1>Nominate. Celebrate. Elevate the Culture.</h1>
+        <p>
+          Welcome to the official ATL’s Hottest Awards Association platform — where artists,
+          creators, businesses, leaders, and culture-makers are recognized, nominated, and celebrated.
+        </p>
+
+        <div class="landing-buttons">
+          <a class="btn primary landing-btn" href="{% url 'nominee_signup' %}">
+            Nominate ATL’s Hottest 2026
+          </a>
+          <a class="btn landing-btn" href="{% url 'login' %}">
+            Approved Nominee Login
+          </a>
+          <a class="btn landing-btn" href="{% url 'association_signup' %}">
+            Join ATL’s Hottest Awards Association
+          </a>
+        </div>
+      </div>
+
+      <aside class="ad-billboard">
+        <div class="ad-content">
+          <span class="ad-label">Featured Sponsor Billboard</span>
+          <h2>Your Brand Here</h2>
+          <p>
+            Premium advertising space for sponsors, partners, featured nominees,
+            event announcements, and red-carpet promotions.
+          </p>
+          <a class="btn primary" href="{% url 'association_signup' %}">Join the Association</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="rolling-banner">
+    <div class="rolling-track">
+      <span>Now accepting ATL’s Hottest 2026 nominations</span>
+      <span>Approved nominees receive dashboard access</span>
+      <span>Sponsor billboard space available</span>
+      <span>Nominate artists, businesses, leaders, creators, and culture-makers</span>
+      <span>Now accepting ATL’s Hottest 2026 nominations</span>
+      <span>Approved nominees receive dashboard access</span>
+      <span>Sponsor billboard space available</span>
+      <span>Nominate artists, businesses, leaders, creators, and culture-makers</span>
+    </div>
+  </div>
+
+  <section class="landing-section-grid">
+    <article class="landing-info-card">
+      <h3>Nomination Period</h3>
+      <p>
+        During nomination season, nominees are accepted into categories for review and approval.
+        Voting remains inactive until the official voting period opens.
+      </p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Approved Nominees</h3>
+      <p>
+        Approved nominees receive login access to complete their nominee profile,
+        upload media, and prepare for voting season.
+      </p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Association Access</h3>
+      <p>
+        Join the ATL’s Hottest Awards Association to manage nominees, submit nominations,
+        and participate in the official awards platform.
+      </p>
+    </article>
+  </section>
+
+  {% if featured_categories %}
+    <section class="card" style="margin-top:26px;">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Category Preview</p>
+          <h2>Featured Award Categories</h2>
+        </div>
+        <a class="btn" href="{% url 'nominee_signup' %}">Submit a Nominee</a>
+      </div>
+
+      <div class="category-preview-strip">
+        {% for block in featured_categories %}
+          <div class="category-preview-row">
+            <strong>{{ block.category.name }}</strong>
+            <span>{{ block.nominee_count }} nominee{{ block.nominee_count|pluralize }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

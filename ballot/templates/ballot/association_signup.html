@@ -1,0 +1,115 @@
+{% extends "ballot/base.html" %}
+{% block title %}Join ATL’s Hottest Awards Association{% endblock %}
+
+{% block content %}
+<section class="association-join-hero">
+  <div class="association-join-copy">
+    <p class="eyebrow">ATL’s Hottest Awards Association</p>
+    <h1>Join the Movement Behind the Culture.</h1>
+    <p>
+      The ATL’s Hottest Awards Association brings together entertainers, event producers,
+      business professionals, media platforms, venues, creatives, community leaders, and fans
+      who want to help celebrate, promote, and elevate Atlanta’s hottest talent and brands.
+    </p>
+
+    <div class="association-cta-row">
+      <a class="btn primary" href="{% url 'signup' %}">Create Association Account</a>
+      <a class="btn" href="{% url 'nominee_signup' %}">Nominate ATL’s Hottest 2026</a>
+    </div>
+  </div>
+
+  <div class="association-billboard">
+    <span>Association Access</span>
+    <h2>Connect. Promote. Celebrate.</h2>
+    <p>Members help power nominations, visibility, events, media exposure, and future awards experiences.</p>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-title-row">
+    <div>
+      <p class="eyebrow">Who Should Join?</p>
+      <h2>A Dynamic Network for the Culture</h2>
+    </div>
+  </div>
+
+  <div class="association-audience-grid">
+    <article>
+      <h3>Entertainers</h3>
+      <p>Artists, DJs, actors, podcasters, hosts, performers, and creators building their visibility.</p>
+    </article>
+
+    <article>
+      <h3>Event Producers</h3>
+      <p>Promoters, show organizers, red-carpet teams, festival producers, and live-experience builders.</p>
+    </article>
+
+    <article>
+      <h3>Business Professionals</h3>
+      <p>Entrepreneurs, service providers, restaurants, fashion brands, beauty professionals, and local businesses.</p>
+    </article>
+
+    <article>
+      <h3>Media</h3>
+      <p>Radio, podcasts, blogs, photographers, videographers, streaming platforms, and press outlets.</p>
+    </article>
+
+    <article>
+      <h3>Venues</h3>
+      <p>Clubs, lounges, theaters, banquet halls, studios, galleries, and event spaces.</p>
+    </article>
+
+    <article>
+      <h3>Creatives & Fans</h3>
+      <p>Designers, influencers, supporters, tastemakers, and fans who want to help spotlight the best of ATL.</p>
+    </article>
+  </div>
+</section>
+
+<section class="card">
+  <div class="section-title-row">
+    <div>
+      <p class="eyebrow">Member Perks</p>
+      <h2>Benefits of Joining</h2>
+    </div>
+  </div>
+
+  <div class="association-benefits-grid">
+    <div class="benefit-row">
+      <strong>Nomination Access</strong>
+      <span>Submit nominees for ATL’s Hottest 2026 categories during nomination season.</span>
+    </div>
+
+    <div class="benefit-row">
+      <strong>Profile & Dashboard Access</strong>
+      <span>Approved nominees can complete their profile, update photos, and manage nominee information.</span>
+    </div>
+
+    <div class="benefit-row">
+      <strong>Promotional Visibility</strong>
+      <span>Future opportunities for featured listings, sponsor placements, red-carpet promotion, and media exposure.</span>
+    </div>
+
+    <div class="benefit-row">
+      <strong>Networking & Collaboration</strong>
+      <span>Connect with entertainers, brands, venues, producers, media, and community leaders.</span>
+    </div>
+
+    <div class="benefit-row">
+      <strong>Event Opportunities</strong>
+      <span>Stay connected to ATL’s Hottest events, showcases, awards updates, and association announcements.</span>
+    </div>
+
+    <div class="benefit-row">
+      <strong>Culture-Building Participation</strong>
+      <span>Help recognize and elevate the people, businesses, and movements shaping Atlanta culture.</span>
+    </div>
+  </div>
+
+  <div class="association-final-cta">
+    <h2>Ready to Join?</h2>
+    <p>Create your association account and become part of the ATL’s Hottest Awards movement.</p>
+    <a class="btn primary" href="{% url 'signup' %}">Create Association Account</a>
+  </div>
+</section>
+{% endblock %}
