@@ -2,6 +2,12 @@
 {% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
 
 {% block content %}
+<section class="hero small">
+  <p class="eyebrow">Nominee Spotlight</p>
+  <h1>{{ nominee.name }}</h1>
+  <p>{{ nominee.category.name }}</p>
+</section>
+
 <section class="nominee-detail-shell">
   <article class="nominee-detail-card">
     <div class="nominee-detail-photo">
@@ -13,21 +19,26 @@
     </div>
 
     <div class="nominee-detail-info">
-      <p class="eyebrow">{{ nominee.category.name }}</p>
-      <h1>{{ nominee.name }}</h1>
+      <p class="eyebrow">About Nominee</p>
+      <h2>{{ nominee.name }}</h2>
+      <p class="category-chip">{{ nominee.category.name }}</p>
+
+      <p class="muted">
+        Cast your vote below. Your email is used to confirm your vote and protect the fairness of the awards.
+      </p>
 
       <div class="detail-link-row">
         {% if nominee.website %}
-          <a class="btn" href="{{ nominee.website }}" target="_blank" rel="noopener">Website</a>
+          <a class="btn" href="{{ nominee.website }}" target="_blank" rel="noopener">Official Website</a>
         {% endif %}
         {% if nominee.social_link %}
-          <a class="btn" href="{{ nominee.social_link }}" target="_blank" rel="noopener">Social</a>
+          <a class="btn" href="{{ nominee.social_link }}" target="_blank" rel="noopener">Social Profile</a>
         {% endif %}
       </div>
 
       <form class="detail-vote-form" method="post" action="{% url 'vote_nominee' nominee.id %}">
         {% csrf_token %}
-        <label class="field-label" for="detail-email">Email address to confirm your vote</label>
+        <label class="field-label" for="detail-email">Email address</label>
         <input id="detail-email" name="email" type="email" placeholder="you@example.com" required>
 
         <button class="btn primary detail-vote-btn" type="submit">

@@ -1,87 +1,119 @@
 {% extends "ballot/base.html" %}
 {% block title %}Staff Dashboard | ATL’s Hottest{% endblock %}
+
 {% block content %}
 <section class="hero small">
-  <h1>Staff Dashboard</h1>
-  <p>Review category requests and monitor vote tallies.</p>
-  <a class="btn primary" href="{% url 'export_votes_csv' %}">Export CSV</a>
-  <a class="btn" href="/admin/">Admin</a>
+  <p class="eyebrow">Staff Control Room</p>
+  <h1>ATL’s Hottest Vote Dashboard</h1>
+  <p>Review pending requests, monitor vote totals, and export results.</p>
+  <a class="btn primary" href="{% url 'export_votes_csv' %}">Export Vote CSV</a>
+</section>
+
+<section class="staff-summary-grid">
+  <div class="stat-card">
+    <span>Pending Category Requests</span>
+    <strong>{{ pending_requests|length }}</strong>
+  </div>
+  <div class="stat-card">
+    <span>Pending Manager Access</span>
+    <strong>{{ pending_memberships|length }}</strong>
+  </div>
+  <div class="stat-card">
+    <span>Tally Rows</span>
+    <strong>{{ tallies|length }}</strong>
+  </div>
 </section>
 
 <section class="card">
-  <h2>Pending Category Requests</h2>
-  {% if pending_requests %}
-    <table>
-      <thead>
-        <tr>
-          <th>Nominee</th>
-          <th>Target Category</th>
-          <th>Requester</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for req in pending_requests %}
+  <div class="section-title-row">
+    <h2>Vote Tallies</h2>
+    <a class="btn" href="{% url 'tallies_json' %}">View JSON</a>
+  </div>
+
+  {% if tallies %}
+    <div class="tally-table-wrap">
+      <table class="tally-table">
+        <thead>
           <tr>
-            <td>{{ req.source_nominee.name }}</td>
-            <td>{{ req.target_category.name }}</td>
-            <td>{{ req.requester }}</td>
-            <td>
-              <form method="post" action="{% url 'staff_request_approve' req.id %}" class="inline-form">
-                {% csrf_token %}
-                <button class="btn primary" type="submit">Approve</button>
-              </form>
-              <form method="post" action="{% url 'staff_request_deny' req.id %}" class="inline-form">
-                {% csrf_token %}
-                <button class="btn danger" type="submit">Deny</button>
-              </form>
-            </td>
+            <th>Category</th>
+            <th>Nominee</th>
+            <th>Votes</th>
+            <th>Visual</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for row in tallies %}
+            <tr>
+              <td>{{ row.category__name }}</td>
+              <td>{{ row.nominee__name }}</td>
+              <td><strong>{{ row.count }}</strong></td>
+              <td>
+                <div class="tally-bar">
+                  <span style="width: {% widthratio row.count 20 100 %}%"></span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="muted">No votes have been recorded yet.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <div class="section-title-row">
+    <h2>Pending Category Requests</h2>
+    <span class="nominee-count">{{ pending_requests|length }} pending</span>
+  </div>
+
+  {% if pending_requests %}
+    <div class="mini-list">
+      {% for req in pending_requests %}
+        <div class="mini-list-item">
+          <strong>{{ req.source_nominee.name }}</strong>
+          <span>Requested category: {{ req.target_category.name }}</span>
+          <span>Requested by: {{ req.requester }}</span>
+
+          <div class="actions">
+            <form method="post" action="{% url 'staff_request_approve' req.id %}">
+              {% csrf_token %}
+              <button class="btn primary" type="submit">Approve</button>
+            </form>
+
+            <form method="post" action="{% url 'staff_request_deny' req.id %}">
+              {% csrf_token %}
+              <button class="btn danger" type="submit">Deny</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   {% else %}
     <p class="muted">No pending category requests.</p>
   {% endif %}
 </section>
 
 <section class="card">
-  <h2>Pending Manager Access</h2>
+  <div class="section-title-row">
+    <h2>Pending Manager Access</h2>
+    <span class="nominee-count">{{ pending_memberships|length }} pending</span>
+  </div>
+
   {% if pending_memberships %}
-    <p>Approve these in Django Admin → Association memberships.</p>
-    <ul>
+    <div class="mini-list">
       {% for membership in pending_memberships %}
-        <li>{{ membership.user }} requested {{ membership.nominee.name }} — {{ membership.nominee.category.name }}</li>
+        <div class="mini-list-item">
+          <strong>{{ membership.nominee.name }}</strong>
+          <span>{{ membership.nominee.category.name }}</span>
+          <span>Requested by: {{ membership.user }}</span>
+          <em class="muted">Approve this access from Django Admin → Association memberships.</em>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
   {% else %}
     <p class="muted">No pending manager access requests.</p>
-  {% endif %}
-</section>
-
-<section class="card">
-  <h2>Vote Tallies</h2>
-  {% if tallies %}
-    <table>
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Nominee</th>
-          <th>Votes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in tallies %}
-          <tr>
-            <td>{{ row.category__name }}</td>
-            <td>{{ row.nominee__name }}</td>
-            <td>{{ row.count }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p class="muted">No votes yet.</p>
   {% endif %}
 </section>
 {% endblock %}

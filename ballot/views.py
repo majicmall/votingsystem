@@ -11,7 +11,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -60,32 +60,71 @@ def _send_vote_confirmation(email, saved_votes):
     if not email or not saved_votes:
         return
 
-    lines = [
-        "Thank you for voting in the ATL's Hottest Awards.",
-        "",
-        "Your vote has been recorded for:",
-    ]
+    vote_lines = [f"- {vote['category']}: {vote['nominee']}" for vote in saved_votes]
+    vote_items_html = "".join(
+        f"<li><strong>{vote['category']}</strong>: {vote['nominee']}</li>"
+        for vote in saved_votes
+    )
 
-    for vote in saved_votes:
-        lines.append(f"- {vote['category']}: {vote['nominee']}")
+    text_message = "\n".join(
+        [
+            "ATL's Hottest Awards",
+            "",
+            "Thank you for voting.",
+            "",
+            "Your vote has been recorded for:",
+            *vote_lines,
+            "",
+            "Important note: each voter may vote once per category per email address.",
+            "",
+            CONFIRMATION_AD_MESSAGE.strip(),
+            "",
+            "Thank you for supporting ATL's Hottest Awards.",
+        ]
+    )
 
-    lines += [
-        "",
-        "Important note: each voter may vote once per category per email address.",
-        "",
-        CONFIRMATION_AD_MESSAGE.strip(),
-        "",
-        "Thank you for supporting ATL's Hottest Awards.",
-    ]
+    html_message = f"""
+    <div style="margin:0;padding:0;background:#050505;color:#ffffff;font-family:Georgia,serif;">
+      <div style="max-width:680px;margin:0 auto;padding:26px;">
+        <div style="border:1px solid #ffd76a;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#000000,#3a0610);box-shadow:0 0 28px rgba(255,215,106,0.25);">
+          <div style="padding:28px;background:linear-gradient(135deg,#000000,#7d0616 55%,#000000);border-bottom:1px solid rgba(255,215,106,0.55);">
+            <p style="margin:0 0 8px;color:#ffd76a;letter-spacing:3px;text-transform:uppercase;font-weight:bold;">Official Vote Confirmation</p>
+            <h1 style="margin:0;color:#ffffff;font-size:34px;line-height:1.05;text-shadow:0 0 18px rgba(255,215,106,0.45);">ATL's Hottest Awards</h1>
+          </div>
+
+          <div style="padding:28px;">
+            <p style="font-size:18px;line-height:1.6;color:#ffffff;">Thank you for voting. Your vote has been recorded.</p>
+
+            <div style="margin:20px 0;padding:18px;border:1px solid rgba(255,215,106,0.45);border-radius:18px;background:rgba(0,0,0,0.38);">
+              <h2 style="margin:0 0 12px;color:#ffd76a;">Your Recorded Vote</h2>
+              <ul style="margin:0;padding-left:20px;color:#ffffff;line-height:1.7;">
+                {vote_items_html}
+              </ul>
+            </div>
+
+            <p style="color:#f5dca0;line-height:1.6;"><strong>Voting rule:</strong> each voter may vote once per category per email address.</p>
+
+            <div style="margin-top:24px;padding:18px;border:1px solid rgba(215,25,53,0.7);border-radius:18px;background:linear-gradient(135deg,rgba(215,25,53,0.24),rgba(0,0,0,0.35));">
+              <p style="margin:0 0 8px;color:#ffd76a;letter-spacing:2px;text-transform:uppercase;font-weight:bold;">Sponsored Message</p>
+              <p style="margin:0;color:#ffffff;line-height:1.6;">ATL's Hottest Awards supporters help keep the culture moving. Watch for featured offers, sponsor announcements, and red-carpet updates from ATL's Hottest Awards.</p>
+            </div>
+
+            <p style="margin-top:24px;color:#ffffff;">Thank you for supporting ATL's Hottest Awards.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
 
     try:
-        send_mail(
+        email_msg = EmailMultiAlternatives(
             subject="Your ATL's Hottest Awards vote was received",
-            message="\n".join(lines),
+            body=text_message,
             from_email=django_settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=True,
+            to=[email],
         )
+        email_msg.attach_alternative(html_message, "text/html")
+        email_msg.send(fail_silently=True)
     except Exception:
         pass
 
