@@ -411,7 +411,6 @@ def association_nominee_delete(request, nominee_id):
     return redirect("assoc_dashboard")
 
 
-@login_required
 @require_http_methods(["GET", "POST"])
 @csrf_protect
 def nominee_signup(request):
@@ -420,6 +419,7 @@ def nominee_signup(request):
     if request.method == "POST" and form.is_valid():
         nominee_name = form.cleaned_data["nominee_name"].strip()
         photo = form.cleaned_data.get("photo")
+        created_nominees = []
 
         for category in form.cleaned_data["categories"]:
             nominee, _was_created = Nominee.objects.get_or_create(
@@ -436,14 +436,24 @@ def nominee_signup(request):
                 },
             )
 
-            AssociationMembership.objects.get_or_create(
-                user=request.user,
-                nominee=nominee,
-                defaults={"is_active": False},
-            )
+            created_nominees.append(nominee)
 
-        messages.success(request, "Nominee signup submitted. Staff can approve it in admin.")
-        return redirect("assoc_dashboard")
+            if request.user.is_authenticated:
+                AssociationMembership.objects.get_or_create(
+                    user=request.user,
+                    nominee=nominee,
+                    defaults={"is_active": False},
+                )
+
+        messages.success(
+            request,
+            "Nominee submitted. Staff will review and approve before it appears on the ballot.",
+        )
+
+        if request.user.is_authenticated:
+            return redirect("assoc_dashboard")
+
+        return redirect("ballot")
 
     return render(request, "ballot/nominee_signup.html", {"form": form})
 

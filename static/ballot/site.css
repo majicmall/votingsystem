@@ -1196,3 +1196,191 @@ nav a:hover {
     min-height: 305px;
   }
 }
+
+/* =======================================================
+   FINAL ATL'S HOTTEST AWARDS COLOR OVERRIDE
+   Black / White / Gold / Red / Vibrant Shine
+======================================================= */
+
+:root {
+  --atl-black: #020202;
+  --atl-black-2: #090506;
+  --atl-red: #d71935;
+  --atl-red-deep: #7d0616;
+  --atl-gold: #ffd76a;
+  --atl-gold-2: #b87318;
+  --atl-white: #ffffff;
+  --atl-glow: rgba(255, 215, 106, 0.42);
+}
+
+body {
+  color: var(--atl-white) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.26), transparent 28%),
+    radial-gradient(circle at 88% 8%, rgba(215, 25, 53, 0.38), transparent 31%),
+    radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.14), transparent 34%),
+    linear-gradient(135deg, #000 0%, #120207 42%, #2a0610 58%, #050505 100%) !important;
+}
+
+.site-header {
+  background:
+    linear-gradient(90deg, #000 0%, #39050d 44%, #000 100%) !important;
+  border-bottom: 2px solid rgba(255, 215, 106, 0.65) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.22),
+    0 0 38px rgba(215, 25, 53, 0.16) !important;
+}
+
+.brand {
+  color: var(--atl-white) !important;
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.35),
+    0 0 18px rgba(255, 215, 106, 0.65) !important;
+}
+
+nav a {
+  color: var(--atl-white) !important;
+}
+
+nav a:hover {
+  color: var(--atl-gold) !important;
+}
+
+.hero h1,
+.awards-hero h1 {
+  color: var(--atl-white) !important;
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.38),
+    0 0 22px rgba(255, 215, 106, 0.52),
+    0 0 38px rgba(215, 25, 53, 0.34) !important;
+}
+
+.eyebrow {
+  color: var(--atl-gold) !important;
+  text-shadow: 0 0 12px rgba(255, 215, 106, 0.45) !important;
+}
+
+.card,
+.awards-card,
+.nominee-card,
+.manager-card,
+.nominee-detail-card {
+  border-color: rgba(255, 215, 106, 0.38) !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    linear-gradient(135deg, rgba(0,0,0,0.78), rgba(67, 5, 16, 0.58)) !important;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.62),
+    0 0 28px rgba(255, 215, 106, 0.12),
+    inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+
+.category-block {
+  border-top: 1px solid rgba(255, 215, 106, 0.32) !important;
+}
+
+.category-block h2,
+h2 {
+  color: var(--atl-gold) !important;
+  text-shadow:
+    0 0 10px rgba(255, 215, 106, 0.36),
+    0 0 22px rgba(215, 25, 53, 0.18) !important;
+}
+
+.ballot-five-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+.ballot-nominee-card {
+  border: 1px solid rgba(255, 215, 106, 0.42) !important;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03)),
+    linear-gradient(135deg, rgba(0,0,0,0.82), rgba(82, 5, 18, 0.58)) !important;
+}
+
+.ballot-nominee-card:hover {
+  border-color: rgba(255, 215, 106, 0.9) !important;
+  box-shadow:
+    0 18px 45px rgba(0,0,0,0.58),
+    0 0 28px rgba(255, 215, 106, 0.22),
+    0 0 42px rgba(215, 25, 53, 0.18) !important;
+}
+
+.nominee-photo-frame,
+.dashboard-photo-frame,
+.nominee-detail-photo {
+  background:
+    radial-gradient(circle, rgba(255, 215, 106, 0.12), rgba(0,0,0,0.68)) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: inset 0 0 22px rgba(0,0,0,0.5) !important;
+}
+
+.photo-placeholder {
+  background:
+    radial-gradient(circle at top, rgba(255, 215, 106, 0.26), transparent 36%),
+    linear-gradient(135deg, rgba(215, 25, 53, 0.35), rgba(0,0,0,0.45)) !important;
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(255, 215, 106, 0.5) !important;
+}
+
+.btn.primary,
+.card-vote-btn,
+.submit-vote-btn,
+.detail-vote-btn {
+  background:
+    linear-gradient(135deg, #fff6c8 0%, #ffd76a 34%, #d69628 63%, #8a4a09 100%) !important;
+  border-color: rgba(255, 215, 106, 0.95) !important;
+  color: #130704 !important;
+  box-shadow:
+    0 0 16px rgba(255, 215, 106, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.55) !important;
+}
+
+.btn,
+.about-btn,
+.see-more-btn {
+  border-color: rgba(255,255,255,0.24) !important;
+  color: #fff !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)) !important;
+}
+
+.see-more-btn {
+  border-color: rgba(255, 215, 106, 0.65) !important;
+  color: var(--atl-gold) !important;
+  box-shadow: 0 0 14px rgba(255, 215, 106, 0.12) !important;
+}
+
+input,
+select,
+textarea {
+  background: rgba(0,0,0,0.68) !important;
+  border-color: rgba(255, 215, 106, 0.24) !important;
+  color: #fff !important;
+}
+
+.nominee-count,
+.category-chip,
+.status-pill {
+  border-color: rgba(255, 215, 106, 0.48) !important;
+  color: var(--atl-gold) !important;
+  background: rgba(255, 215, 106, 0.12) !important;
+}
+
+@media (max-width: 1100px) {
+  .ballot-five-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .ballot-five-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .ballot-five-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}

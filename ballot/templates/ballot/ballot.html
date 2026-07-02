@@ -65,14 +65,14 @@
                 </div>
                 <span class="nominee-name">Nominee Spot Available</span>
                 <div class="card-actions">
-                  <a class="btn about-btn" href="{% url 'nominee_signup' %}">Submit Nominee</a>
+                  <a class="btn primary" href="{% url 'nominee_signup' %}">Submit Nominee</a>
                 </div>
               </article>
             {% endfor %}
           </div>
 
           {% if block.nominees|length > 5 %}
-            <button type="button" class="btn see-more-btn" data-see-more>See More</button>
+            <button type="button" class="btn see-more-btn" data-see-more>See More Nominees</button>
           {% endif %}
         </section>
       {% endfor %}
@@ -108,14 +108,18 @@ document.querySelectorAll("[data-vote-card]").forEach((button) => {
   button.addEventListener("click", () => {
     const card = button.closest(".ballot-nominee-card");
     const radio = card.querySelector("input[type=radio]");
-    if (radio) {
-      radio.checked = true;
+    const email = document.getElementById("email");
+
+    if (!email.value.trim()) {
+      email.focus();
+      document.getElementById("voteResult").innerHTML = "<strong>Please enter your email before voting.</strong>";
+      return;
     }
 
+    if (radio) radio.checked = true;
+
     const form = document.getElementById("voteForm");
-    if (form) {
-      form.requestSubmit();
-    }
+    if (form) form.requestSubmit();
   });
 });
 
