@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="{% static 'ballot/favicon.svg' %}">
 
-  <link rel="stylesheet" href="{% static 'ballot/site.css' %}?v=guided-vote-2026-07-02-2">
-  <link rel="stylesheet" href="{% static 'ballot/mobile_force.css' %}?v=mobile-guided-vote-2026-07-02-2">
+  <link rel="stylesheet" href="{% static 'ballot/site.css' %}?v=guided-vote-2026-07-02-4">
+  <link rel="stylesheet" href="{% static 'ballot/mobile_force.css' %}?v=mobile-guided-vote-2026-07-02-4">
 
   <style>
     :root {
@@ -263,6 +263,160 @@
       text-shadow: 0 0 14px rgba(255, 215, 106, 0.45);
     }
   </style>
+
+  <style>
+    /* INLINE MOBILE GUIDED BALLOT FORCE */
+    @media screen and (max-width: 820px) {
+      .category-selection-grid,
+      .guided-category-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+      }
+
+      .category-select-btn,
+      .guided-category-btn {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        width: 100% !important;
+        min-height: 116px !important;
+        padding: 18px !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 215, 106, 0.48) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.2), transparent 46%),
+          linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .guided-category-btn b {
+        display: inline-flex !important;
+        width: fit-content !important;
+        margin-top: 10px !important;
+        padding: 8px 11px !important;
+        border-radius: 999px !important;
+        color: #111 !important;
+        background: linear-gradient(135deg, #ffd76a, #d69628) !important;
+        font-size: 0.75rem !important;
+        font-weight: 1000 !important;
+        text-transform: uppercase !important;
+      }
+
+      .ballot-six-grid,
+      .nominees-grid,
+      .ballot-category-only-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      .ballot-nominee-card,
+      .nominee-card,
+      .placeholder-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        overflow: hidden !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 215, 106, 0.42) !important;
+        background:
+          linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame,
+      .nominee-card .nominee-photo-frame,
+      .placeholder-card .nominee-photo-frame,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+        display: grid !important;
+        place-items: center !important;
+        width: 100% !important;
+        height: 240px !important;
+        min-height: 240px !important;
+        border-radius: 0 !important;
+        border: 0 !important;
+        border-bottom: 1px solid rgba(255, 215, 106, 0.32) !important;
+        background:
+          radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.18), transparent 45%),
+          #070707 !important;
+        overflow: hidden !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame img,
+      .nominee-card .nominee-photo-frame img,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+
+      .nominee-card-body {
+        display: block !important;
+        padding: 18px !important;
+        text-align: center !important;
+      }
+
+      .nominee-card-body h3 {
+        margin: 0 0 8px !important;
+        color: #ffffff !important;
+        font-size: 1.22rem !important;
+        line-height: 1.12 !important;
+        font-weight: 1000 !important;
+      }
+
+      .nominee-card-body p {
+        margin: 0 !important;
+        color: #ffd76a !important;
+        font-size: 0.92rem !important;
+        font-weight: 900 !important;
+      }
+
+      .select-nominee-form {
+        display: grid !important;
+        gap: 9px !important;
+        padding: 0 12px 14px !important;
+      }
+
+      .vote-card-btn,
+      .select-nominee-form .btn {
+        display: inline-flex !important;
+        width: 100% !important;
+        min-height: 48px !important;
+        margin: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+      }
+
+      .review-vote-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+      }
+
+      .review-vote-row .btn,
+      .ballot-status-row .btn,
+      .ballot-navigation-strip .btn,
+      .ballot-menu-footer .btn {
+        width: 100% !important;
+      }
+    }
+  </style>
+
 </head>
 
 <body>
