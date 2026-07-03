@@ -993,3 +993,9 @@ Thank you for supporting ATL's Hottest Awards.
     )
     email.attach_alternative(html_body, "text/html")
     email.send(fail_silently=True)
+
+
+@require_http_methods(["GET"])
+def atl_tv(request):
+    return render(request, "ballot/atl_tv.html")
+

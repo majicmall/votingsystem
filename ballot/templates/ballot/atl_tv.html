@@ -1,0 +1,117 @@
+{% extends "ballot/base.html" %}
+{% block title %}ATL’s Hottest TV{% endblock %}
+
+{% block content %}
+<section class="atl-tv-hero">
+  <div class="atl-tv-hero-copy">
+    <p class="eyebrow">ATL’s Hottest TV</p>
+    <h1>Watch the Culture Move.</h1>
+    <p>
+      ATL’s Hottest TV is the visual heartbeat of the movement — spotlighting entertainment,
+      comedy, events, red carpets, interviews, short-form content, business stories,
+      music culture, lifestyle moments, and the people shaping what’s hot in Atlanta.
+    </p>
+
+    <div class="atl-tv-cta-row">
+      <a class="btn primary" href="#submit-content">Submit Content</a>
+      <a class="btn" href="#advertise">Advertise on ATL’s Hottest TV</a>
+    </div>
+  </div>
+
+  <aside class="atl-tv-now-card">
+    <span>Now Accepting</span>
+    <strong>Shows • Comedy • Events • Shorts • Interviews</strong>
+    <p>Creators, producers, venues, brands, and media partners are invited to submit programming opportunities.</p>
+  </aside>
+</section>
+
+<section class="atl-tv-player-section">
+  <div class="atl-tv-frame">
+    <div class="atl-tv-screen-glow"></div>
+    <div class="atl-tv-player">
+      {% include "ballot/partials/atl_tv_embed.html" %}
+    </div>
+  </div>
+</section>
+
+<section class="card atl-tv-programming-card" id="submit-content">
+  <div class="section-title-row">
+    <div>
+      <p class="eyebrow">Programming Opportunities</p>
+      <h2>Now Accepting Content</h2>
+    </div>
+    <span class="member-level-badge">ATL’s Hottest TV</span>
+  </div>
+
+  <div class="atl-tv-grid">
+    <article>
+      <h3>TV Shows</h3>
+      <p>Original talk shows, music shows, lifestyle shows, business features, entertainment programs, and branded series.</p>
+    </article>
+
+    <article>
+      <h3>Comedy</h3>
+      <p>Stand-up clips, sketch comedy, comedy specials, funny shorts, and personality-driven entertainment.</p>
+    </article>
+
+    <article>
+      <h3>Event Coverage</h3>
+      <p>Red carpet coverage, award shows, concerts, showcases, festivals, venue recaps, and behind-the-scenes moments.</p>
+    </article>
+
+    <article>
+      <h3>Short Content</h3>
+      <p>Short-form videos, creator clips, interviews, announcements, promos, reels, trailers, and culture moments.</p>
+    </article>
+
+    <article>
+      <h3>Business Features</h3>
+      <p>Spotlights for entrepreneurs, restaurants, boutiques, beauty professionals, venues, brands, and community leaders.</p>
+    </article>
+
+    <article>
+      <h3>Music & Creative Culture</h3>
+      <p>Artist interviews, music video features, DJ sets, producer stories, visual art, creative profiles, and performances.</p>
+    </article>
+  </div>
+
+  <div class="atl-tv-submit-panel">
+    <h2>Want Your Content Featured?</h2>
+    <p>
+      ATL’s Hottest TV is building a dynamic content network for creators, entertainers,
+      media partners, venues, event producers, businesses, and community voices.
+    </p>
+    <a class="btn primary" href="mailto:passkeyent@yahoo.com?subject=ATL%27s%20Hottest%20TV%20Content%20Submission">Submit Content by Email</a>
+  </div>
+</section>
+
+<section class="atl-tv-advertise-card" id="advertise">
+  <div>
+    <p class="eyebrow">Advertise</p>
+    <h2>Advertise on ATL’s Hottest TV</h2>
+    <p>
+      Reach viewers connected to Atlanta entertainment, nightlife, business, music,
+      community culture, events, media, and the ATL’s Hottest Awards audience.
+    </p>
+  </div>
+
+  <div class="atl-tv-ad-options">
+    <div>
+      <strong>Brand Spots</strong>
+      <span>Run commercials, sponsor messages, and promotional videos.</span>
+    </div>
+
+    <div>
+      <strong>Event Promotion</strong>
+      <span>Promote upcoming shows, red carpets, festivals, concerts, and venue nights.</span>
+    </div>
+
+    <div>
+      <strong>Featured Placement</strong>
+      <span>Place your business, show, venue, or campaign inside ATL’s Hottest programming.</span>
+    </div>
+  </div>
+
+  <a class="btn primary" href="mailto:passkeyent@yahoo.com?subject=Advertise%20on%20ATL%27s%20Hottest%20TV">Request Advertising Info</a>
+</section>
+{% endblock %}

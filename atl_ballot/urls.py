@@ -9,6 +9,7 @@ from django.views.generic import RedirectView
 from ballot import views as ballot_views
 
 urlpatterns = [
+    path("tv/", ballot_views.atl_tv, name="atl_tv"),
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "ballot/favicon.svg", permanent=True)),
     path("healthz/", ballot_views.healthz, name="healthz"),
     # Landing page
