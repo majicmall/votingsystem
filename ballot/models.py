@@ -301,19 +301,60 @@ class Nominee(models.Model):
 
     def send_approval_notice(self, user=None, temporary_password=None):
         """
-        Backward-compatible approval notice method.
+        Create/connect the nominee's association account, set a real temporary
+        password when needed, and send the polished approval email.
 
-        Older approval code may call send_approval_notice() with no arguments.
-        Route it through the polished approval email.
+        Important:
+        The password included in the email must match the password saved on the
+        actual Django user account.
         """
+        if not self.contact_email:
+            return None
+
+        email = self.contact_email.strip().lower()
+        User = get_user_model()
+
+        user = user or User.objects.filter(email__iexact=email).first() or User.objects.filter(username__iexact=email).first()
+
+        created = False
         if user is None:
-            class _EmailUser:
-                username = self.contact_email
-                email = self.contact_email
+            temporary_password = temporary_password or secrets.token_urlsafe(10)
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=temporary_password,
+            )
+            created = True
+        else:
+            if not user.email:
+                user.email = email
+                user.save(update_fields=["email"])
 
-            user = _EmailUser()
+            # If caller supplies a temporary password, actually set it.
+            # If no password was supplied, do not overwrite an existing user's password.
+            if temporary_password:
+                user.set_password(temporary_password)
+                user.save(update_fields=["password"])
 
-        return self.send_approval_email(user, temporary_password=temporary_password)
+        membership, _created_membership = AssociationMembership.objects.get_or_create(
+            user=user,
+            nominee=self,
+            defaults={"is_active": True},
+        )
+
+        if not membership.is_active:
+            membership.is_active = True
+            membership.save(update_fields=["is_active", "activated_at"])
+
+        # If the user was newly created, temporary_password is guaranteed.
+        # If this is an existing user and no temporary_password was supplied,
+        # the email will not show a fake password.
+        self.send_approval_email(
+            user,
+            temporary_password=temporary_password if (created or temporary_password) else None,
+        )
+
+        return user
 
     def archive(self):
         self.is_active = False
