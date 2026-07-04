@@ -7,8 +7,8 @@
     <p class="eyebrow">Association Member Dashboard</p>
     <h1>Welcome to the ATL’s Hottest Awards Association</h1>
     <p>
-      Complete your professional member profile, manage your association information,
-      and access approved nominee tools when available.
+      Complete your professional member profile, keep your approved nominee information updated,
+      and prepare for member rewards, promotions, visibility tools, and future association benefits.
     </p>
   </div>
 
@@ -103,7 +103,8 @@
     <p class="eyebrow">Membership</p>
     <h2>Silver Level</h2>
     <p>
-      All new association members begin at Silver level unless they upgrade their membership.
+      All approved association members begin at Silver level unless they upgrade their membership.
+      This dashboard is for profile management, visibility, rewards, promotions, and approved nominee tools.
     </p>
 
     <div class="member-status-list">
@@ -123,7 +124,7 @@
       </div>
     </div>
 
-    <a class="btn primary" href="{% url 'nominee_signup' %}">Nominate ATL’s Hottest 2026</a>
+    
   </aside>
 </section>
 
@@ -221,11 +222,13 @@
     </div>
   {% else %}
     <div class="empty-nominee-access">
-      <h3>No approved nominee dashboards yet.</h3>
+      <h3>No approved nominee dashboard is connected yet.</h3>
       <p>
-        Once a nominee is approved and connected to your account, nominee tools will appear here.
+        Once your nomination is approved and your account is connected, your nominee tools will appear here.
+        Use this dashboard to maintain professional information, profile visibility, rewards, promotions,
+        and approved nominee updates.
       </p>
-      <a class="btn primary" href="{% url 'nominee_signup' %}">Submit a Nominee</a>
+      
     </div>
   {% endif %}
 </section>
