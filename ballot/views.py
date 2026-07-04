@@ -29,6 +29,7 @@ from .models import (
     Nominee,
     Vote,
 )
+from ballot.email_utils import absolute_url, extract_category_names_from_object, send_nominee_approved_email
 from .services import approve_category_request, deny_category_request
 
 
@@ -998,4 +999,65 @@ Thank you for supporting ATL's Hottest Awards.
 @require_http_methods(["GET"])
 def atl_tv(request):
     return render(request, "ballot/atl_tv.html")
+
+def _send_real_nominee_approval_email(request_obj, nominee_obj=None, temporary_password=None):
+    """
+    Send polished nominee approval email from staff approval flow.
+
+    This function is intentionally defensive because request/nominee field names
+    can differ across versions of the app.
+    """
+    obj = nominee_obj or request_obj
+
+    to_email = (
+        getattr(request_obj, "contact_email", None)
+        or getattr(request_obj, "email", None)
+        or getattr(request_obj, "nominee_email", None)
+        or getattr(obj, "contact_email", None)
+        or getattr(obj, "email", None)
+        or ""
+    )
+
+    if not to_email:
+        return
+
+    nominee_name = (
+        getattr(obj, "display_name", None)
+        or getattr(obj, "name", None)
+        or getattr(obj, "nominee_name", None)
+        or getattr(request_obj, "display_name", None)
+        or getattr(request_obj, "name", None)
+        or getattr(request_obj, "nominee_name", None)
+        or "Nominee"
+    )
+
+    username = to_email
+
+    categories = []
+    for source in [request_obj, nominee_obj]:
+        if source is None:
+            continue
+        for category_name in extract_category_names_from_object(source):
+            if category_name not in categories:
+                categories.append(category_name)
+
+    nominee_url = None
+    try:
+        if nominee_obj and hasattr(nominee_obj, "get_absolute_url"):
+            nominee_url = absolute_url(nominee_obj.get_absolute_url())
+        elif nominee_obj and getattr(nominee_obj, "slug", None):
+            nominee_url = absolute_url(f"/nominee/{nominee_obj.slug}/")
+    except Exception:
+        nominee_url = None
+
+    send_nominee_approved_email(
+        to_email=to_email,
+        nominee_name=nominee_name,
+        username=username,
+        temporary_password=temporary_password,
+        categories=categories,
+        login_url=absolute_url("/accounts/login/"),
+        dashboard_url=absolute_url("/association/dashboard/"),
+        nominee_url=nominee_url,
+    )
 
