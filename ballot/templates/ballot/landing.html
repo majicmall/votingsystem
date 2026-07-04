@@ -1,4 +1,5 @@
 {% extends "ballot/base.html" %}
+{% load static %}
 {% block title %}ATL’s Hottest Awards Association{% endblock %}
 
 {% block content %}
@@ -241,7 +242,16 @@
 </style>
 
 <div class="landing-shell">
-  <section class="landing-hero">
+  
+<section class="atl-hero-banner-wrap">
+  <img
+    class="atl-hero-banner"
+    src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
+    alt="ATL’s Hottest Awards 2026 red carpet banner"
+  >
+</section>
+
+<section class="landing-hero">
     <div class="landing-grid">
       <div class="landing-copy">
         <p class="eyebrow">ATL’s Hottest Awards Association</p>
