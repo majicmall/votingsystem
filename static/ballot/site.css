@@ -2149,15 +2149,17 @@ form .errorlist {
   }
 }
 
-/* Final polish: remove top gap above landing hero banner */
-.landing-shell {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
+/* Final polish: remove top gap above landing hero banner on desktop only */
+@media (min-width: 721px) {
+  .landing-shell {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
 
-.landing-shell > .atl-hero-banner-wrap:first-child,
-.atl-hero-banner-wrap:first-child {
-  margin-top: -44px !important;
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  .atl-hero-banner-wrap:first-child {
+    margin-top: -44px !important;
+  }
 }
 
 /* Top navigation polish */
