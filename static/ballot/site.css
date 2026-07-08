@@ -2202,6 +2202,7 @@ header nav a:hover {
   }
 }
 
+/* DISABLED MOBILE FLUSH BLOCK - caused hero to slide under header
 /* =========================================================
    MOBILE HOMEPAGE HEADER-TO-HERO FLUSH FIX
    Removes purple/pink background gap between header gold line
@@ -2239,6 +2240,8 @@ header nav a:hover {
     margin-top: 0 !important;
   }
 }
+*/
+
 
 /* Emergency mobile hero flush: pull first hero into header gap */
 @media (max-width: 720px) {

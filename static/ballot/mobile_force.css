@@ -423,3 +423,33 @@
     object-position: center top !important;
   }
 }
+
+/* =========================================================
+   CLEAN MOBILE HERO POSITION
+   Keeps full hero visible just below the header gold line.
+   ========================================================= */
+@media (max-width: 720px) {
+  body .atl-hero-banner-wrap,
+  body .landing-shell > .atl-hero-banner-wrap:first-child,
+  body main .atl-hero-banner-wrap:first-child {
+    margin-top: 8px !important;
+    margin-bottom: 18px !important;
+    padding-top: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  body .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center top !important;
+    transform: none !important;
+  }
+}
