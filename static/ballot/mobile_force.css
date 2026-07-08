@@ -375,3 +375,51 @@
     object-position: center top !important;
   }
 }
+
+/* =========================================================
+   FINAL MOBILE HERO FLUSH FIX
+   Removes the visible gap between header gold line and hero image.
+   ========================================================= */
+@media (max-width: 720px) {
+  body,
+  main,
+  .landing-shell,
+  .page-shell,
+  .container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  body header,
+  body .site-header,
+  body .topbar {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body header + main,
+  body .site-header + main,
+  body .topbar + main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  body .atl-hero-banner-wrap,
+  body .landing-shell > .atl-hero-banner-wrap:first-child,
+  body main .atl-hero-banner-wrap:first-child {
+    margin-top: -56px !important;
+    padding-top: 0 !important;
+    margin-bottom: 18px !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  body .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center top !important;
+  }
+}
