@@ -355,3 +355,23 @@
     top: auto !important;
   }
 }
+
+/* Mobile hero banner correction: keep full top of image visible */
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap,
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  .atl-hero-banner-wrap:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    transform: none !important;
+  }
+
+  .atl-hero-banner {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center top !important;
+  }
+}
