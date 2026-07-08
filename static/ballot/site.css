@@ -2247,3 +2247,117 @@ header nav a:hover {
     margin-bottom: -6px !important;
   }
 }
+
+/* =========================================================
+   MOBILE HOMEPAGE HEADER-TO-HERO FLUSH FIX
+   Removes purple/pink background gap between header gold line
+   and the ATL hero image on mobile.
+   ========================================================= */
+@media (max-width: 720px) {
+  body:has(.atl-hero-banner-wrap) main,
+  body:has(.atl-hero-banner-wrap) .site-main,
+  body:has(.atl-hero-banner-wrap) .page-main,
+  body:has(.atl-hero-banner-wrap) .content,
+  body:has(.atl-hero-banner-wrap) .content-wrap,
+  body:has(.atl-hero-banner-wrap) .page-shell,
+  body:has(.atl-hero-banner-wrap) .landing-shell {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) header,
+  body:has(.atl-hero-banner-wrap) .site-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner-wrap {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    display: block !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* =========================================================
+   MOBILE HOMEPAGE HEADER-TO-HERO FLUSH FIX
+   Removes purple/pink background gap between header gold line
+   and the ATL hero image on mobile.
+   ========================================================= */
+@media (max-width: 720px) {
+  body:has(.atl-hero-banner-wrap) main,
+  body:has(.atl-hero-banner-wrap) .site-main,
+  body:has(.atl-hero-banner-wrap) .page-main,
+  body:has(.atl-hero-banner-wrap) .content,
+  body:has(.atl-hero-banner-wrap) .content-wrap,
+  body:has(.atl-hero-banner-wrap) .page-shell,
+  body:has(.atl-hero-banner-wrap) .landing-shell {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) header,
+  body:has(.atl-hero-banner-wrap) .site-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner-wrap {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    display: block !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* =========================================================
+   MOBILE HOMEPAGE HEADER-TO-HERO FLUSH FIX
+   Removes purple/pink background gap between header gold line
+   and the ATL hero image on mobile.
+   ========================================================= */
+@media (max-width: 720px) {
+  body:has(.atl-hero-banner-wrap) main,
+  body:has(.atl-hero-banner-wrap) .site-main,
+  body:has(.atl-hero-banner-wrap) .page-main,
+  body:has(.atl-hero-banner-wrap) .content,
+  body:has(.atl-hero-banner-wrap) .content-wrap,
+  body:has(.atl-hero-banner-wrap) .page-shell,
+  body:has(.atl-hero-banner-wrap) .landing-shell {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) header,
+  body:has(.atl-hero-banner-wrap) .site-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner-wrap {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    display: block !important;
+  }
+
+  body:has(.atl-hero-banner-wrap) .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    margin-top: 0 !important;
+  }
+}
