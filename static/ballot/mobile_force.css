@@ -432,7 +432,7 @@
   body .atl-hero-banner-wrap,
   body .landing-shell > .atl-hero-banner-wrap:first-child,
   body main .atl-hero-banner-wrap:first-child {
-    margin-top: 8px !important;
+    margin-top: 0 !important;
     margin-bottom: 18px !important;
     padding-top: 0 !important;
     transform: none !important;
