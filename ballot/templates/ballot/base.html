@@ -423,7 +423,12 @@
   <header class="site-header">
     <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards</a>
 
-    <nav>
+    <input class="mobile-nav-check" type="checkbox" id="mobile-nav-check">
+<label class="mobile-nav-toggle" for="mobile-nav-check">
+  <span>Menu</span>
+  <b>☰</b>
+</label>
+<nav>
       <a href="{% url 'home' %}">Home</a>
         <a href="{% url 'ballot' %}">VOTE</a>
         <a href="{% url 'atl_tv' %}">ATL TV</a>

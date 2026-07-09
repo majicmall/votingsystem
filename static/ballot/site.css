@@ -2785,3 +2785,108 @@ header nav a:hover::before,
     animation: none !important;
   }
 }
+
+/* =========================================================
+   MOBILE DROPDOWN NAVIGATION
+   Desktop keeps full nav. Mobile gets compact dropdown menu.
+   ========================================================= */
+
+.mobile-nav-check,
+.mobile-nav-toggle {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  .brand {
+    width: auto !important;
+    text-align: left !important;
+    font-size: 0.82rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.075em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .mobile-nav-check {
+    display: none !important;
+  }
+
+  .mobile-nav-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 34px !important;
+    padding: 7px 12px !important;
+    border: 1px solid rgba(255, 215, 106, 1) !important;
+    border-radius: 999px !important;
+    color: #190504 !important;
+    background:
+      linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    box-shadow:
+      0 0 14px rgba(255, 215, 106, 0.35),
+      inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1rem !important;
+    line-height: 1 !important;
+  }
+
+  .site-header nav,
+  header nav,
+  .site-nav,
+  .nav {
+    grid-column: 1 / -1 !important;
+    display: none !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 8px 0 0 !important;
+    margin: 0 !important;
+    gap: 7px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .mobile-nav-check:checked ~ nav {
+    display: flex !important;
+  }
+
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    flex: 0 1 auto !important;
+    min-height: 32px !important;
+    padding: 7px 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.045em !important;
+    white-space: nowrap !important;
+  }
+
+  .site-header nav a:hover,
+  header nav a:hover,
+  .site-nav a:hover,
+  .nav a:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+  }
+}
