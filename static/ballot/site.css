@@ -3043,3 +3043,155 @@ header nav a:hover::before,
     animation: none !important;
   }
 }
+
+/* =========================================================
+   FINAL MOBILE MENU BUTTON ALIGNMENT
+   Centers the Menu button vertically and makes it square.
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    align-items: center !important;
+    padding: 12px 14px 13px !important;
+    min-height: 58px !important;
+  }
+
+  .mobile-nav-toggle {
+    width: 76px !important;
+    min-width: 76px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    align-self: center !important;
+    justify-self: end !important;
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span,
+  .mobile-nav-toggle b {
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span {
+    font-size: 0.76rem !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1rem !important;
+  }
+}
+
+/* =========================================================
+   STRONGER MOVING PREMIERE SPOTLIGHTS
+   More visible cinematic beams over the hero image.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner-wrap .atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.atl-hero-banner-wrap::before,
+.atl-hero-banner-wrap::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 3 !important;
+  bottom: -30% !important;
+  width: 54% !important;
+  height: 145% !important;
+  pointer-events: none !important;
+  mix-blend-mode: screen !important;
+  filter: blur(8px) !important;
+  opacity: 0.74 !important;
+}
+
+.atl-hero-banner-wrap::before {
+  left: -18% !important;
+  background:
+    linear-gradient(
+      68deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(255, 255, 245, 0.22) 43%,
+      rgba(255, 215, 106, 0.18) 51%,
+      rgba(255, 255, 245, 0.12) 58%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  transform-origin: 50% 100% !important;
+  animation: premiereSpotlightSweepLeft 6.4s ease-in-out infinite alternate !important;
+}
+
+.atl-hero-banner-wrap::after {
+  right: -18% !important;
+  background:
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(255, 255, 245, 0.20) 43%,
+      rgba(255, 215, 106, 0.16) 51%,
+      rgba(255, 255, 245, 0.11) 58%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  transform-origin: 50% 100% !important;
+  animation: premiereSpotlightSweepRight 7s ease-in-out infinite alternate !important;
+}
+
+@keyframes premiereSpotlightSweepLeft {
+  0% {
+    transform: rotate(-24deg) translateX(-8%);
+  }
+  50% {
+    transform: rotate(6deg) translateX(12%);
+  }
+  100% {
+    transform: rotate(26deg) translateX(22%);
+  }
+}
+
+@keyframes premiereSpotlightSweepRight {
+  0% {
+    transform: rotate(24deg) translateX(8%);
+  }
+  50% {
+    transform: rotate(-6deg) translateX(-12%);
+  }
+  100% {
+    transform: rotate(-26deg) translateX(-22%);
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    width: 82% !important;
+    height: 130% !important;
+    bottom: -24% !important;
+    opacity: 0.58 !important;
+    filter: blur(7px) !important;
+  }
+
+  .atl-hero-banner-wrap::before {
+    left: -46% !important;
+  }
+
+  .atl-hero-banner-wrap::after {
+    right: -46% !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
