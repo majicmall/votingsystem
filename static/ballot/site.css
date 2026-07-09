@@ -3195,3 +3195,143 @@ header nav a:hover::before,
     animation: none !important;
   }
 }
+
+/* =========================================================
+   CENTER CROSSING MOVIE PREMIERE SPOTLIGHTS
+   Thin bright beams crossing over the hero image.
+   ========================================================= */
+
+/* Turn off older pseudo-element spotlight beams */
+.atl-hero-banner-wrap::before,
+.atl-hero-banner-wrap::after {
+  display: none !important;
+  content: none !important;
+}
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.premiere-spotlight-beam {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: -24%;
+  width: 12%;
+  height: 150%;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  opacity: 0.92;
+  mix-blend-mode: screen;
+  filter: blur(3px);
+  background:
+    linear-gradient(
+      to top,
+      rgba(255, 255, 255, 0.00) 0%,
+      rgba(255, 245, 190, 0.18) 18%,
+      rgba(255, 255, 255, 0.62) 48%,
+      rgba(255, 215, 106, 0.42) 58%,
+      rgba(255, 255, 255, 0.18) 76%,
+      rgba(255, 255, 255, 0.00) 100%
+    );
+  clip-path: polygon(44% 100%, 56% 100%, 100% 0%, 0% 0%);
+}
+
+.premiere-spotlight-beam::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2%;
+  width: 44px;
+  height: 44px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.82), rgba(255,215,106,0.22), transparent 68%);
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.56),
+    0 0 34px rgba(255,215,106,0.38);
+}
+
+.beam-left {
+  animation: centerSpotlightLeft 4.8s ease-in-out infinite alternate;
+}
+
+.beam-right {
+  animation: centerSpotlightRight 5.2s ease-in-out infinite alternate;
+}
+
+@keyframes centerSpotlightLeft {
+  0% {
+    transform: translateX(-50%) rotate(-28deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(6deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(28deg);
+  }
+}
+
+@keyframes centerSpotlightRight {
+  0% {
+    transform: translateX(-50%) rotate(28deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(-6deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(-28deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .premiere-spotlight-beam {
+    bottom: -20%;
+    width: 18%;
+    height: 135%;
+    opacity: 0.95;
+    filter: blur(2px);
+  }
+
+  .premiere-spotlight-beam::after {
+    width: 30px;
+    height: 30px;
+  }
+
+  @keyframes centerSpotlightLeft {
+    0% {
+      transform: translateX(-50%) rotate(-24deg);
+    }
+    50% {
+      transform: translateX(-50%) rotate(5deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(24deg);
+    }
+  }
+
+  @keyframes centerSpotlightRight {
+    0% {
+      transform: translateX(-50%) rotate(24deg);
+    }
+    50% {
+      transform: translateX(-50%) rotate(-5deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(-24deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premiere-spotlight-beam {
+    animation: none !important;
+  }
+}
