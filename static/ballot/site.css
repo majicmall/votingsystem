@@ -2890,3 +2890,156 @@ header nav a:hover::before,
     transform: translateY(-1px) scale(1.01) !important;
   }
 }
+
+/* =========================================================
+   MOBILE MENU BUTTON READABILITY + BREATHING ROOM
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    padding: 10px 14px 11px !important;
+  }
+
+  .brand {
+    padding-right: 4px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .mobile-nav-toggle {
+    min-width: 92px !important;
+    min-height: 38px !important;
+    padding: 8px 14px !important;
+    color: #050505 !important;
+    background:
+      linear-gradient(135deg, #fffbe2 0%, #ffd76a 34%, #d69628 68%, #8a4a09 100%) !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span,
+  .mobile-nav-toggle b {
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1.05rem !important;
+  }
+}
+
+/* =========================================================
+   MOVIE PREMIERE SPOTLIGHTS
+   Replaces floating text with cinematic moving light beams.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.atl-hero-banner-wrap::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: -18%;
+  bottom: -18%;
+  width: 58%;
+  height: 125%;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      72deg,
+      transparent 0%,
+      rgba(255, 248, 210, 0.00) 27%,
+      rgba(255, 248, 210, 0.22) 46%,
+      rgba(255, 215, 106, 0.16) 53%,
+      rgba(255, 248, 210, 0.00) 70%,
+      transparent 100%
+    );
+  filter: blur(10px);
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+  animation: moviePremiereSpotlightLeft 6.8s ease-in-out infinite alternate;
+}
+
+.atl-hero-banner-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  right: -18%;
+  bottom: -18%;
+  width: 58%;
+  height: 125%;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      rgba(255, 248, 210, 0.00) 27%,
+      rgba(255, 248, 210, 0.20) 46%,
+      rgba(255, 215, 106, 0.14) 53%,
+      rgba(255, 248, 210, 0.00) 70%,
+      transparent 100%
+    );
+  filter: blur(10px);
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+  animation: moviePremiereSpotlightRight 7.4s ease-in-out infinite alternate;
+}
+
+@keyframes moviePremiereSpotlightLeft {
+  0% {
+    transform: rotate(-16deg) translateX(-4%);
+  }
+  50% {
+    transform: rotate(8deg) translateX(10%);
+  }
+  100% {
+    transform: rotate(22deg) translateX(18%);
+  }
+}
+
+@keyframes moviePremiereSpotlightRight {
+  0% {
+    transform: rotate(16deg) translateX(4%);
+  }
+  50% {
+    transform: rotate(-8deg) translateX(-10%);
+  }
+  100% {
+    transform: rotate(-22deg) translateX(-18%);
+  }
+}
+
+/* Hide old floating gala text styles if any duplicate markup remains */
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    width: 72%;
+    height: 112%;
+    bottom: -14%;
+    filter: blur(9px);
+    opacity: 0.5;
+  }
+
+  .atl-hero-banner-wrap::before {
+    left: -34%;
+  }
+
+  .atl-hero-banner-wrap::after {
+    right: -34%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
