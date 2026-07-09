@@ -2556,3 +2556,232 @@ header nav a:hover::before,
     letter-spacing: 0.055em !important;
   }
 }
+
+/* =========================================================
+   MOBILE-FIRST HEADER COMPACT POLISH
+   Keeps the gold desktop nav but makes mobile tighter,
+   cleaner, and better for phone voters.
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    align-items: center !important;
+    padding: 7px 10px 8px !important;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,0.98), rgba(70,4,17,0.96), rgba(0,0,0,0.98)) !important;
+    border-bottom: 2px solid rgba(255, 215, 106, 0.88) !important;
+    box-shadow:
+      0 0 14px rgba(255, 215, 106, 0.24),
+      0 9px 22px rgba(0,0,0,0.62) !important;
+  }
+
+  .brand {
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    font-size: 0.88rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.105em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .site-header nav,
+  header nav,
+  .site-nav,
+  .nav {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 1px 1px 3px !important;
+    margin: 0 !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .site-header nav::-webkit-scrollbar,
+  header nav::-webkit-scrollbar,
+  .site-nav::-webkit-scrollbar,
+  .nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    flex: 0 0 auto !important;
+    min-height: 30px !important;
+    padding: 6px 9px !important;
+    border-radius: 999px !important;
+    font-size: 0.69rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.045em !important;
+    white-space: nowrap !important;
+    box-shadow:
+      0 0 10px rgba(255, 215, 106, 0.22),
+      inset 0 1px 0 rgba(255,255,255,0.56) !important;
+  }
+
+  .site-header nav a:hover,
+  header nav a:hover,
+  .site-nav a:hover,
+  .nav a:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+  }
+
+  main {
+    padding-top: 14px !important;
+  }
+
+  .atl-hero-banner-wrap,
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  main .atl-hero-banner-wrap:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+/* =========================================================
+   RED CARPET GALA MOVING SPOTLIGHTS
+   Animated prestige callouts over the hero image.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  isolation: isolate;
+}
+
+.red-carpet-gala-spotlight {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 215, 106, 0.74);
+  border-radius: 999px;
+  color: #fff8d2;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 46%),
+    linear-gradient(135deg, rgba(0,0,0,0.72), rgba(108,4,20,0.56));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.76rem, 1.35vw, 1.05rem);
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.55),
+    0 0 22px rgba(255,215,106,0.58),
+    0 0 38px rgba(215,25,53,0.34);
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.38),
+    0 0 46px rgba(215, 25, 53, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+  opacity: 0.92;
+  mix-blend-mode: screen;
+}
+
+.red-carpet-gala-spotlight::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -72px;
+  width: 150px;
+  height: 88px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(ellipse at top, rgba(255, 235, 170, 0.34), transparent 68%);
+  filter: blur(8px);
+  opacity: 0.8;
+}
+
+.spotlight-one {
+  top: 10%;
+  left: 7%;
+  animation: redCarpetDriftOne 7s ease-in-out infinite alternate;
+}
+
+.spotlight-two {
+  right: 7%;
+  bottom: 13%;
+  animation: redCarpetDriftTwo 8.5s ease-in-out infinite alternate;
+}
+
+@keyframes redCarpetDriftOne {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+  45% {
+    transform: translate3d(18vw, 5vh, 0) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(9vw, 12vh, 0) rotate(-1deg);
+  }
+}
+
+@keyframes redCarpetDriftTwo {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(3deg);
+  }
+  45% {
+    transform: translate3d(-16vw, -7vh, 0) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(-7vw, -13vh, 0) rotate(1deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .red-carpet-gala-spotlight {
+    padding: 6px 10px;
+    font-size: 0.54rem;
+    letter-spacing: 0.095em;
+    opacity: 0.86;
+  }
+
+  .red-carpet-gala-spotlight::before {
+    width: 92px;
+    height: 56px;
+    bottom: -44px;
+  }
+
+  .spotlight-one {
+    top: 8%;
+    left: 4%;
+  }
+
+  .spotlight-two {
+    right: 4%;
+    bottom: 12%;
+  }
+
+  @keyframes redCarpetDriftOne {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(-3deg);
+    }
+    100% {
+      transform: translate3d(24vw, 5vh, 0) rotate(2deg);
+    }
+  }
+
+  @keyframes redCarpetDriftTwo {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(3deg);
+    }
+    100% {
+      transform: translate3d(-24vw, -5vh, 0) rotate(-2deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .red-carpet-gala-spotlight {
+    animation: none !important;
+  }
+}
