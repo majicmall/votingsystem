@@ -2469,3 +2469,90 @@ header nav a:hover::before,
     letter-spacing: 0.055em !important;
   }
 }
+
+/* =========================================================
+   UNIFIED GOLD HEADER NAVIGATION
+   Make every nav button match the premium VOTE button style.
+   ========================================================= */
+.site-header nav a,
+header nav a,
+.site-nav a,
+.nav a {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(255, 215, 106, 1) !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  color: #190504 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.38),
+    0 0 34px rgba(215, 25, 53, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease !important;
+}
+
+.site-header nav a::before,
+header nav a::before,
+.site-nav a::before,
+.nav a::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transform: translateX(-120%) !important;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255,255,255,0.32) 45%,
+    transparent 62%
+  ) !important;
+  transition: transform 0.55s ease !important;
+}
+
+.site-header nav a:hover,
+header nav a:hover,
+.site-nav a:hover,
+.nav a:hover {
+  color: #000000 !important;
+  transform: translateY(-3px) scale(1.03) !important;
+  border-color: rgba(255, 245, 190, 1) !important;
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.58),
+    0 0 48px rgba(255, 215, 106, 0.24),
+    0 14px 26px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.72) !important;
+}
+
+.site-header nav a:hover::before,
+header nav a:hover::before,
+.site-nav a:hover::before,
+.nav a:hover::before {
+  transform: translateX(120%) !important;
+}
+
+@media (max-width: 720px) {
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    min-height: 38px !important;
+    padding: 8px 11px !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.055em !important;
+  }
+}
