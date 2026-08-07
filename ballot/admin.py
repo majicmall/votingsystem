@@ -145,3 +145,43 @@ class NominationCategoryRequestAdmin(admin.ModelAdmin):
     list_filter = ("status", "target_category", "created_at")
     search_fields = ("source_nominee__name", "target_category__name", "requester__username")
     readonly_fields = ("created_at", "decided_at")
+
+
+# =========================================================
+# ATL's Hottest Billboard System Admin
+# Powered By The MajesticMall Megaverse Advertising Platform
+# =========================================================
+
+from .models import BillboardAd
+
+@admin.register(BillboardAd)
+class BillboardAdAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "advertiser_name",
+        "placement",
+        "is_active",
+        "starts_at",
+        "ends_at",
+        "priority",
+    )
+    list_filter = ("placement", "is_active", "starts_at", "ends_at")
+    search_fields = ("title", "advertiser_name", "subtitle", "destination_url")
+    ordering = ("priority", "-created_at")
+    fieldsets = (
+        ("Advertiser", {
+            "fields": ("advertiser_name", "title", "subtitle")
+        }),
+        ("Placement", {
+            "fields": ("placement", "priority", "is_active")
+        }),
+        ("Creative", {
+            "fields": ("image", "destination_url", "call_to_action")
+        }),
+        ("Schedule", {
+            "fields": ("starts_at", "ends_at")
+        }),
+        ("Internal Notes", {
+            "fields": ("impressions_note",)
+        }),
+    )

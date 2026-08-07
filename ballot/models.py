@@ -525,3 +525,67 @@ class NominationCategoryRequest(models.Model):
 
     def __str__(self) -> str:
         return f"{self.source_nominee.name} → {self.target_category.name} ({self.status})"
+
+
+# =========================================================
+# ATL's Hottest Billboard System
+# Powered By The MajesticMall Megaverse Advertising Platform
+# =========================================================
+
+class BillboardAd(models.Model):
+    PLACEMENT_HOMEPAGE_TOP = "homepage_top"
+    PLACEMENT_HOMEPAGE_VIDEO = "homepage_video"
+    PLACEMENT_VOTING_TOP = "voting_top"
+    PLACEMENT_CATEGORY_TOP = "category_top"
+    PLACEMENT_NOMINEE_PROFILE = "nominee_profile"
+    PLACEMENT_CONFIRMATION = "confirmation"
+    PLACEMENT_ATL_TV = "atl_tv"
+
+    PLACEMENT_CHOICES = [
+        (PLACEMENT_HOMEPAGE_TOP, "Homepage Red Carpet Billboard"),
+        (PLACEMENT_HOMEPAGE_VIDEO, "Homepage TV Sponsor Billboard"),
+        (PLACEMENT_VOTING_TOP, "Voting Page Billboard"),
+        (PLACEMENT_CATEGORY_TOP, "Category Sponsor Billboard"),
+        (PLACEMENT_NOMINEE_PROFILE, "Nominee Profile Sponsor"),
+        (PLACEMENT_CONFIRMATION, "Confirmation Page Billboard"),
+        (PLACEMENT_ATL_TV, "ATL TV Sponsor Billboard"),
+    ]
+
+    advertiser_name = models.CharField(max_length=160)
+    title = models.CharField(max_length=180)
+    subtitle = models.CharField(max_length=240, blank=True)
+    placement = models.CharField(max_length=40, choices=PLACEMENT_CHOICES, default=PLACEMENT_HOMEPAGE_TOP)
+    image = models.ImageField(upload_to="billboards/", blank=True, null=True)
+    destination_url = models.URLField(blank=True)
+    call_to_action = models.CharField(max_length=80, default="Learn More")
+    is_active = models.BooleanField(default=True)
+    starts_at = models.DateTimeField(blank=True, null=True)
+    ends_at = models.DateTimeField(blank=True, null=True)
+    priority = models.PositiveIntegerField(default=100)
+    impressions_note = models.CharField(
+        max_length=180,
+        blank=True,
+        help_text="Optional internal note, such as package name or sponsor slot."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["priority", "-created_at"]
+        verbose_name = "Billboard Ad"
+        verbose_name_plural = "Billboard Ads"
+
+    def __str__(self):
+        return f"{self.title} — {self.get_placement_display()}"
+
+    @property
+    def is_current(self):
+        from django.utils import timezone
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if self.starts_at and self.starts_at > now:
+            return False
+        if self.ends_at and self.ends_at < now:
+            return False
+        return True
