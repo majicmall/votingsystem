@@ -5039,3 +5039,95 @@ header nav a:hover::before,
     linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
     rgba(0,0,0,0.48);
 }
+
+/* =========================================================
+   BILLBOARD CREATIVE IMAGE UPGRADE
+   Makes uploaded billboard artwork display like a real billboard.
+   ========================================================= */
+
+.mm-billboard {
+  max-width: 100%;
+  min-height: 0 !important;
+}
+
+.mm-billboard-link {
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  min-height: 0 !important;
+  padding: clamp(12px, 2vw, 20px) !important;
+}
+
+.mm-billboard-art {
+  order: -1 !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 215, 106, 0.58) !important;
+  background: #000 !important;
+  box-shadow:
+    0 0 26px rgba(255, 215, 106, 0.22),
+    0 18px 50px rgba(0,0,0,0.55) !important;
+}
+
+.mm-billboard-art img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.mm-billboard-copy {
+  text-align: center !important;
+  justify-items: center !important;
+  align-content: center !important;
+}
+
+.mm-billboard-copy h2 {
+  font-size: clamp(1.65rem, 3.8vw, 3.8rem) !important;
+}
+
+.mm-billboard-copy p {
+  max-width: 860px !important;
+}
+
+.mm-billboard-powered {
+  justify-content: center !important;
+}
+
+.mm-billboard-cta {
+  justify-self: center !important;
+  min-width: 220px !important;
+}
+
+@media (max-width: 820px) {
+  .mm-billboard-link {
+    padding: 10px !important;
+    gap: 12px !important;
+  }
+
+  .mm-billboard-art {
+    border-radius: 16px !important;
+  }
+
+  .mm-billboard-copy h2 {
+    font-size: clamp(1.45rem, 8vw, 2.7rem) !important;
+  }
+
+  .mm-billboard-copy p {
+    font-size: 0.95rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .mm-billboard-powered {
+    font-size: 0.62rem !important;
+  }
+
+  .mm-billboard-cta {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+}
