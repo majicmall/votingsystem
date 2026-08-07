@@ -536,3 +536,60 @@
     margin: 10px auto 0 !important;
   }
 }
+
+/* =========================================================
+   EMERGENCY MOBILE BILLBOARD IMAGE FIX
+   Desktop works; mobile was showing text/button but hiding image.
+   ========================================================= */
+
+@media (max-width: 820px) {
+  .mm-billboard .mm-billboard-art,
+  .mm-billboard-link .mm-billboard-art,
+  section.mm-billboard .mm-billboard-art {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 190px !important;
+    aspect-ratio: 16 / 9 !important;
+    margin: 0 auto 14px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: #000 !important;
+    order: -10 !important;
+    z-index: 5 !important;
+  }
+
+  .mm-billboard .mm-billboard-art img,
+  .mm-billboard-link .mm-billboard-art img,
+  section.mm-billboard .mm-billboard-art img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 190px !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    z-index: 6 !important;
+  }
+
+  .mm-billboard .mm-billboard-link {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .mm-billboard .mm-billboard-copy {
+    order: 2 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
