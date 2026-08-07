@@ -1,5 +1,5 @@
 {% extends "ballot/base.html" %}
-{% load static %}
+{% load static billboard_ads %}
 {% block title %}ATL’s Hottest Awards Association{% endblock %}
 
 {% block content %}
@@ -12,6 +12,9 @@
     alt="ATL’s Hottest Awards 2026 red carpet banner"
   >
 </section>
+
+{% render_billboard "homepage_top" %}
+
 
 
 <style>

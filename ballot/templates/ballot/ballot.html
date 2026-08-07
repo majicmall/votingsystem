@@ -1,7 +1,10 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 {% block title %}Choose Category | ATL’s Hottest{% endblock %}
 
 {% block content %}
+{% render_billboard "voting_top" %}
+
 <section class="hero awards-hero ballot-hero" id="top">
   <p class="eyebrow">Official Ballot</p>
   <h1>Choose a Category</h1>

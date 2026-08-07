@@ -1,7 +1,10 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 {% block title %}{{ category.name }} | ATL’s Hottest{% endblock %}
 
 {% block content %}
+{% render_billboard "voting_top" %}
+
 <section class="hero small ballot-category-hero">
   <p class="eyebrow">{{ category.group|default:"ATL’s Hottest Category" }}</p>
   <h1>{{ category.name }}</h1>
