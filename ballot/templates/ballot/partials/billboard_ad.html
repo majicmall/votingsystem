@@ -1,38 +1,40 @@
+{% load static %}
+
 {% if ad %}
-<section class="mm-billboard mm-billboard-{{ placement }}">
-  {% if ad.destination_url %}
-    <a class="mm-billboard-link" href="{{ ad.destination_url }}" target="_blank" rel="noopener">
-  {% else %}
-    <div class="mm-billboard-link">
-  {% endif %}
+<section class="mm-billboard mm-billboard-live">
+  <a
+    class="mm-billboard-link"
+    href="{% if ad.destination_url %}{{ ad.destination_url }}{% else %}#{% endif %}"
+    {% if ad.destination_url %}target="_blank" rel="noopener noreferrer"{% endif %}
+    aria-label="{{ ad.title }}"
+  >
+
+    <div class="mm-billboard-image-wrap">
+      {% if ad.image %}
+        <img class="mm-billboard-creative-img" src="{{ ad.image.url }}" alt="{{ ad.title }}">
+      {% else %}
+        <img class="mm-billboard-creative-img" src="{% static 'ballot/img/atls_hottest_billboard_1.png' %}" alt="{{ ad.title }}">
+      {% endif %}
+    </div>
 
     <div class="mm-billboard-copy">
-      <p class="mm-billboard-kicker">Sponsored Billboard</p>
+      <span class="mm-billboard-label">Sponsored Billboard</span>
+
       <h2>{{ ad.title }}</h2>
 
       {% if ad.subtitle %}
         <p>{{ ad.subtitle }}</p>
       {% endif %}
 
-      <span class="mm-billboard-powered">
+      <div class="mm-billboard-powered">
         Powered By The MajesticMall Megaverse Advertising Platform
-      </span>
-    </div>
-
-    {% if ad.image %}
-      <div class="mm-billboard-art">
-        <img src="{{ ad.image.url }}" alt="{{ ad.title }}">
       </div>
-    {% endif %}
 
-    {% if ad.call_to_action %}
-      <span class="mm-billboard-cta">{{ ad.call_to_action }}</span>
-    {% endif %}
-
-  {% if ad.destination_url %}
-    </a>
-  {% else %}
+      {% if ad.call_to_action %}
+        <span class="mm-billboard-cta">{{ ad.call_to_action }}</span>
+      {% endif %}
     </div>
-  {% endif %}
+
+  </a>
 </section>
 {% endif %}

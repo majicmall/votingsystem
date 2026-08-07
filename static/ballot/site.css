@@ -5131,3 +5131,105 @@ header nav a:hover::before,
     max-width: 280px !important;
   }
 }
+
+/* =========================================================
+   LIVE BILLBOARD IMAGE STRUCTURE
+   Fresh classes so older mobile rules cannot hide the creative.
+   ========================================================= */
+
+.mm-billboard-live {
+  width: min(1180px, 96vw) !important;
+  margin: clamp(18px, 4vw, 42px) auto !important;
+  padding: clamp(10px, 1.5vw, 18px) !important;
+}
+
+.mm-billboard-live .mm-billboard-link {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(12px, 2vw, 20px) !important;
+  width: 100% !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+}
+
+.mm-billboard-image-wrap {
+  display: block !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  background: #000 !important;
+  border: 1px solid rgba(255, 215, 106, 0.72) !important;
+  box-shadow:
+    0 0 28px rgba(255, 215, 106, 0.30),
+    0 24px 70px rgba(0,0,0,0.68) !important;
+}
+
+.mm-billboard-creative-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.mm-billboard-live .mm-billboard-copy {
+  text-align: center !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 8px !important;
+}
+
+.mm-billboard-live .mm-billboard-copy p {
+  max-width: 850px !important;
+}
+
+.mm-billboard-live .mm-billboard-cta {
+  margin-top: 6px !important;
+}
+
+@media (max-width: 820px) {
+  .mm-billboard-live {
+    width: calc(100vw - 20px) !important;
+    margin: 18px auto 26px !important;
+    padding: 8px !important;
+  }
+
+  .mm-billboard-image-wrap {
+    display: block !important;
+    width: 100% !important;
+    min-height: 190px !important;
+    aspect-ratio: 16 / 9 !important;
+    border-radius: 16px !important;
+  }
+
+  .mm-billboard-creative-img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 190px !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 8px 10px !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy h2 {
+    font-size: clamp(1.45rem, 7vw, 2.65rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy p {
+    font-size: 0.94rem !important;
+    line-height: 1.4 !important;
+  }
+}
