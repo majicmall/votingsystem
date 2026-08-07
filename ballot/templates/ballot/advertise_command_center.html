@@ -62,7 +62,7 @@
     </p>
   </div>
 
-  <form method="post" class="advertise-form card">
+  <form method="post" enctype="multipart/form-data" class="advertise-form card">
     {% csrf_token %}
 
     <label class="field-label" for="{{ form.business_name.id_for_label }}">Business Name</label>
@@ -85,6 +85,22 @@
 
     <label class="field-label" for="{{ form.budget_range.id_for_label }}">Budget Range</label>
     {{ form.budget_range }}
+
+    <label class="field-label" for="{{ form.requested_start_date.id_for_label }}">Requested Start Date</label>
+    {{ form.requested_start_date }}
+
+    <label class="field-label" for="{{ form.requested_end_date.id_for_label }}">Requested End Date</label>
+    {{ form.requested_end_date }}
+
+    <label class="field-label" for="{{ form.creative_upload.id_for_label }}">Upload Creative</label>
+    {{ form.creative_upload }}
+    <p class="muted advertise-upload-note">
+      Optional: upload a flyer, logo, ad image, or campaign creative. You can also submit now and send final artwork later.
+    </p>
+
+    <label class="field-label" for="{{ form.creative_notes.id_for_label }}">Creative Notes</label>
+    {{ form.creative_notes }}
+
 
     <label class="field-label" for="{{ form.campaign_message.id_for_label }}">Campaign Message</label>
     {{ form.campaign_message }}

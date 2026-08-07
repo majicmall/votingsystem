@@ -628,6 +628,18 @@ class AdvertisingInquiry(models.Model):
         blank=True,
         help_text="Optional budget range or campaign spend."
     )
+    requested_start_date = models.DateField(blank=True, null=True)
+    requested_end_date = models.DateField(blank=True, null=True)
+    creative_upload = models.FileField(
+        upload_to="advertising_inquiries/",
+        blank=True,
+        null=True,
+        help_text="Optional ad creative, flyer, logo, or campaign artwork."
+    )
+    creative_notes = models.TextField(
+        blank=True,
+        help_text="Optional notes about ad creative, sizing, copy, links, or campaign instructions."
+    )
     campaign_message = models.TextField(
         blank=True,
         help_text="What does the advertiser want to promote?"

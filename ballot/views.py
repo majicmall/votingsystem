@@ -1075,7 +1075,7 @@ def advertise_command_center(request):
     from .forms import AdvertisingInquiryForm
 
     if request.method == "POST":
-        form = AdvertisingInquiryForm(request.POST)
+        form = AdvertisingInquiryForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 form.save()

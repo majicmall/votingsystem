@@ -5021,3 +5021,21 @@ header nav a:hover::before,
     text-align: center;
   }
 }
+
+/* Advertise Command Center upload note */
+.advertise-upload-note {
+  margin: 8px 0 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.advertise-form input[type="file"] {
+  width: 100%;
+  border: 1px dashed rgba(255, 215, 106, 0.45);
+  border-radius: 14px;
+  padding: 13px;
+  color: rgba(255,255,255,0.82);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.48);
+}

@@ -89,6 +89,10 @@ class AdvertisingInquiryForm(forms.ModelForm):
             "website",
             "placement_interest",
             "budget_range",
+            "requested_start_date",
+            "requested_end_date",
+            "creative_upload",
+            "creative_notes",
             "campaign_message",
         ]
         widgets = {
@@ -98,6 +102,12 @@ class AdvertisingInquiryForm(forms.ModelForm):
             "phone": forms.TextInput(attrs={"placeholder": "Phone number"}),
             "website": forms.URLInput(attrs={"placeholder": "https://yourbrand.com"}),
             "budget_range": forms.TextInput(attrs={"placeholder": "Example: $50-$250, $500+, monthly package"}),
+            "requested_start_date": forms.DateInput(attrs={"type": "date"}),
+            "requested_end_date": forms.DateInput(attrs={"type": "date"}),
+            "creative_notes": forms.Textarea(attrs={
+                "placeholder": "Tell us about your creative, artwork, logo, copy, sizing, or link instructions.",
+                "rows": 4,
+            }),
             "campaign_message": forms.Textarea(attrs={
                 "placeholder": "Tell us what you want to promote and when you want your campaign to run.",
                 "rows": 5,

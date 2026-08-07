@@ -195,6 +195,8 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
         "email",
         "placement_interest",
         "budget_range",
+        "requested_start_date",
+        "requested_end_date",
         "is_contacted",
         "created_at",
     )
@@ -207,7 +209,16 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
             "fields": ("business_name", "contact_name", "email", "phone", "website")
         }),
         ("Campaign Interest", {
-            "fields": ("placement_interest", "budget_range", "campaign_message")
+            "fields": (
+                "placement_interest",
+                "budget_range",
+                "requested_start_date",
+                "requested_end_date",
+                "campaign_message",
+            )
+        }),
+        ("Creative", {
+            "fields": ("creative_upload", "creative_notes")
         }),
         ("Follow Up", {
             "fields": ("is_contacted", "internal_notes", "created_at")
