@@ -152,7 +152,7 @@ class NominationCategoryRequestAdmin(admin.ModelAdmin):
 # Powered By The MajesticMall Megaverse Advertising Platform
 # =========================================================
 
-from .models import BillboardAd
+from .models import BillboardAd, AdvertisingInquiry
 
 @admin.register(BillboardAd)
 class BillboardAdAdmin(admin.ModelAdmin):
@@ -183,5 +183,33 @@ class BillboardAdAdmin(admin.ModelAdmin):
         }),
         ("Internal Notes", {
             "fields": ("impressions_note",)
+        }),
+    )
+
+
+@admin.register(AdvertisingInquiry)
+class AdvertisingInquiryAdmin(admin.ModelAdmin):
+    list_display = (
+        "business_name",
+        "contact_name",
+        "email",
+        "placement_interest",
+        "budget_range",
+        "is_contacted",
+        "created_at",
+    )
+    list_filter = ("placement_interest", "is_contacted", "created_at")
+    search_fields = ("business_name", "contact_name", "email", "phone", "website", "campaign_message")
+    readonly_fields = ("created_at",)
+    ordering = ("-created_at",)
+    fieldsets = (
+        ("Advertiser", {
+            "fields": ("business_name", "contact_name", "email", "phone", "website")
+        }),
+        ("Campaign Interest", {
+            "fields": ("placement_interest", "budget_range", "campaign_message")
+        }),
+        ("Follow Up", {
+            "fields": ("is_contacted", "internal_notes", "created_at")
         }),
     )

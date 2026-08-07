@@ -1,0 +1,22 @@
+{% extends "ballot/base.html" %}
+{% load static %}
+
+{% block title %}Advertising Inquiry Received | ATL’s Hottest Awards{% endblock %}
+
+{% block content %}
+<section class="confirmation-hero">
+  <p class="eyebrow">Advertising Inquiry Received</p>
+  <h1>We Got It</h1>
+  <p>
+    Thank you for your interest in advertising with ATL’s Hottest Awards.
+    Our team will review your campaign request and follow up with next steps.
+  </p>
+  <p class="advertise-powered">
+    Powered By The MajesticMall Megaverse Advertising Platform
+  </p>
+  <div class="atl-cta-row">
+    <a class="btn primary" href="{% url 'landing' %}">Back to Home</a>
+    <a class="btn" href="{% url 'atl_tv' %}">Watch ATL TV</a>
+  </div>
+</section>
+{% endblock %}

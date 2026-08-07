@@ -4884,3 +4884,140 @@ header nav a:hover::before,
     min-height: 150px !important;
   }
 }
+
+
+/* =========================================================
+   ATL ADVERTISE COMMAND CENTER
+   Powered By The MajesticMall Megaverse Advertising Platform
+   ========================================================= */
+
+.advertise-command-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(20px, 5vw, 54px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(26px, 6vw, 70px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 215, 106, 0.28), transparent 36%),
+    radial-gradient(circle at 88% 14%, rgba(215, 25, 53, 0.34), transparent 38%),
+    linear-gradient(135deg, #000 0%, #2d0510 54%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 42px rgba(255, 215, 106, 0.18),
+    0 0 70px rgba(215, 25, 53, 0.14);
+}
+
+.advertise-command-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 7vw, 6.3rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+}
+
+.advertise-powered {
+  display: inline-flex;
+  margin-top: 12px;
+  color: #ffd76a;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.advertise-command-card {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.18), transparent 44%),
+    linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.5);
+}
+
+.advertise-command-card span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.advertise-command-card strong {
+  color: #fff;
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+  line-height: 1.02;
+}
+
+.advertise-package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.advertise-package-grid article {
+  padding: 20px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.38);
+}
+
+.advertise-package-grid span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+}
+
+.advertise-package-grid h2 {
+  margin-top: 8px;
+  color: #fff;
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+}
+
+.advertise-form-section {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: clamp(20px, 5vw, 48px);
+  align-items: start;
+}
+
+.advertise-form-copy h2 {
+  color: #fff;
+  font-size: clamp(2rem, 4.4vw, 4rem);
+  line-height: 0.95;
+}
+
+.advertise-form {
+  margin: 0;
+}
+
+.advertise-submit-btn {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .advertise-command-hero,
+  .advertise-package-grid,
+  .advertise-form-section {
+    grid-template-columns: 1fr;
+  }
+
+  .advertise-command-hero {
+    padding: 26px 16px;
+    border-radius: 24px;
+  }
+
+  .advertise-command-card,
+  .advertise-package-grid article {
+    text-align: center;
+  }
+}

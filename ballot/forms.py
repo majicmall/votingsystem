@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from django import forms
 
-from .models import Category, Nominee
+from .models import Category, Nominee, AdvertisingInquiry
 
 
 class NomineePhotoForm(forms.Form):
@@ -74,4 +74,32 @@ class AssociationProfileForm(forms.ModelForm):
         ]
         widgets = {
             "special_interest": forms.Textarea(attrs={"rows": 5}),
+        }
+
+
+
+class AdvertisingInquiryForm(forms.ModelForm):
+    class Meta:
+        model = AdvertisingInquiry
+        fields = [
+            "business_name",
+            "contact_name",
+            "email",
+            "phone",
+            "website",
+            "placement_interest",
+            "budget_range",
+            "campaign_message",
+        ]
+        widgets = {
+            "business_name": forms.TextInput(attrs={"placeholder": "Business or brand name"}),
+            "contact_name": forms.TextInput(attrs={"placeholder": "Your name"}),
+            "email": forms.EmailInput(attrs={"placeholder": "best@email.com"}),
+            "phone": forms.TextInput(attrs={"placeholder": "Phone number"}),
+            "website": forms.URLInput(attrs={"placeholder": "https://yourbrand.com"}),
+            "budget_range": forms.TextInput(attrs={"placeholder": "Example: $50-$250, $500+, monthly package"}),
+            "campaign_message": forms.Textarea(attrs={
+                "placeholder": "Tell us what you want to promote and when you want your campaign to run.",
+                "rows": 5,
+            }),
         }

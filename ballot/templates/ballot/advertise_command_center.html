@@ -1,0 +1,93 @@
+{% extends "ballot/base.html" %}
+{% load static %}
+
+{% block title %}Advertise Command Center | ATL’s Hottest Awards{% endblock %}
+
+{% block content %}
+<section class="advertise-command-hero">
+  <div>
+    <p class="eyebrow">ATL’s Hottest Advertise Command Center</p>
+    <h1>Put Your Brand on the Red Carpet</h1>
+    <p>
+      Reserve premium billboard space inside the ATL’s Hottest Awards App,
+      connected to the ATL’s Hottest Zone in the MajicMall Megaverse.
+    </p>
+    <p class="advertise-powered">
+      Powered By The MajesticMall Megaverse Advertising Platform
+    </p>
+  </div>
+
+  <div class="advertise-command-card">
+    <span>Available Placements</span>
+    <strong>Billboards · Sponsors · ATL TV · Category Campaigns</strong>
+    <p>
+      Start with a single placement or build a full campaign across ATL’s Hottest.
+    </p>
+  </div>
+</section>
+
+<section class="advertise-package-grid">
+  <article>
+    <span>01</span>
+    <h2>Homepage Billboard</h2>
+    <p>Premium visibility near the front-page red carpet experience.</p>
+  </article>
+  <article>
+    <span>02</span>
+    <h2>Voting Page Billboard</h2>
+    <p>Reach voters while they are actively engaging with categories and nominees.</p>
+  </article>
+  <article>
+    <span>03</span>
+    <h2>ATL TV Sponsor</h2>
+    <p>Position your brand around ATL’s Hottest video programming and coverage.</p>
+  </article>
+</section>
+
+<section class="advertise-form-section">
+  <div class="advertise-form-copy">
+    <p class="eyebrow">Reserve Space</p>
+    <h2>Tell us about your campaign</h2>
+    <p>
+      Submit your advertising interest and our team will follow up with placement options,
+      availability, and campaign recommendations.
+    </p>
+  </div>
+
+  <form method="post" class="advertise-form card">
+    {% csrf_token %}
+
+    <label class="field-label" for="{{ form.business_name.id_for_label }}">Business Name</label>
+    {{ form.business_name }}
+
+    <label class="field-label" for="{{ form.contact_name.id_for_label }}">Contact Name</label>
+    {{ form.contact_name }}
+
+    <label class="field-label" for="{{ form.email.id_for_label }}">Email</label>
+    {{ form.email }}
+
+    <label class="field-label" for="{{ form.phone.id_for_label }}">Phone</label>
+    {{ form.phone }}
+
+    <label class="field-label" for="{{ form.website.id_for_label }}">Website</label>
+    {{ form.website }}
+
+    <label class="field-label" for="{{ form.placement_interest.id_for_label }}">Placement Interest</label>
+    {{ form.placement_interest }}
+
+    <label class="field-label" for="{{ form.budget_range.id_for_label }}">Budget Range</label>
+    {{ form.budget_range }}
+
+    <label class="field-label" for="{{ form.campaign_message.id_for_label }}">Campaign Message</label>
+    {{ form.campaign_message }}
+
+    {% if form.errors %}
+      <div class="alert">
+        Please review the highlighted fields and try again.
+      </div>
+    {% endif %}
+
+    <button class="btn primary advertise-submit-btn" type="submit">Submit Advertising Inquiry</button>
+  </form>
+</section>
+{% endblock %}

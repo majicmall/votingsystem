@@ -589,3 +589,57 @@ class BillboardAd(models.Model):
         if self.ends_at and self.ends_at < now:
             return False
         return True
+
+
+# =========================================================
+# ATL's Hottest Advertise Command Center
+# Powered By The MajesticMall Megaverse Advertising Platform
+# =========================================================
+
+class AdvertisingInquiry(models.Model):
+    PLACEMENT_HOMEPAGE = "homepage"
+    PLACEMENT_VOTING = "voting"
+    PLACEMENT_CATEGORY = "category"
+    PLACEMENT_NOMINEE = "nominee"
+    PLACEMENT_ATL_TV = "atl_tv"
+    PLACEMENT_FULL_CAMPAIGN = "full_campaign"
+
+    PLACEMENT_CHOICES = [
+        (PLACEMENT_HOMEPAGE, "Homepage Billboard"),
+        (PLACEMENT_VOTING, "Voting Page Billboard"),
+        (PLACEMENT_CATEGORY, "Category Sponsor"),
+        (PLACEMENT_NOMINEE, "Nominee Profile Sponsor"),
+        (PLACEMENT_ATL_TV, "ATL TV Sponsor"),
+        (PLACEMENT_FULL_CAMPAIGN, "Full ATL’s Hottest Campaign"),
+    ]
+
+    business_name = models.CharField(max_length=180)
+    contact_name = models.CharField(max_length=140)
+    email = models.EmailField()
+    phone = models.CharField(max_length=40, blank=True)
+    website = models.URLField(blank=True)
+    placement_interest = models.CharField(
+        max_length=40,
+        choices=PLACEMENT_CHOICES,
+        default=PLACEMENT_HOMEPAGE,
+    )
+    budget_range = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Optional budget range or campaign spend."
+    )
+    campaign_message = models.TextField(
+        blank=True,
+        help_text="What does the advertiser want to promote?"
+    )
+    is_contacted = models.BooleanField(default=False)
+    internal_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Advertising Inquiry"
+        verbose_name_plural = "Advertising Inquiries"
+
+    def __str__(self):
+        return f"{self.business_name} — {self.get_placement_interest_display()}"

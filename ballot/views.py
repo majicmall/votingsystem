@@ -1061,3 +1061,29 @@ def _send_real_nominee_approval_email(request_obj, nominee_obj=None, temporary_p
         nominee_url=nominee_url,
     )
 
+
+
+
+# =========================================================
+# ATL's Hottest Advertise Command Center
+# Powered By The MajesticMall Megaverse Advertising Platform
+# =========================================================
+
+def advertise_command_center(request):
+    from django.shortcuts import render, redirect
+    from .forms import AdvertisingInquiryForm
+
+    if request.method == "POST":
+        form = AdvertisingInquiryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("advertise_thank_you")
+    else:
+        form = AdvertisingInquiryForm()
+
+    return render(request, "ballot/advertise_command_center.html", {"form": form})
+
+
+def advertise_thank_you(request):
+    from django.shortcuts import render
+    return render(request, "ballot/advertise_thank_you.html")
