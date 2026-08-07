@@ -4041,3 +4041,169 @@ header nav a:hover::before,
   }
 }
 
+
+/* =========================================================
+   REAL HERO SHIMMER + CAMERA FLASH LAYERS
+   Uses actual overlay divs so effects are visible on desktop/mobile.
+   ========================================================= */
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+}
+
+/* Permanently hide old spotlight system */
+.premiere-spotlight-beam,
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+.atl-hero-shimmer-layer,
+.atl-camera-flash-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+}
+
+/* Wide luxury sweep across the red carpet image */
+.atl-hero-shimmer-layer {
+  background:
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 32%,
+      rgba(255, 255, 255, 0.00) 39%,
+      rgba(255, 245, 190, 0.24) 46%,
+      rgba(255, 255, 255, 0.58) 50%,
+      rgba(255, 215, 106, 0.26) 54%,
+      rgba(255, 255, 255, 0.00) 62%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  width: 180% !important;
+  left: -180% !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.95 !important;
+  animation: atlRealHeroShimmer 5.8s ease-in-out infinite !important;
+}
+
+/* Camera flash pops */
+.atl-camera-flash-layer {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.48) 4%, rgba(255,255,255,0.00) 11%),
+    radial-gradient(circle at 82% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.42) 4%, rgba(255,255,255,0.00) 11%),
+    radial-gradient(circle at 68% 42%, rgba(255,215,106,0.92) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 12%),
+    radial-gradient(circle at 34% 48%, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 12%) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0 !important;
+  animation: atlRealCameraFlashes 4.8s linear infinite !important;
+}
+
+@keyframes atlRealHeroShimmer {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  35% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateX(220%);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateX(220%);
+    opacity: 0;
+  }
+}
+
+@keyframes atlRealCameraFlashes {
+  0%, 9%, 22%, 37%, 54%, 74%, 100% {
+    opacity: 0;
+  }
+
+  4% {
+    opacity: 1;
+  }
+
+  5% {
+    opacity: 0.12;
+  }
+
+  16% {
+    opacity: 0.82;
+  }
+
+  17% {
+    opacity: 0.08;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  31% {
+    opacity: 0.12;
+  }
+
+  47% {
+    opacity: 0.78;
+  }
+
+  48% {
+    opacity: 0.08;
+  }
+
+  66% {
+    opacity: 0.95;
+  }
+
+  67% {
+    opacity: 0.1;
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-shimmer-layer {
+    opacity: 1 !important;
+    animation-duration: 5.2s !important;
+    background:
+      linear-gradient(
+        112deg,
+        transparent 0%,
+        transparent 28%,
+        rgba(255, 245, 190, 0.32) 44%,
+        rgba(255, 255, 255, 0.72) 50%,
+        rgba(255, 215, 106, 0.34) 56%,
+        transparent 70%,
+        transparent 100%
+      ) !important;
+  }
+
+  .atl-camera-flash-layer {
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.58) 6%, rgba(255,255,255,0.00) 15%),
+      radial-gradient(circle at 84% 16%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.52) 6%, rgba(255,255,255,0.00) 15%),
+      radial-gradient(circle at 72% 38%, rgba(255,215,106,1) 0%, rgba(255,255,255,0.44) 6%, rgba(255,255,255,0.00) 16%),
+      radial-gradient(circle at 30% 42%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.44) 6%, rgba(255,255,255,0.00) 16%) !important;
+    animation-duration: 4.5s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-shimmer-layer,
+  .atl-camera-flash-layer {
+    animation: none !important;
+  }
+}
