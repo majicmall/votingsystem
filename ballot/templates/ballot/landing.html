@@ -12,6 +12,29 @@
     alt="ATL’s Hottest Awards 2026 red carpet banner"
   >
 </section>
+
+<section class="front-page-video-section">
+  <div class="front-video-copy">
+    <p class="eyebrow">ATL’s Hottest TV</p>
+    <h2>Watch the Movement</h2>
+    <p>
+      Step into the spotlight with ATL’s Hottest Awards coverage, nominee features,
+      event moments, red carpet energy, and exclusive video programming.
+    </p>
+    <div class="front-video-actions">
+      <a class="btn primary" href="{% url 'atl_tv' %}">Open ATL TV</a>
+      <a class="btn" href="{% url 'ballot' %}">Vote Now</a>
+    </div>
+  </div>
+
+  <div class="front-video-frame">
+    <div class="front-video-glow"></div>
+    <div class="front-video-player">
+      {% include "ballot/partials/atl_tv_embed.html" %}
+    </div>
+  </div>
+</section>
+
 <style>
   .landing-shell {
     position: relative;

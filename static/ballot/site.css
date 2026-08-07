@@ -3335,3 +3335,144 @@ header nav a:hover::before,
     animation: none !important;
   }
 }
+
+/* =========================================================
+   FRONT PAGE VIDEO PLAYER SECTION
+   Premium ATL TV feature block for homepage.
+   ========================================================= */
+.front-page-video-section {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(20px, 5vw, 52px);
+  align-items: center;
+  margin: 28px 0 34px;
+  padding: clamp(22px, 5vw, 52px);
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 215, 106, 0.22), transparent 38%),
+    radial-gradient(circle at 88% 18%, rgba(215, 25, 53, 0.26), transparent 42%),
+    linear-gradient(135deg, rgba(0,0,0,0.82), rgba(62,5,17,0.68), rgba(0,0,0,0.86));
+  box-shadow:
+    0 28px 90px rgba(0,0,0,0.62),
+    0 0 34px rgba(255, 215, 106, 0.14),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.front-page-video-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 54%);
+  opacity: 0.6;
+}
+
+.front-video-copy,
+.front-video-frame {
+  position: relative;
+  z-index: 1;
+}
+
+.front-video-copy h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-shadow:
+    0 0 14px rgba(255,255,255,0.26),
+    0 0 30px rgba(255, 215, 106, 0.36),
+    0 0 52px rgba(215, 25, 53, 0.2);
+}
+
+.front-video-copy p {
+  max-width: 560px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.front-video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.front-video-frame {
+  position: relative;
+  padding: clamp(8px, 1.8vw, 16px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 26px;
+  background:
+    linear-gradient(135deg, rgba(255,215,106,0.18), rgba(215,25,53,0.14)),
+    #030303;
+  box-shadow:
+    0 0 28px rgba(255, 215, 106, 0.18),
+    0 0 48px rgba(215, 25, 53, 0.12),
+    0 18px 48px rgba(0,0,0,0.58);
+}
+
+.front-video-glow {
+  position: absolute;
+  inset: -10px;
+  z-index: 0;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 215, 106, 0.24), transparent 44%),
+    radial-gradient(circle at 50% 86%, rgba(215, 25, 53, 0.22), transparent 48%);
+  filter: blur(16px);
+  opacity: 0.75;
+}
+
+.front-video-player {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 215, 106, 0.44);
+  border-radius: 18px;
+  background: #000;
+}
+
+.front-video-player iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 860px) {
+  .front-page-video-section {
+    grid-template-columns: 1fr;
+    margin: 22px 0 28px;
+    padding: 20px 14px;
+    border-radius: 24px;
+  }
+
+  .front-video-copy {
+    text-align: center;
+  }
+
+  .front-video-copy p {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.96rem;
+  }
+
+  .front-video-actions {
+    justify-content: center;
+  }
+
+  .front-video-frame {
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .front-video-player {
+    border-radius: 14px;
+  }
+}
