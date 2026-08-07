@@ -3584,3 +3584,170 @@ header nav a:hover::before,
     opacity: 0 !important;
   }
 }
+
+/* =========================================================
+   RESTORED PREMIUM CROSSING SPOTLIGHTS
+   Thin, brighter, centered, slower movie-premiere beams.
+   ========================================================= */
+
+/* Override prior shimmer patch that hid the spotlights */
+.premiere-spotlight-beam {
+  display: block !important;
+}
+
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.premiere-spotlight-beam {
+  position: absolute !important;
+  z-index: 4 !important;
+  left: 50% !important;
+  bottom: -28% !important;
+  width: 8% !important;
+  height: 165% !important;
+  pointer-events: none !important;
+  transform-origin: 50% 100% !important;
+  opacity: 0.9 !important;
+  mix-blend-mode: screen !important;
+  filter: blur(2px) !important;
+  background:
+    linear-gradient(
+      to top,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,244,188,0.16) 20%,
+      rgba(255,255,255,0.78) 45%,
+      rgba(255,215,106,0.50) 55%,
+      rgba(255,255,255,0.18) 74%,
+      rgba(255,255,255,0.00) 100%
+    ) !important;
+  clip-path: polygon(47% 100%, 53% 100%, 86% 0%, 14% 0%) !important;
+}
+
+/* Small glow at base of each spotlight */
+.premiere-spotlight-beam::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -2% !important;
+  width: 38px !important;
+  height: 38px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,215,106,0.36), transparent 70%) !important;
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.62),
+    0 0 38px rgba(255,215,106,0.46) !important;
+}
+
+/* True criss-cross: one beam starts left, one starts right */
+.beam-left {
+  animation: classySpotlightLeft 13s ease-in-out infinite alternate !important;
+}
+
+.beam-right {
+  animation: classySpotlightRight 13s ease-in-out infinite alternate !important;
+}
+
+@keyframes classySpotlightLeft {
+  0% {
+    transform: translateX(-50%) rotate(-32deg);
+  }
+  45% {
+    transform: translateX(-50%) rotate(8deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(30deg);
+  }
+}
+
+@keyframes classySpotlightRight {
+  0% {
+    transform: translateX(-50%) rotate(32deg);
+  }
+  45% {
+    transform: translateX(-50%) rotate(-8deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(-30deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .premiere-spotlight-beam {
+    bottom: -24% !important;
+    width: 18% !important;
+    height: 150% !important;
+    opacity: 1 !important;
+    filter: blur(1.2px) !important;
+    background:
+      linear-gradient(
+        to top,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,244,188,0.34) 18%,
+        rgba(255,255,255,1) 44%,
+        rgba(255,215,106,0.78) 56%,
+        rgba(255,255,255,0.48) 76%,
+        rgba(255,255,255,0.00) 100%
+      ) !important;
+    clip-path: polygon(46% 100%, 54% 100%, 92% 0%, 8% 0%) !important;
+  }
+
+  .premiere-spotlight-beam::after {
+    width: 30px !important;
+    height: 30px !important;
+    box-shadow:
+      0 0 18px rgba(255,255,255,0.88),
+      0 0 34px rgba(255,215,106,0.72) !important;
+  }
+
+  .beam-left {
+    animation: classyMobileSpotlightLeft 14s ease-in-out infinite alternate !important;
+  }
+
+  .beam-right {
+    animation: classyMobileSpotlightRight 14s ease-in-out infinite alternate !important;
+  }
+
+  @keyframes classyMobileSpotlightLeft {
+    0% {
+      transform: translateX(-50%) rotate(-27deg);
+    }
+    45% {
+      transform: translateX(-50%) rotate(7deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(25deg);
+    }
+  }
+
+  @keyframes classyMobileSpotlightRight {
+    0% {
+      transform: translateX(-50%) rotate(27deg);
+    }
+    45% {
+      transform: translateX(-50%) rotate(-7deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(-25deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premiere-spotlight-beam {
+    animation: none !important;
+  }
+}
