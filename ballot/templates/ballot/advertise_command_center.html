@@ -44,6 +44,14 @@
   </article>
 </section>
 
+{% if messages %}
+  <div class="alert">
+    {% for message in messages %}
+      <p>{{ message }}</p>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <section class="advertise-form-section">
   <div class="advertise-form-copy">
     <p class="eyebrow">Reserve Space</p>
@@ -82,8 +90,9 @@
     {{ form.campaign_message }}
 
     {% if form.errors %}
-      <div class="alert">
-        Please review the highlighted fields and try again.
+      <div class="alert advertise-field-errors">
+        <strong>Please review these fields:</strong>
+        {{ form.errors }}
       </div>
     {% endif %}
 

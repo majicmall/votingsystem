@@ -1070,14 +1070,20 @@ def _send_real_nominee_approval_email(request_obj, nominee_obj=None, temporary_p
 # =========================================================
 
 def advertise_command_center(request):
+    from django.contrib import messages
     from django.shortcuts import render, redirect
     from .forms import AdvertisingInquiryForm
 
     if request.method == "POST":
         form = AdvertisingInquiryForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("advertise_thank_you")
+            try:
+                form.save()
+                return redirect("advertise_thank_you")
+            except Exception as exc:
+                messages.error(request, f"Your inquiry could not be submitted yet: {exc}")
+        else:
+            messages.error(request, "Please review the form and try again.")
     else:
         form = AdvertisingInquiryForm()
 
