@@ -9,7 +9,15 @@
 </section>
 
 <section class="card nomination-card">
-  <form class="nomination-form" method="post" enctype="multipart/form-data">
+  
+<p class="nomination-info-note">
+  Enter as much information about your nominee as possible.
+</p>
+
+<p class="nomination-contact-note">
+  If you know the nominee’s social media or email address, please include it. If not, you can still submit the nomination.
+</p>
+<form class="nomination-form" method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
