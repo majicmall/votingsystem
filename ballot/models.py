@@ -429,7 +429,7 @@ class AssociationProfile(models.Model):
     user = models.OneToOneField("auth.User", on_delete=models.CASCADE, related_name="association_profile")
     full_name = models.CharField(max_length=160, blank=True)
     business_name = models.CharField(max_length=180, blank=True)
-    social_media = models.URLField(blank=True)
+    social_media = models.URLField(blank=True, null=True)
     website = models.URLField(blank=True)
     notification_email = models.EmailField(blank=True)
     profile_pic = models.ImageField(upload_to="association_profiles/", blank=True, null=True)

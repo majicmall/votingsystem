@@ -25,6 +25,24 @@ class CategoryRequestForm(forms.Form):
 
     def __init__(self, nominee, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        optional_nominee_fields = [
+            "nominee_email",
+            "nominee_social_media",
+            "nominee_social",
+            "social_media",
+            "instagram",
+            "nominee_instagram",
+        ]
+
+        for field_name in optional_nominee_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
+                self.fields[field_name].help_text = (
+                    "If you know the nominee’s social media or email address, please include it. "
+                    "If not, you can still submit the nomination."
+                )
+
         self.nominee = nominee
         self.fields["categories"].queryset = (
             Category.objects.filter(is_active=True)
