@@ -1,0 +1,55 @@
+{% extends "ballot/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="membership-dashboard">
+  <p class="eyebrow">ATL’s Hottest Member Dashboard</p>
+
+  {% if membership %}
+    <h1>{{ membership.plan.name }}</h1>
+    <p class="membership-status">Status: <strong>{{ membership.get_status_display }}</strong></p>
+
+    <div class="membership-dashboard-grid">
+      <article>
+        <h2>Your Benefits</h2>
+        <ul class="membership-list">
+          {% for benefit in membership.plan.benefits.all %}
+            <li>
+              <strong>{% if benefit.icon %}{{ benefit.icon }} {% endif %}{{ benefit.title }}</strong>
+              {% if benefit.description %}
+                <span>{{ benefit.description }}</span>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li><strong>Benefits are being prepared.</strong></li>
+          {% endfor %}
+        </ul>
+      </article>
+
+      <article>
+        <h2>Your Rewards</h2>
+        <ul class="membership-list">
+          {% for reward in membership.plan.rewards.all %}
+            {% if reward.is_active %}
+              <li>
+                <strong>{{ reward.title }}</strong>
+                {% if reward.description %}
+                  <span>{{ reward.description }}</span>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% empty %}
+            <li><strong>Rewards are being prepared.</strong></li>
+          {% endfor %}
+        </ul>
+      </article>
+    </div>
+
+    <a class="membership-btn" href="{% url 'membership_plans' %}">Upgrade or Change Plan</a>
+  {% else %}
+    <h1>No Membership Selected Yet</h1>
+    <p>Choose a membership plan to unlock ATL’s Hottest benefits, rewards, visibility, and promotional opportunities.</p>
+    <a class="membership-btn primary" href="{% url 'membership_plans' %}">View Membership Plans</a>
+  {% endif %}
+</section>
+{% endblock %}

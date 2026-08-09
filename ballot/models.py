@@ -655,3 +655,119 @@ class AdvertisingInquiry(models.Model):
 
     def __str__(self):
         return f"{self.business_name} — {self.get_placement_interest_display()}"
+
+
+
+# =========================================================
+# ATL'S HOTTEST AUTOPILOT MEMBERSHIP ENGINE
+# =========================================================
+
+class MembershipPlan(models.Model):
+    BILLING_CHOICES = [
+        ("free", "Free"),
+        ("monthly", "Monthly"),
+        ("yearly", "Yearly"),
+        ("one_time", "One-Time"),
+    ]
+
+    name = models.CharField(max_length=120)
+    slug = models.SlugField(unique=True)
+    tagline = models.CharField(max_length=180, blank=True)
+    description = models.TextField(blank=True)
+
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    billing_period = models.CharField(max_length=20, choices=BILLING_CHOICES, default="monthly")
+
+    badge_label = models.CharField(max_length=80, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    external_checkout_url = models.URLField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["display_order", "price", "name"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def is_free(self):
+        return self.price == 0
+
+
+class MembershipBenefit(models.Model):
+    plan = models.ForeignKey(MembershipPlan, on_delete=models.CASCADE, related_name="benefits")
+    title = models.CharField(max_length=160)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=40, blank=True, help_text="Optional emoji or short icon text.")
+    display_order = models.PositiveIntegerField(default=0)
+    is_highlighted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["display_order", "title"]
+
+    def __str__(self):
+        return f"{self.plan.name} — {self.title}"
+
+
+class MembershipReward(models.Model):
+    REWARD_TYPES = [
+        ("visibility", "Visibility"),
+        ("discount", "Discount"),
+        ("credit", "Credit"),
+        ("badge", "Badge"),
+        ("access", "Access"),
+        ("other", "Other"),
+    ]
+
+    plan = models.ForeignKey(MembershipPlan, on_delete=models.CASCADE, related_name="rewards")
+    title = models.CharField(max_length=160)
+    description = models.TextField(blank=True)
+    reward_type = models.CharField(max_length=30, choices=REWARD_TYPES, default="other")
+    value = models.CharField(max_length=120, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "title"]
+
+    def __str__(self):
+        return f"{self.plan.name} — {self.title}"
+
+
+class UserMembership(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("active", "Active"),
+        ("past_due", "Past Due"),
+        ("cancelled", "Cancelled"),
+        ("expired", "Expired"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="atl_membership",
+    )
+    plan = models.ForeignKey(MembershipPlan, on_delete=models.PROTECT, related_name="members")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="pending")
+
+    started_at = models.DateTimeField(blank=True, null=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
+    auto_renew = models.BooleanField(default=False)
+
+    payment_reference = models.CharField(max_length=180, blank=True)
+    internal_notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.user} — {self.plan.name} ({self.status})"

@@ -1093,3 +1093,168 @@ def advertise_command_center(request):
 def advertise_thank_you(request):
     from django.shortcuts import render
     return render(request, "ballot/advertise_thank_you.html")
+
+
+# =========================================================
+# ATL'S HOTTEST AUTOPILOT MEMBERSHIP VIEWS
+# =========================================================
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.utils import timezone
+
+
+def membership_plans(request):
+    plans = (
+        MembershipPlan.objects
+        .filter(is_active=True)
+        .prefetch_related("benefits", "rewards")
+        .order_by("display_order", "price", "name")
+    )
+
+    current_membership = None
+    if request.user.is_authenticated:
+        current_membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_plans.html", {
+        "plans": plans,
+        "current_membership": current_membership,
+    })
+
+
+def membership_plan_detail(request, slug):
+    plan = get_object_or_404(
+        MembershipPlan.objects.prefetch_related("benefits", "rewards"),
+        slug=slug,
+        is_active=True,
+    )
+
+    current_membership = None
+    if request.user.is_authenticated:
+        current_membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_plan_detail.html", {
+        "plan": plan,
+        "current_membership": current_membership,
+    })
+
+
+@login_required
+def choose_membership_plan(request, slug):
+    plan = get_object_or_404(MembershipPlan, slug=slug, is_active=True)
+
+    membership, created = UserMembership.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "plan": plan,
+            "status": "active" if plan.is_free else "pending",
+            "started_at": timezone.now() if plan.is_free else None,
+        }
+    )
+
+    if not created:
+        membership.plan = plan
+        membership.status = "active" if plan.is_free else "pending"
+        if plan.is_free and not membership.started_at:
+            membership.started_at = timezone.now()
+        membership.save()
+
+    # Temporary autopilot payment bridge:
+    # If the plan has an external payment URL, send them there.
+    # Later we replace this with Stripe/PayPal/Coinbase checkout.
+    if not plan.is_free and plan.external_checkout_url:
+        return redirect(plan.external_checkout_url)
+
+    return redirect("membership_dashboard")
+
+
+@login_required
+def membership_dashboard(request):
+    membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_dashboard.html", {
+        "membership": membership,
+    })
+
+
+# =========================================================
+# ATL'S HOTTEST AUTOPILOT MEMBERSHIP VIEWS
+# =========================================================
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.utils import timezone
+from .models import MembershipPlan, MembershipBenefit, MembershipReward, UserMembership
+
+
+def membership_plans(request):
+    plans = (
+        MembershipPlan.objects
+        .filter(is_active=True)
+        .prefetch_related("benefits", "rewards")
+        .order_by("display_order", "price", "name")
+    )
+
+    current_membership = None
+    if request.user.is_authenticated:
+        current_membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_plans.html", {
+        "plans": plans,
+        "current_membership": current_membership,
+    })
+
+
+def membership_plan_detail(request, slug):
+    plan = get_object_or_404(
+        MembershipPlan.objects.prefetch_related("benefits", "rewards"),
+        slug=slug,
+        is_active=True,
+    )
+
+    current_membership = None
+    if request.user.is_authenticated:
+        current_membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_plan_detail.html", {
+        "plan": plan,
+        "current_membership": current_membership,
+    })
+
+
+@login_required
+def choose_membership_plan(request, slug):
+    plan = get_object_or_404(MembershipPlan, slug=slug, is_active=True)
+
+    membership, created = UserMembership.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "plan": plan,
+            "status": "active" if plan.is_free else "pending",
+            "started_at": timezone.now() if plan.is_free else None,
+        }
+    )
+
+    if not created:
+        membership.plan = plan
+        membership.status = "active" if plan.is_free else "pending"
+        if plan.is_free and not membership.started_at:
+            membership.started_at = timezone.now()
+        membership.save()
+
+    # Temporary autopilot payment bridge:
+    # If the plan has an external payment URL, send them there.
+    # Later we replace this with Stripe/PayPal/Coinbase checkout.
+    if not plan.is_free and plan.external_checkout_url:
+        return redirect(plan.external_checkout_url)
+
+    return redirect("membership_dashboard")
+
+
+@login_required
+def membership_dashboard(request):
+    membership = getattr(request.user, "atl_membership", None)
+
+    return render(request, "ballot/membership_dashboard.html", {
+        "membership": membership,
+    })

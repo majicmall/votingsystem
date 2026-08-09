@@ -153,6 +153,7 @@ class NominationCategoryRequestAdmin(admin.ModelAdmin):
 # =========================================================
 
 from .models import BillboardAd, AdvertisingInquiry
+from .models import MembershipPlan, MembershipBenefit, MembershipReward, UserMembership
 
 @admin.register(BillboardAd)
 class BillboardAdAdmin(admin.ModelAdmin):
@@ -224,3 +225,55 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
             "fields": ("is_contacted", "internal_notes", "created_at")
         }),
     )
+
+
+
+# =========================================================
+# ATL'S HOTTEST AUTOPILOT MEMBERSHIP ADMIN
+# =========================================================
+
+class MembershipBenefitInline(admin.TabularInline):
+    model = MembershipBenefit
+    extra = 1
+
+
+class MembershipRewardInline(admin.TabularInline):
+    model = MembershipReward
+    extra = 1
+
+
+@admin.register(MembershipPlan)
+class MembershipPlanAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "price",
+        "billing_period",
+        "is_featured",
+        "is_active",
+        "display_order",
+    )
+    list_filter = ("billing_period", "is_featured", "is_active")
+    search_fields = ("name", "tagline", "description")
+    prepopulated_fields = {"slug": ("name",)}
+    inlines = [MembershipBenefitInline, MembershipRewardInline]
+
+
+@admin.register(MembershipBenefit)
+class MembershipBenefitAdmin(admin.ModelAdmin):
+    list_display = ("title", "plan", "is_highlighted", "display_order")
+    list_filter = ("plan", "is_highlighted")
+    search_fields = ("title", "description")
+
+
+@admin.register(MembershipReward)
+class MembershipRewardAdmin(admin.ModelAdmin):
+    list_display = ("title", "plan", "reward_type", "value", "is_active", "display_order")
+    list_filter = ("plan", "reward_type", "is_active")
+    search_fields = ("title", "description", "value")
+
+
+@admin.register(UserMembership)
+class UserMembershipAdmin(admin.ModelAdmin):
+    list_display = ("user", "plan", "status", "auto_renew", "started_at", "expires_at", "updated_at")
+    list_filter = ("plan", "status", "auto_renew")
+    search_fields = ("user__username", "user__email", "plan__name", "payment_reference")

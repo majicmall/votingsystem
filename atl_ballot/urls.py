@@ -9,6 +9,11 @@ from django.views.generic import RedirectView
 from ballot import views as ballot_views
 
 urlpatterns = [
+    path("memberships/", ballot_views.membership_plans, name="membership_plans"),
+    path("memberships/<slug:slug>/", ballot_views.membership_plan_detail, name="membership_plan_detail"),
+    path("memberships/choose/<slug:slug>/", ballot_views.choose_membership_plan, name="choose_membership_plan"),
+    path("membership/dashboard/", ballot_views.membership_dashboard, name="membership_dashboard"),
+
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
     path("advertise/thank-you/", ballot_views.advertise_thank_you, name="advertise_thank_you"),
 
