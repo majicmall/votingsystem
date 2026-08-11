@@ -5565,3 +5565,47 @@ header nav a:hover::before,
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   JOIN TAAHAA MEMBERSHIP BUTTON
+   ========================================================= */
+
+.taahaa-membership-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin: 10px 8px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 106, 0.78);
+  background:
+    linear-gradient(135deg, #fff4ba, #e6b94c 45%, #8c5a00),
+    radial-gradient(circle at top left, rgba(255,255,255,0.45), transparent 38%);
+  color: #170900 !important;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  box-shadow:
+    0 0 24px rgba(255, 215, 106, 0.30),
+    0 14px 34px rgba(0, 0, 0, 0.42);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.taahaa-membership-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 34px rgba(255, 215, 106, 0.45),
+    0 18px 42px rgba(0, 0, 0, 0.52);
+}
+
+@media (max-width: 760px) {
+  .taahaa-membership-btn {
+    width: min(92vw, 340px);
+    margin: 10px auto;
+    padding: 13px 18px;
+    font-size: 0.88rem;
+  }
+}
