@@ -771,3 +771,77 @@ class UserMembership(models.Model):
 
     def __str__(self):
         return f"{self.user} — {self.plan.name} ({self.status})"
+
+
+# =========================================================
+# ATL'S HOTTEST VOTING CAMPAIGN CONTROL
+# Allows admin/white-label organizations to open and close voting.
+# =========================================================
+
+class VotingCampaign(models.Model):
+    name = models.CharField(max_length=160, default="ATL's Hottest Awards Campaign")
+    slug = models.SlugField(unique=True, default="atl-hottest-awards")
+
+    nominations_enabled = models.BooleanField(
+        default=True,
+        help_text="Allow nominees to be submitted during the nomination period."
+    )
+
+    voting_enabled = models.BooleanField(
+        default=False,
+        help_text="Manual master switch. Admin can turn voting on/off instantly."
+    )
+
+    campaign_start_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Voting opens on this date/time if voting is enabled."
+    )
+
+    campaign_end_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Voting closes after this date/time."
+    )
+
+    is_active_campaign = models.BooleanField(
+        default=True,
+        help_text="Only one campaign should normally be active at a time."
+    )
+
+    public_message = models.CharField(
+        max_length=220,
+        blank=True,
+        default="Voting is not open yet. Nominations may still be active."
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-is_active_campaign", "-created_at"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def is_voting_open(self):
+        now = timezone.now()
+
+        if not self.is_active_campaign:
+            return False
+
+        if not self.voting_enabled:
+            return False
+
+        if self.campaign_start_date and now < self.campaign_start_date:
+            return False
+
+        if self.campaign_end_date and now > self.campaign_end_date:
+            return False
+
+        return True
+
+    @property
+    def voting_status_label(self):
+        return "Voting Open" if self.is_voting_open else "Voting Closed"

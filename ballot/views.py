@@ -218,6 +218,11 @@ def ballot_view(request):
 @require_POST
 @csrf_protect
 def submit_votes(request):
+
+    closed = voting_closed_response(request)
+    if closed:
+        return closed
+
     ballot_settings = BallotSettings.get_solo()
 
     if not ballot_settings.is_active():
@@ -291,12 +296,17 @@ def nominee_detail(request, nominee_id):
         approval_status=Nominee.APPROVAL_APPROVED,
     )
 
-    return render(request, "ballot/nominee_detail.html", {"nominee": nominee})
+    return render(request, "ballot/nominee_detail.html", {**get_voting_status_context(), "nominee": nominee})
 
 
 @require_POST
 @csrf_protect
 def vote_nominee(request, nominee_id):
+
+    closed = voting_closed_response(request)
+    if closed:
+        return closed
+
     ballot_settings = BallotSettings.get_solo()
 
     nominee = get_object_or_404(
@@ -729,6 +739,11 @@ def ballot_category_view(request, category_slug):
 @require_http_methods(["POST"])
 @csrf_protect
 def select_ballot_nominee(request, category_slug, nominee_id):
+
+    closed = voting_closed_response(request)
+    if closed:
+        return closed
+
     category = get_object_or_404(Category, slug=category_slug, is_active=True)
     nominee = get_object_or_404(
         Nominee,
@@ -755,6 +770,11 @@ def select_ballot_nominee(request, category_slug, nominee_id):
 
 @require_http_methods(["GET"])
 def ballot_review(request):
+
+    closed = voting_closed_response(request)
+    if closed:
+        return closed
+
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
 
     selections = request.session.get("ballot_selections", {})
@@ -795,6 +815,11 @@ def ballot_review(request):
 @require_http_methods(["POST"])
 @csrf_protect
 def submit_final_ballot(request):
+
+    closed = voting_closed_response(request)
+    if closed:
+        return closed
+
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
 
     if settings_obj.status_label() != "active":
@@ -1185,6 +1210,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.utils import timezone
 from .models import MembershipPlan, MembershipBenefit, MembershipReward, UserMembership
+from .models import VotingCampaign
 
 
 def membership_plans(request):
@@ -1257,4 +1283,46 @@ def membership_dashboard(request):
 
     return render(request, "ballot/membership_dashboard.html", {
         "membership": membership,
+    })
+
+
+# =========================================================
+# VOTING CAMPAIGN CONTROL HELPERS
+# =========================================================
+
+def get_active_voting_campaign():
+    try:
+        return VotingCampaign.objects.filter(is_active_campaign=True).order_by("-created_at").first()
+    except Exception:
+        return None
+
+
+def is_voting_currently_open():
+    campaign = get_active_voting_campaign()
+
+    # If no campaign has been configured yet, keep legacy voting behavior open.
+    # Once admin creates a VotingCampaign, the campaign controls take over.
+    if campaign is None:
+        return True, None
+
+    return campaign.is_voting_open, campaign
+
+
+
+def get_voting_status_context():
+    voting_open, campaign = is_voting_currently_open()
+    return {
+        "voting_open": voting_open,
+        "active_campaign": campaign,
+    }
+
+
+def voting_closed_response(request):
+    voting_open, campaign = is_voting_currently_open()
+
+    if voting_open:
+        return None
+
+    return render(request, "ballot/voting_closed.html", {
+        "campaign": campaign,
     })

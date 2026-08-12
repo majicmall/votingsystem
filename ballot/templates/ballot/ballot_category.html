@@ -1,15 +1,24 @@
 {% extends "ballot/base.html" %}
 {% load billboard_ads %}
+
 {% block title %}{{ category.name }} | ATL’s Hottest{% endblock %}
 
 {% block content %}
+
+{% if active_campaign and not voting_open %}
+  <div class="voting-preview-notice">
+    <strong>Voting is not open yet.</strong>
+    <span>You may view the current ballot and nominees, but votes cannot be cast until the official voting period begins.</span>
+  </div>
+{% endif %}
+
 {% render_billboard "voting_top" %}
 
 <section class="hero small ballot-category-hero">
   <p class="eyebrow">{{ category.group|default:"ATL’s Hottest Category" }}</p>
   <h1>{{ category.name }}</h1>
 
-  {% if settings.status_label == "active" %}
+  {% if voting_open %}
     <p>Select one nominee in this category. You can review and change your selections before final submit.</p>
   {% else %}
     <p>Voting is not active yet. You may preview approved nominees in this category.</p>
@@ -17,7 +26,12 @@
 
   <div class="ballot-status-row">
     <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
-    <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
+
+    {% if voting_open %}
+      <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
+    {% else %}
+      <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
+    {% endif %}
   </div>
 </section>
 
@@ -52,7 +66,7 @@
           </div>
         </a>
 
-        {% if settings.status_label == "active" %}
+        {% if voting_open %}
           <form method="post" action="{% url 'select_ballot_nominee' category.slug nominee.id %}" class="select-nominee-form">
             {% csrf_token %}
             <button class="btn primary vote-card-btn" type="submit" name="next_action" value="review">
@@ -64,7 +78,21 @@
           </form>
         {% else %}
           <a class="btn vote-card-btn" href="{% url 'nominee_detail' nominee.id %}">View Nominee</a>
+          <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
         {% endif %}
+      </article>
+    {% empty %}
+      <article class="ballot-nominee-card nominee-card placeholder-card">
+        <div class="nominee-photo-frame placeholder-frame">
+          <div class="photo-placeholder">ATL</div>
+        </div>
+
+        <div class="nominee-card-body">
+          <h3>No Nominees Yet</h3>
+          <p>{{ category.name }}</p>
+        </div>
+
+        <a class="btn vote-card-btn" href="{% url 'nominee_signup' %}">Nominate Someone</a>
       </article>
     {% endfor %}
 
@@ -78,13 +106,23 @@
           <h3>Your Nominee Here</h3>
           <p>{{ category.name }}</p>
         </div>
+
+        <a class="btn vote-card-btn" href="{% url 'nominee_signup' %}">Submit Nomination</a>
       </article>
     {% endfor %}
   </div>
 </section>
 
-<section class="ballot-navigation-strip">
-  <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
-  <a class="btn primary" href="{% url 'ballot_review' %}">Continue to Review</a>
+<section class="ballot-bottom-actions">
+  <div class="ballot-status-row">
+    <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
+
+    {% if voting_open %}
+      <a class="btn primary" href="{% url 'ballot_review' %}">Continue to Review</a>
+    {% else %}
+      <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
+    {% endif %}
+  </div>
 </section>
+
 {% endblock %}

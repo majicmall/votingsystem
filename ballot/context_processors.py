@@ -1,15 +1,23 @@
-# ballot/context_processors.py
-from .models import BallotSettings
+def voting_campaign_status(request):
+    try:
+        from .models import VotingCampaign
 
+        campaign = (
+            VotingCampaign.objects
+            .filter(is_active_campaign=True)
+            .order_by("-created_at")
+            .first()
+        )
 
-def ballot_status(request):
-    settings = BallotSettings.get_solo()
+        if campaign:
+            return {
+                "active_campaign": campaign,
+                "voting_open": campaign.is_voting_open,
+            }
+    except Exception:
+        pass
+
     return {
-        "BALLOT": {
-            "is_active": settings.is_active(),
-            "status": settings.status_label(),
-            "start_at": settings.start_at,
-            "end_at": settings.end_at,
-            "announcement": settings.announcement,
-        }
+        "active_campaign": None,
+        "voting_open": True,
     }

@@ -277,3 +277,71 @@ class UserMembershipAdmin(admin.ModelAdmin):
     list_display = ("user", "plan", "status", "auto_renew", "started_at", "expires_at", "updated_at")
     list_filter = ("plan", "status", "auto_renew")
     search_fields = ("user__username", "user__email", "plan__name", "payment_reference")
+
+
+# =========================================================
+# VOTING CAMPAIGN ADMIN CONTROL
+# =========================================================
+
+from .models import VotingCampaign
+
+
+@admin.action(description="Open voting for selected campaign(s)")
+def open_voting(modeladmin, request, queryset):
+    queryset.update(voting_enabled=True)
+
+
+@admin.action(description="Close voting for selected campaign(s)")
+def close_voting(modeladmin, request, queryset):
+    queryset.update(voting_enabled=False)
+
+
+@admin.action(description="Mark selected campaign as active")
+def mark_campaign_active(modeladmin, request, queryset):
+    VotingCampaign.objects.update(is_active_campaign=False)
+    queryset.update(is_active_campaign=True)
+
+
+@admin.register(VotingCampaign)
+class VotingCampaignAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "voting_status_label",
+        "nominations_enabled",
+        "voting_enabled",
+        "campaign_start_date",
+        "campaign_end_date",
+        "is_active_campaign",
+        "updated_at",
+    )
+    list_filter = (
+        "voting_enabled",
+        "nominations_enabled",
+        "is_active_campaign",
+    )
+    search_fields = ("name", "slug", "public_message")
+    prepopulated_fields = {"slug": ("name",)}
+    actions = [open_voting, close_voting, mark_campaign_active]
+
+    fieldsets = (
+        ("Campaign", {
+            "fields": (
+                "name",
+                "slug",
+                "is_active_campaign",
+                "public_message",
+            )
+        }),
+        ("Nomination Control", {
+            "fields": (
+                "nominations_enabled",
+            )
+        }),
+        ("Voting Control", {
+            "fields": (
+                "voting_enabled",
+                "campaign_start_date",
+                "campaign_end_date",
+            )
+        }),
+    )

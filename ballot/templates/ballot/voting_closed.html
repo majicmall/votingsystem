@@ -1,0 +1,43 @@
+{% extends "ballot/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="voting-closed-panel">
+  <p class="eyebrow">Voting Status</p>
+
+  <h1>Voting Is Not Open Yet</h1>
+
+  {% if campaign and campaign.public_message %}
+    <p>{{ campaign.public_message }}</p>
+  {% else %}
+    <p>
+      Nominations may still be active, but voting has not started yet.
+      Please check back when the official voting period opens.
+    </p>
+  {% endif %}
+
+  {% if campaign %}
+    <div class="campaign-dates">
+      {% if campaign.campaign_start_date %}
+        <div>
+          <strong>Voting Opens</strong>
+          <span>{{ campaign.campaign_start_date }}</span>
+        </div>
+      {% endif %}
+
+      {% if campaign.campaign_end_date %}
+        <div>
+          <strong>Voting Ends</strong>
+          <span>{{ campaign.campaign_end_date }}</span>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="voting-closed-actions">
+    <a class="btn primary" href="{% url 'nominee_signup' %}">Nominate ATL’s Hottest</a>
+    <a class="btn" href="{% url 'home' %}">Back to Home</a>
+    <a class="btn" href="{% url 'membership_plans' %}">Join TAAHAA Membership</a>
+  </div>
+</section>
+{% endblock %}
