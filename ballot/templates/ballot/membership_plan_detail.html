@@ -67,8 +67,13 @@
     </div>
   </div>
 
-  <a class="membership-btn primary large" href="{% url 'choose_membership_plan' plan.slug %}">
+  <a class="membership-btn primary large" href="{% if plan.price == 0 %}{% url 'choose_membership_plan' plan.slug %}{% else %}{% url 'membership_payment_center' plan.slug %}{% endif %}">
     Choose {{ plan.name }}
   </a>
 </section>
+
+<a class="membership-marketplace-btn" href="{% url 'atls_hottest_marketplace' %}">
+  See More Benefits / Add-Ons
+</a>
+
 {% endblock %}

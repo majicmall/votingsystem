@@ -1,0 +1,39 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}ATL’s Hottest Marketplace{% endblock %}
+
+{% block content %}
+<section class="membership-payment-hero">
+  <p class="eyebrow">ATL’s Hottest Marketplace</p>
+  <h1>Benefits, Add-Ons, Merch & Advertising Bundles</h1>
+
+  <p>
+    The ATL’s Hottest Marketplace is where members, nominees, creators, businesses,
+    supporters, and future merchants can access merchandise, badges, advertising packages,
+    seller tools, product promotion opportunities, and visibility add-ons.
+  </p>
+
+  <div class="intro-price-note">
+    Members are positioned as merchants in The ATL’s Hottest Zone of The MajicMall Megaverse
+    inside the Majestic Megaverse. More marketplace items and payment options will continue
+    to open as the platform expands.
+  </div>
+</section>
+
+<section class="membership-payment-grid marketplace-grid">
+  {% for item in marketplace_items %}
+    <article class="membership-payment-panel marketplace-item-card">
+      <p class="eyebrow">{{ item.category }}</p>
+      <h2>{{ item.name }}</h2>
+      <div class="marketplace-price">{{ item.price }}</div>
+      <p>{{ item.description }}</p>
+
+      <span class="btn disabled-vote-btn">Coming Soon</span>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="membership-payment-actions">
+  <a class="btn primary" href="{% url 'membership_plans' %}">Back to Memberships</a>
+</section>
+{% endblock %}

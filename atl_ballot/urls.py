@@ -1,32 +1,36 @@
 # atl_ballot/urls.py
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 
 from ballot import views as ballot_views
+
 
 urlpatterns = [
     path("memberships/", ballot_views.membership_plans, name="membership_plans"),
     path("memberships/<slug:slug>/", ballot_views.membership_plan_detail, name="membership_plan_detail"),
     path("memberships/choose/<slug:slug>/", ballot_views.choose_membership_plan, name="choose_membership_plan"),
+    re_path(r"^memberships/pay/(?P<slug>[-a-zA-Z0-9_]+)/$", ballot_views.membership_payment_center, name="membership_payment_center"),
     path("membership/dashboard/", ballot_views.membership_dashboard, name="membership_dashboard"),
-
+    path("marketplace/", ballot_views.atls_hottest_marketplace, name="atls_hottest_marketplace"),
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
     path("advertise/thank-you/", ballot_views.advertise_thank_you, name="advertise_thank_you"),
 
     path("tv/", ballot_views.atl_tv, name="atl_tv"),
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "ballot/favicon.svg", permanent=True)),
     path("healthz/", ballot_views.healthz, name="healthz"),
+
     # Landing page
     path("", ballot_views.landing_page, name="home"),
 
     # Ballot
     path("ballot/", ballot_views.ballot_view, name="ballot"),
-    path("ballot/category/<slug:category_slug>/", ballot_views.ballot_category_view, name="ballot_category"),
-    path("ballot/select/<slug:category_slug>/<slug:nominee_id>/", ballot_views.select_ballot_nominee, name="select_ballot_nominee"),
+    re_path(r"^ballot/category/(?P<category_slug>[-a-zA-Z0-9_]+)/$", ballot_views.ballot_category_view, name="ballot_category"),
+    re_path(r"^ballot/select/(?P<category_slug>[-a-zA-Z0-9_]+)/(?P<nominee_id>[-a-zA-Z0-9_]+)/$", ballot_views.select_ballot_nominee, name="select_ballot_nominee"),
     path("ballot/review/", ballot_views.ballot_review, name="ballot_review"),
     path("ballot/submit-final/", ballot_views.submit_final_ballot, name="submit_final_ballot"),
     path("ballot/confirmation/", ballot_views.ballot_confirmation, name="ballot_confirmation"),
@@ -70,6 +74,7 @@ urlpatterns = [
     path("admin/logout/", ballot_views.logout_then_home, name="admin_logout"),
     path("admin/", admin.site.urls),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

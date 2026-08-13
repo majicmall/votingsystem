@@ -1326,3 +1326,148 @@ def voting_closed_response(request):
     return render(request, "ballot/voting_closed.html", {
         "campaign": campaign,
     })
+
+
+# =========================================================
+# CLEAN BALLOT PREVIEW VIEW
+# Ensures /ballot/ always shows categories while voting is closed.
+# =========================================================
+
+def ballot_view(request):
+    from .models import Category
+
+    try:
+        from .models import BallotSettings
+        settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+    except Exception:
+        settings_obj = None
+
+    order_fields = []
+    category_field_names = {field.name for field in Category._meta.fields}
+
+    if "group" in category_field_names:
+        order_fields.append("group")
+
+    if "display_order" in category_field_names:
+        order_fields.append("display_order")
+
+    if "name" in category_field_names:
+        order_fields.append("name")
+
+    if order_fields:
+        categories = Category.objects.all().order_by(*order_fields)
+    else:
+        categories = Category.objects.all()
+
+    return render(request, "ballot/ballot.html", {
+        "categories": categories,
+        "settings": settings_obj,
+    })
+
+
+# =========================================================
+# HOME / LANDING VIEW SAFETY ALIAS
+# Restores homepage route after URL cleanup.
+# =========================================================
+
+def landing(request):
+    return render(request, "ballot/landing.html")
+
+
+# =========================================================
+# ATL'S HOTTEST MEMBERSHIP PAYMENT CENTER
+# Sends paid package selections to a payment/intake center.
+# =========================================================
+
+def membership_payment_center(request, slug):
+    from django.shortcuts import get_object_or_404, render
+    from .models import MembershipPlan
+
+    plan = get_object_or_404(
+        MembershipPlan.objects.prefetch_related("benefits", "rewards"),
+        slug=slug,
+        is_active=True,
+    )
+
+    return render(request, "ballot/membership_payment_center.html", {
+        "plan": plan,
+    })
+
+
+@login_required
+def choose_membership_plan(request, slug):
+    from django.shortcuts import get_object_or_404, redirect
+    from .models import MembershipPlan, UserMembership
+
+    plan = get_object_or_404(MembershipPlan, slug=slug, is_active=True)
+
+    # Free plans can still activate immediately.
+    if plan.is_free:
+        UserMembership.objects.update_or_create(
+            user=request.user,
+            defaults={
+                "plan": plan,
+                "status": "active",
+                "payment_reference": "free-plan",
+            },
+        )
+        return redirect("membership_dashboard")
+
+    # Paid plans now go to the Payment Center first.
+    return redirect("membership_payment_center", slug=plan.slug)
+
+
+# =========================================================
+# ATL'S HOTTEST MARKETPLACE
+# Merchandise, badges, add-ons, advertising bundles, and member upgrades.
+# =========================================================
+
+def atls_hottest_marketplace(request):
+    marketplace_items = [
+        {
+            "category": "Merchandise",
+            "name": "I Am ATL’s Hottest T-Shirt",
+            "price": "Coming Soon",
+            "description": "Official ATL’s Hottest member merchandise for fans, nominees, creators, and supporters.",
+        },
+        {
+            "category": "Recognition",
+            "name": "I Am ATL’s Hottest Badge",
+            "price": "Coming Soon",
+            "description": "Digital and promotional badge options for members, nominees, creators, businesses, and supporters.",
+        },
+        {
+            "category": "Merchandise",
+            "name": "ATL’s Hottest Fan",
+            "price": "Coming Soon",
+            "description": "Branded fan merchandise for events, red carpet moments, community activations, and promotional giveaways.",
+        },
+        {
+            "category": "Advertising",
+            "name": "3-Day Billboard/Banner Advertising Package",
+            "price": "Coming Soon",
+            "description": "Short-run advertising bundle for announcements, music releases, product drops, event promotion, and brand visibility.",
+        },
+        {
+            "category": "Advertising",
+            "name": "7-Day Spotlight Advertising Bundle",
+            "price": "Coming Soon",
+            "description": "One-week promotional package for billboard, banner, category, and ATL’s Hottest visibility opportunities.",
+        },
+        {
+            "category": "Advertising",
+            "name": "ATL TV Sponsor Add-On",
+            "price": "Coming Soon",
+            "description": "Sponsor visibility connected to ATL TV programming, nominee highlights, interviews, and promotional content.",
+        },
+        {
+            "category": "Seller Tools",
+            "name": "Product Promotion Add-On",
+            "price": "Coming Soon",
+            "description": "Add-on for members preparing to sell products, services, offers, tickets, music, media, or branded merchandise.",
+        },
+    ]
+
+    return render(request, "ballot/atls_hottest_marketplace.html", {
+        "marketplace_items": marketplace_items,
+    })

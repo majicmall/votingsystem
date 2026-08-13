@@ -69,7 +69,7 @@
 
       <div class="membership-actions">
         <a class="membership-btn" href="{% url 'membership_plan_detail' plan.slug %}">View Details</a>
-        <a class="membership-btn primary" href="{% url 'choose_membership_plan' plan.slug %}">Choose Plan</a>
+        <a class="membership-btn primary" href="{% if plan.price == 0 %}{% url 'choose_membership_plan' plan.slug %}{% else %}{% url 'membership_payment_center' plan.slug %}{% endif %}">Choose Package</a>
       </div>
     </article>
   {% empty %}
@@ -79,4 +79,9 @@
     </div>
   {% endfor %}
 </section>
+
+<a class="membership-marketplace-btn" href="{% url 'atls_hottest_marketplace' %}">
+  See More Benefits / Add-Ons
+</a>
+
 {% endblock %}

@@ -1,0 +1,70 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Pay for {{ plan.name }} | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<section class="membership-payment-hero">
+  <p class="eyebrow">ATL’s Hottest Payment Center</p>
+  <h1>Pay for {{ plan.name }}</h1>
+
+  <p>
+    You are ready to activate the <strong>{{ plan.name }}</strong> package.
+    Complete payment to unlock your membership visibility, advertising benefits,
+    seller positioning, and ATL’s Hottest member opportunities.
+  </p>
+
+  <div class="payment-summary-card">
+    <p class="eyebrow">Selected Package</p>
+    <h2>{{ plan.name }}</h2>
+
+    <div class="payment-price">
+      {% if plan.price == 0 %}
+        Free
+      {% else %}
+        ${{ plan.price }}
+      {% endif %}
+      <span>
+        {% if plan.billing_period == "one_time" %}
+          One-Time Introductory Fee
+        {% elif plan.billing_period == "monthly" %}
+          Monthly Membership
+        {% elif plan.billing_period == "yearly" %}
+          Yearly Membership
+        {% else %}
+          Membership Access
+        {% endif %}
+      </span>
+    </div>
+
+    <div class="payment-button-stack">
+      {% if plan.external_checkout_url %}
+        <a class="btn primary payment-pay-now-btn" href="{{ plan.external_checkout_url }}">
+          Pay ${{ plan.price }} Now
+        </a>
+      {% else %}
+        <span class="btn disabled-vote-btn payment-pay-now-btn">
+          Payment Link Coming Soon
+        </span>
+        <p class="payment-link-note">
+          Add this package’s Stripe, PayPal, Square, or other secure checkout link in the
+          Membership Plan admin field named <strong>external checkout url</strong>.
+        </p>
+      {% endif %}
+
+      <a class="btn" href="{% url 'membership_plan_detail' plan.slug %}">
+        Review Package Details
+      </a>
+
+      <a class="btn" href="{% url 'atls_hottest_marketplace' %}">
+        See More Benefits / Add-Ons
+      </a>
+    </div>
+
+    <div class="intro-price-note">
+      Introductory membership prices are available for the first year.
+      Advertising credits are tied to approved membership terms. Monthly members receive
+      advertising credit after 3 months of paid monthly membership.
+    </div>
+  </div>
+</section>
+{% endblock %}
