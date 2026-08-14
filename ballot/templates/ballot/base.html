@@ -262,6 +262,165 @@
       font-weight: 1000;
       text-shadow: 0 0 14px rgba(255, 215, 106, 0.45);
     }
+  
+    /* =========================================================
+       ATL'S HOTTEST HEADER BRAND + NAV POLISH
+       ========================================================= */
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.86), rgba(42, 2, 10, 0.82)),
+        rgba(0,0,0,0.82) !important;
+      border-bottom: 1px solid rgba(255, 215, 106, 0.28);
+      box-shadow:
+        0 12px 34px rgba(0,0,0,0.38),
+        0 0 24px rgba(255, 215, 106, 0.08);
+    }
+
+    .brand {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      color: #fff !important;
+      font-family: "Playfair Display", Georgia, serif !important;
+      font-size: clamp(1.25rem, 2.5vw, 2rem) !important;
+      font-weight: 1000 !important;
+      letter-spacing: -0.045em !important;
+      line-height: 1.05;
+      text-decoration: none !important;
+      text-transform: none !important;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.20),
+        0 0 18px rgba(255, 215, 106, 0.50),
+        0 0 34px rgba(215, 25, 53, 0.26);
+    }
+
+    .brand::before {
+      content: "";
+      width: 18px;
+      height: 24px;
+      margin-right: 10px;
+      display: inline-block;
+      flex: 0 0 auto;
+      border-radius: 62% 38% 58% 42% / 68% 38% 62% 32%;
+      background:
+        radial-gradient(circle at 52% 68%, #fff3a6 0 12%, transparent 18%),
+        radial-gradient(circle at 48% 60%, #ffd76a 0 24%, transparent 34%),
+        linear-gradient(145deg, #ffd76a 0%, #ff8a00 34%, #d71935 68%, #76000f 100%);
+      transform: rotate(-9deg);
+      box-shadow:
+        0 0 8px rgba(255, 215, 106, 0.82),
+        0 0 16px rgba(255, 119, 0, 0.42),
+        0 0 26px rgba(215, 25, 53, 0.34);
+      clip-path: polygon(
+        52% 0%,
+        72% 22%,
+        86% 44%,
+        78% 72%,
+        58% 100%,
+        33% 88%,
+        16% 64%,
+        23% 38%,
+        38% 22%
+      );
+      animation: atlBrandFlameFlicker 2.6s ease-in-out infinite;
+    }
+
+    @keyframes atlBrandFlameFlicker {
+      0%, 100% {
+        transform: rotate(-9deg) scale(1);
+        filter: brightness(1);
+      }
+      45% {
+        transform: rotate(-6deg) scale(1.06);
+        filter: brightness(1.18);
+      }
+      72% {
+        transform: rotate(-12deg) scale(0.97);
+        filter: brightness(0.96);
+      }
+    }
+
+
+    .brand::after {
+      content: "";
+      position: absolute;
+      left: 1.45em;
+      right: 8%;
+      bottom: -8px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, #ffd76a, #d71935, transparent);
+      box-shadow: 0 0 16px rgba(255, 215, 106, 0.55);
+    }
+
+    nav a {
+      position: relative;
+      overflow: hidden;
+      border-radius: 999px !important;
+      padding: 9px 15px !important;
+      border: 1px solid rgba(255, 215, 106, 0.42) !important;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.025)),
+        rgba(0, 0, 0, 0.54) !important;
+      color: #fff !important;
+      font-size: 0.74rem !important;
+      font-weight: 950 !important;
+      letter-spacing: 0.065em !important;
+      text-transform: uppercase !important;
+      text-decoration: none !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        0 0 14px rgba(255, 215, 106, 0.10);
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
+    }
+
+    nav a:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 215, 106, 0.82) !important;
+      background:
+        linear-gradient(135deg, rgba(255, 215, 106, 0.24), rgba(215, 25, 53, 0.16)),
+        rgba(0, 0, 0, 0.74) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        0 0 22px rgba(255, 215, 106, 0.24),
+        0 0 34px rgba(215, 25, 53, 0.12);
+    }
+
+    nav a[href*="ballot"] {
+      color: #080808 !important;
+      border-color: rgba(255, 215, 106, 0.9) !important;
+      background:
+        linear-gradient(135deg, #fff4b0 0%, #ffd76a 42%, #b67812 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.62),
+        0 0 22px rgba(255, 215, 106, 0.30) !important;
+    }
+
+    @media (max-width: 760px) {
+      .brand {
+        font-size: clamp(1rem, 4.7vw, 1.35rem) !important;
+      }
+
+      .brand::before {
+        margin-right: 6px;
+      }
+
+      nav a {
+        padding: 8px 12px !important;
+        font-size: 0.68rem !important;
+      }
+    }
+
   </style>
 
   <style>
@@ -421,7 +580,7 @@
 
 <body>
   <header class="site-header">
-    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards</a>
+    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards Association</a>
 
     <input class="mobile-nav-check" type="checkbox" id="mobile-nav-check">
 <label class="mobile-nav-toggle" for="mobile-nav-check">

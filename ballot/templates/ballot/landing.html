@@ -3,19 +3,8 @@
 {% block title %}ATL’s Hottest Awards Association{% endblock %}
 
 {% block content %}
-<section class="atl-hero-banner-wrap">
-  <div class="atl-hero-shimmer-layer"></div>
-  <div class="atl-camera-flash-layer"></div>
-<img
-    class="atl-hero-banner"
-    src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
-    alt="ATL’s Hottest Awards 2026 red carpet banner"
-  >
-</section>
 
 {% render_billboard "homepage_top" %}
-
-
 
 <style>
   .landing-shell {
@@ -253,6 +242,35 @@
       min-height: auto;
     }
   }
+
+  .atl-banner-feature-card {
+    padding: 0;
+    min-height: auto;
+    background: #000;
+  }
+
+  .atl-banner-feature-card::after {
+    display: none;
+  }
+
+  .atl-banner-feature-img {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    object-fit: cover;
+    border-radius: 24px;
+  }
+
+  @media (max-width: 980px) {
+    .atl-banner-feature-img {
+      min-height: auto;
+      height: auto;
+    }
+  }
+
 </style>
 
 <div class="landing-shell">
@@ -288,16 +306,12 @@
 </div>
       </div>
 
-      <aside class="ad-billboard">
-        <div class="ad-content">
-          <span class="ad-label">Featured Sponsor Billboard</span>
-          <h2>Your Brand Here</h2>
-          <p>
-            Premium advertising space for sponsors, partners, featured nominees,
-            event announcements, and red-carpet promotions.
-          </p>
-          <a class="btn primary" href="{% url 'association_signup' %}">Join the Association</a>
-        </div>
+      <aside class="ad-billboard atl-banner-feature-card">
+        <img
+          class="atl-banner-feature-img"
+          src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
+          alt="ATL’s Hottest Awards 2026 red carpet banner"
+        >
       </aside>
     </div>
   </section>
