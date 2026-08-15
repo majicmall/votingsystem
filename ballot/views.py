@@ -1328,6 +1328,41 @@ def voting_closed_response(request):
     })
 
 
+
+
+def visible_category_queryset():
+    """
+    Return public-facing categories only.
+    Hides old archived categories from the ballot pages.
+    """
+    from .models import Category
+
+    qs = Category.objects.all()
+    field_names = {field.name for field in Category._meta.fields}
+
+    if "is_active" in field_names:
+        qs = qs.filter(is_active=True)
+    elif "active" in field_names:
+        qs = qs.filter(active=True)
+    elif "is_public" in field_names:
+        qs = qs.filter(is_public=True)
+
+    qs = qs.exclude(name__istartswith="Archived - ")
+
+    order_fields = []
+    if "group" in field_names:
+        order_fields.append("group")
+    if "display_order" in field_names:
+        order_fields.append("display_order")
+    if "name" in field_names:
+        order_fields.append("name")
+
+    if order_fields:
+        qs = qs.order_by(*order_fields)
+
+    return qs
+
+
 # =========================================================
 # CLEAN BALLOT PREVIEW VIEW
 # Ensures /ballot/ always shows categories while voting is closed.
@@ -1355,9 +1390,9 @@ def ballot_view(request):
         order_fields.append("name")
 
     if order_fields:
-        categories = Category.objects.all().order_by(*order_fields)
+        categories = visible_category_queryset()
     else:
-        categories = Category.objects.all()
+        categories = visible_category_queryset()
 
     return render(request, "ballot/ballot.html", {
         "categories": categories,
