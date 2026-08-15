@@ -7,7 +7,7 @@
 
 {% if active_campaign and not voting_open %}
   <div class="voting-preview-notice">
-    <strong>Voting starts October 4, 2026 and ends November 22, 2026.</strong>
+    <strong>Voting is not open yet.</strong>
     <span>You may view the current ballot and nominees, but votes cannot be cast until the official voting period begins.</span>
   </div>
 {% endif %}
@@ -29,8 +29,8 @@
       <span class="status-pill active">Status: Voting Open</span>
       <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
     {% else %}
-      <span class="status-pill disabled-vote-btn">Status: Voting Starts October 4, 2026</span>
-      <span class="btn disabled-vote-btn">Review Opens October 4, 2026</span>
+      <span class="status-pill disabled-vote-btn">Status: Voting Not Open Yet</span>
+      <span class="btn disabled-vote-btn">Review Disabled Until Voting Opens</span>
     {% endif %}
   </div>
 </section>
@@ -80,7 +80,7 @@
     {% if voting_open %}
       <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
     {% else %}
-      <span class="btn disabled-vote-btn">Voting Starts October 4, 2026</span>
+      <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
     {% endif %}
   </div>
 </section>

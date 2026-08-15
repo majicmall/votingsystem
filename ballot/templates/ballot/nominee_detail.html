@@ -2,6 +2,14 @@
 {% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
 
 {% block content %}
+
+{% if active_campaign and not voting_open %}
+  <div class="voting-preview-notice">
+    <strong>Voting is not open yet.</strong>
+    <span>You may view the current ballot and nominees, but votes cannot be cast until the official voting period begins.</span>
+  </div>
+{% endif %}
+
 {% if request.session.vote_thank_you %}
   {% with thanks=request.session.vote_thank_you %}
     {% if thanks.nominee == nominee.name %}
@@ -63,6 +71,9 @@
         <button class="btn primary detail-vote-btn" type="submit">
           Vote for {{ nominee.name }}
         </button>
+        {% else %}
+          <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
+        {% endif %}
       </form>
 
       <p class="muted vote-rule">

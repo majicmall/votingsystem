@@ -1,0 +1,87 @@
+{% extends "ballot/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="membership-hero">
+  <p class="eyebrow">ATL’s Hottest Memberships</p>
+  <h1>Choose Your Access. Unlock Your Benefits.</h1>
+  <p>
+    Join the ATL’s Hottest community, unlock rewards, upgrade your visibility,
+    and connect with opportunities powered by The MajesticMall Megaverse Advertising Platform.
+  </p>
+</section>
+
+<section class="membership-grid">
+  {% for plan in plans %}
+    <article class="membership-card {% if plan.is_featured %}featured{% endif %}">
+      {% if plan.badge_label %}
+        <div class="membership-badge">{{ plan.badge_label }}</div>
+      {% endif %}
+
+      <h2>{{ plan.name }}</h2>
+
+      {% if plan.tagline %}
+        <p class="membership-tagline">{{ plan.tagline }}</p>
+      {% endif %}
+
+      <div class="membership-price">
+        {% if plan.price == 0 %}
+          Free
+        {% else %}
+          ${{ plan.price }}
+          <span>/ {{ plan.get_billing_period_display }}</span>
+        {% endif %}
+      </div>
+
+      {% if plan.description %}
+        <p class="membership-description">{{ plan.description }}</p>
+      {% endif %}
+
+      <div class="membership-section-title">Benefits</div>
+      <ul class="membership-list">
+        {% for benefit in plan.benefits.all %}
+          <li>
+            <strong>{% if benefit.icon %}{{ benefit.icon }} {% endif %}{{ benefit.title }}</strong>
+            {% if benefit.description %}
+              <span>{{ benefit.description }}</span>
+            {% endif %}
+          </li>
+        {% empty %}
+          <li><strong>Benefits coming soon.</strong></li>
+        {% endfor %}
+      </ul>
+
+      <div class="membership-section-title">Rewards</div>
+      <ul class="membership-list">
+        {% for reward in plan.rewards.all %}
+          {% if reward.is_active %}
+            <li>
+              <strong>{{ reward.title }}</strong>
+              {% if reward.description %}
+                <span>{{ reward.description }}</span>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% empty %}
+          <li><strong>Rewards coming soon.</strong></li>
+        {% endfor %}
+      </ul>
+
+      <div class="membership-actions">
+        <a class="membership-btn" href="{% url 'membership_plan_detail' plan.slug %}">View Details</a>
+        <a class="membership-btn primary" href="{% if plan.price == 0 %}{% url 'choose_membership_plan' plan.slug %}{% else %}{% url 'membership_payment_center' plan.slug %}{% endif %}">Choose Package</a>
+      </div>
+    </article>
+  {% empty %}
+    <div class="membership-empty">
+      <h2>Membership plans are coming soon.</h2>
+      <p>Check back soon for ATL’s Hottest memberships, benefits, and rewards.</p>
+    </div>
+  {% endfor %}
+</section>
+
+<a class="membership-marketplace-btn" href="{% url 'atls_hottest_marketplace' %}">
+  See More Benefits / Add-Ons
+</a>
+
+{% endblock %}

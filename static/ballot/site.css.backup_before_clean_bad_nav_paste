@@ -1,0 +1,6162 @@
+:root {
+  --black: #020202;
+  --black-2: #080405;
+  --black-3: #13070a;
+  --red: #d71935;
+  --red-2: #9f061d;
+  --red-3: #5f0310;
+  --gold: #ffd76a;
+  --gold-2: #d69628;
+  --gold-3: #8a4a09;
+  --white: #ffffff;
+  --soft-white: rgba(255,255,255,0.82);
+  --muted: rgba(255,255,255,0.66);
+  --line: rgba(255,215,106,0.32);
+  --glass: rgba(0,0,0,0.54);
+  --shadow: 0 28px 90px rgba(0,0,0,0.62);
+  --gold-glow: 0 0 18px rgba(255,215,106,0.35), 0 0 44px rgba(255,215,106,0.14);
+  --red-glow: 0 0 22px rgba(215,25,53,0.28), 0 0 48px rgba(215,25,53,0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: #000;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--white);
+  font-family: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,215,106,0.26), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(215,25,53,0.42), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(255,215,106,0.12), transparent 32%),
+    linear-gradient(135deg, #000 0%, #110207 38%, #2b0611 57%, #050505 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.05) 38%, transparent 47%),
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 45%);
+  mix-blend-mode: screen;
+  opacity: 0.8;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,215,106,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,215,106,0.035) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 80%);
+  z-index: 0;
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #fff3c1;
+}
+
+img {
+  max-width: 100%;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  padding: 16px clamp(18px, 4vw, 52px);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.96), rgba(73,4,17,0.96), rgba(0,0,0,0.96));
+  border-bottom: 2px solid rgba(255,215,106,0.58);
+  box-shadow:
+    0 0 20px rgba(255,215,106,0.18),
+    0 14px 40px rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  color: var(--white);
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.35),
+    0 0 20px rgba(255,215,106,0.56),
+    0 0 35px rgba(215,25,53,0.22);
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+nav a {
+  color: var(--white);
+  border: 1px solid rgba(255,215,106,0.24);
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.045);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+nav a:hover {
+  color: var(--gold);
+  border-color: rgba(255,215,106,0.62);
+  box-shadow: var(--gold-glow);
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  width: min(1320px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 34px 0 70px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px, 6vw, 72px);
+  margin: 0 0 28px;
+  border: 1px solid rgba(255,215,106,0.32);
+  border-radius: 30px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    radial-gradient(circle at 20% 0%, rgba(255,215,106,0.18), transparent 34%),
+    radial-gradient(circle at 90% 12%, rgba(215,25,53,0.24), transparent 38%),
+    rgba(0,0,0,0.62);
+  box-shadow: var(--shadow), var(--gold-glow);
+}
+
+.hero::before,
+.card::before,
+.nominee-detail-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(118deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 52%);
+  opacity: 0.55;
+}
+
+.hero.small {
+  padding: clamp(24px, 4vw, 44px);
+}
+
+.eyebrow {
+  margin: 0 0 9px;
+  color: var(--gold);
+  font-size: 0.84rem;
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(255,215,106,0.5);
+}
+
+.hero h1,
+h1 {
+  margin: 0;
+  color: var(--white);
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.32),
+    0 0 26px rgba(255,215,106,0.42),
+    0 0 50px rgba(215,25,53,0.28);
+}
+
+.hero p {
+  max-width: 760px;
+  color: var(--soft-white);
+  font-size: 1.12rem;
+  line-height: 1.65;
+}
+
+.card,
+.manager-card,
+.nominee-card,
+.nominee-detail-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,215,106,0.34);
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    linear-gradient(135deg, rgba(0,0,0,0.84), rgba(67,5,16,0.62));
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.58),
+    0 0 28px rgba(255,215,106,0.11),
+    inset 0 0 0 1px rgba(255,255,255,0.045);
+}
+
+.card {
+  padding: clamp(20px, 4vw, 34px);
+  margin-bottom: 24px;
+}
+
+h2 {
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+  text-shadow:
+    0 0 14px rgba(255,215,106,0.34),
+    0 0 26px rgba(215,25,53,0.16);
+}
+
+h3 {
+  color: var(--white);
+  text-shadow: 0 0 14px rgba(255,215,106,0.18);
+}
+
+p {
+  color: var(--soft-white);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.alert,
+.result {
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,215,106,0.36);
+  border-radius: 16px;
+  color: #fff5cf;
+  background: rgba(215,25,53,0.16);
+}
+
+.field-label {
+  display: block;
+  margin: 14px 0 8px;
+  color: var(--gold);
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(255,215,106,0.28);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--white);
+  background: rgba(0,0,0,0.68);
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(255,215,106,0.75);
+  box-shadow: 0 0 0 3px rgba(255,215,106,0.14);
+}
+
+.btn,
+button.btn,
+input[type="submit"] {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,0.24);
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: var(--white);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  font-weight: 1000;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.btn:hover,
+button.btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,215,106,0.65);
+  box-shadow: var(--gold-glow);
+}
+
+.btn.primary,
+button.primary,
+input[type="submit"] {
+  border-color: rgba(255,215,106,0.95);
+  color: #160704;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 34%, #d69628 66%, #8a4a09 100%);
+  box-shadow:
+    0 0 18px rgba(255,215,106,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.btn.danger {
+  border-color: rgba(215,25,53,0.8);
+  background: linear-gradient(135deg, #d71935, #680312);
+}
+
+.category-block {
+  padding: 30px 0;
+  border-top: 1px solid rgba(255,215,106,0.28);
+}
+
+.category-block:first-of-type {
+  border-top: 0;
+}
+
+.category-heading-row,
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.nominee-count,
+.category-chip,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255,215,106,0.44);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--gold);
+  background: rgba(255,215,106,0.12);
+  font-weight: 1000;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.nominee-grid,
+.dashboard-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.ballot-five-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.ballot-nominee-card {
+  min-height: 342px;
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-color: rgba(255,215,106,0.38);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+    linear-gradient(135deg, rgba(0,0,0,0.84), rgba(87,5,20,0.58));
+}
+
+.ballot-nominee-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255,215,106,0.9);
+  box-shadow:
+    0 18px 45px rgba(0,0,0,0.58),
+    0 0 28px rgba(255,215,106,0.2),
+    0 0 42px rgba(215,25,53,0.2);
+}
+
+.ballot-nominee-card input[type="radio"] {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  transform: scale(1.25);
+  z-index: 3;
+  accent-color: var(--gold);
+}
+
+.nominee-photo-frame,
+.dashboard-photo-frame,
+.nominee-detail-photo {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 16px;
+  padding: 8px;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255,215,106,0.16), transparent 38%),
+    rgba(0,0,0,0.58);
+  box-shadow: inset 0 0 24px rgba(0,0,0,0.52);
+}
+
+.nominee-photo-frame {
+  height: 205px;
+  margin-bottom: 11px;
+}
+
+.dashboard-photo-frame {
+  height: 235px;
+  margin-bottom: 14px;
+}
+
+.nominee-photo-frame img,
+.dashboard-photo-frame img,
+.nominee-detail-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 11px;
+}
+
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 135px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--white);
+  background:
+    radial-gradient(circle at top, rgba(255,215,106,0.28), transparent 38%),
+    linear-gradient(135deg, rgba(215,25,53,0.38), rgba(0,0,0,0.58));
+  font-size: 1.45rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 14px rgba(255,215,106,0.48);
+}
+
+.photo-placeholder.large {
+  min-height: 300px;
+}
+
+.placeholder-card {
+  opacity: 0.9;
+  border-style: dashed;
+}
+
+.nominee-name {
+  display: block;
+  min-height: 40px;
+  color: var(--white);
+  text-align: center;
+  font-weight: 1000;
+  line-height: 1.18;
+  text-shadow: 0 0 12px rgba(255,215,106,0.18);
+}
+
+.card-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.card-actions .btn {
+  width: 100%;
+  margin: 0;
+}
+
+.see-more-btn,
+.submit-vote-btn {
+  margin-top: 18px;
+}
+
+.see-more-btn {
+  color: var(--gold);
+  border-color: rgba(255,215,106,0.62);
+  box-shadow: 0 0 16px rgba(255,215,106,0.1);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.nominee-dashboard-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.manager-card,
+.nominee-dashboard-card {
+  padding: 18px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.status-approved,
+.status-live {
+  color: #caffdc;
+  background: rgba(21,115,71,0.24);
+  border-color: rgba(21,115,71,0.55);
+}
+
+.status-pending {
+  color: #ffe0bd;
+  background: rgba(255,215,106,0.13);
+}
+
+.status-rejected,
+.status-archived {
+  color: #ffc3cd;
+  background: rgba(215,25,53,0.24);
+  border-color: rgba(215,25,53,0.55);
+}
+
+.profile-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 24px;
+  margin-bottom: 10px;
+}
+
+.copy-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.mini-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-list-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(0,0,0,0.28);
+}
+
+.nominee-detail-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nominee-detail-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 430px) 1fr;
+  gap: 30px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.nominee-detail-photo {
+  min-height: 430px;
+}
+
+.nominee-detail-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.nominee-detail-info h1 {
+  font-size: clamp(2.5rem, 7vw, 5.3rem);
+}
+
+.detail-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 18px;
+}
+
+.detail-vote-form {
+  padding: 18px;
+  border: 1px solid rgba(255,215,106,0.28);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.32);
+  margin: 16px 0;
+}
+
+.detail-vote-btn {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.staff-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  padding: 18px;
+  border: 1px solid rgba(255,215,106,0.3);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.34);
+}
+
+.stat-card strong {
+  display: block;
+  color: var(--gold);
+  font-size: 2rem;
+  text-shadow: var(--gold-glow);
+}
+
+.tally-table-wrap {
+  overflow-x: auto;
+}
+
+table.tally-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.tally-table th,
+.tally-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,215,106,0.18);
+  text-align: left;
+}
+
+.tally-table th {
+  color: var(--gold);
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.tally-bar {
+  height: 11px;
+  min-width: 120px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+}
+
+.tally-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--red), var(--gold));
+  box-shadow: var(--gold-glow);
+}
+
+@media (max-width: 1100px) {
+  .ballot-five-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ballot-five-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nominee-detail-card {
+    grid-template-columns: 1fr;
+  }
+
+  .nominee-detail-photo {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 620px) {
+  main {
+    width: min(100% - 20px, 1320px);
+  }
+
+  .ballot-five-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ballot-nominee-card {
+    min-height: 306px;
+  }
+
+  .nominee-photo-frame {
+    height: 160px;
+  }
+
+  .category-heading-row,
+  .section-title-row {
+    flex-direction: column;
+  }
+
+  .copy-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =======================================================
+   Nomination form category checkbox alignment
+======================================================= */
+
+.nomination-form ul,
+.nomination-form .category-checkbox-list,
+form ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0 22px;
+}
+
+.nomination-form li,
+form ul li {
+  margin: 0 0 10px;
+}
+
+.nomination-form li label,
+form ul li label {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.42);
+  color: #ffffff !important;
+  line-height: 1.3;
+}
+
+.nomination-form li label:hover,
+form ul li label:hover {
+  border-color: rgba(255, 215, 106, 0.72);
+  box-shadow: 0 0 16px rgba(255, 215, 106, 0.14);
+}
+
+.nomination-form input[type="checkbox"],
+form ul li input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 1px 0 0 !important;
+  accent-color: #ffd76a;
+}
+
+.nomination-form .helptext,
+form .helptext {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255,255,255,0.66);
+  font-size: 0.9rem;
+}
+
+.nomination-form .errorlist,
+form .errorlist {
+  padding: 12px 14px;
+  border: 1px solid rgba(215, 25, 53, 0.6);
+  border-radius: 14px;
+  background: rgba(215, 25, 53, 0.16);
+  color: #fff;
+}
+
+/* =======================================================
+   Nomination form category checkbox alignment
+======================================================= */
+
+.nomination-form ul,
+.nomination-form .category-checkbox-list,
+form ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0 22px;
+}
+
+.nomination-form li,
+form ul li {
+  margin: 0 0 10px;
+}
+
+.nomination-form li label,
+form ul li label {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.42);
+  color: #ffffff !important;
+  line-height: 1.3;
+}
+
+.nomination-form li label:hover,
+form ul li label:hover {
+  border-color: rgba(255, 215, 106, 0.72);
+  box-shadow: 0 0 16px rgba(255, 215, 106, 0.14);
+}
+
+.nomination-form input[type="checkbox"],
+form ul li input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 1px 0 0 !important;
+  accent-color: #ffd76a;
+}
+
+.nomination-form .helptext,
+form .helptext {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255,255,255,0.66);
+  font-size: 0.9rem;
+}
+
+.nomination-form .errorlist,
+form .errorlist {
+  padding: 12px 14px;
+  border: 1px solid rgba(215, 25, 53, 0.6);
+  border-radius: 14px;
+  background: rgba(215, 25, 53, 0.16);
+  color: #fff;
+}
+
+/* =======================================================
+   Clean nomination category selector
+   Category name left, selection box right
+======================================================= */
+
+.nomination-card {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.category-select-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin: 30px 0 16px;
+}
+
+.category-select-header h2 {
+  margin: 0 0 6px;
+}
+
+.category-select-header p {
+  margin: 0;
+}
+
+.category-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.category-choice-card {
+  display: grid !important;
+  grid-template-columns: 1fr 38px !important;
+  gap: 14px !important;
+  align-items: center !important;
+  min-height: 62px;
+  padding: 14px 16px !important;
+  border: 1px solid rgba(255, 215, 106, 0.36) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035)),
+    rgba(0,0,0,0.48) !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.category-choice-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 215, 106, 0.82) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.16),
+    0 12px 28px rgba(0,0,0,0.32);
+}
+
+.category-choice-name {
+  color: #ffffff !important;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.category-choice-box {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  justify-self: end;
+}
+
+.category-choice-box input[type="checkbox"] {
+  position: absolute;
+  inset: 0;
+  width: 34px !important;
+  height: 34px !important;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.fake-check {
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 215, 106, 0.78);
+  border-radius: 9px;
+  background:
+    linear-gradient(135deg, rgba(0,0,0,0.75), rgba(80,5,18,0.55));
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,0.55),
+    0 0 10px rgba(255, 215, 106, 0.12);
+}
+
+.category-choice-box input[type="checkbox"]:checked + .fake-check {
+  border-color: rgba(255, 215, 106, 1);
+  background:
+    radial-gradient(circle at 50% 40%, #ffffff 0 12%, transparent 13%),
+    linear-gradient(135deg, #fff8d2, #ffd76a 42%, #b87318);
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.45),
+    inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+.category-choice-box input[type="checkbox"]:checked + .fake-check::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #160704;
+  font-weight: 1000;
+  font-size: 1.05rem;
+}
+
+.nomination-submit-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 12px;
+  font-size: 1.05rem;
+}
+
+.nomination-form .errorlist {
+  list-style: none;
+  padding-left: 0;
+}
+
+@media (max-width: 760px) {
+  .category-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-select-header {
+    flex-direction: column;
+  }
+}
+
+/* =======================================================
+   Six-card ballot preview
+======================================================= */
+
+.ballot-six-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.ballot-six-grid .ballot-nominee-card {
+  min-height: 330px;
+}
+
+.ballot-six-grid .nominee-photo-frame {
+  height: 185px;
+}
+
+@media (max-width: 1250px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ballot-six-grid .nominee-photo-frame {
+    height: 160px;
+  }
+}
+
+/* =======================================================
+   ATL's Hottest Awards Association signup page
+======================================================= */
+
+.association-join-hero {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: clamp(22px, 5vw, 54px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(26px, 6vw, 72px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 215, 106, 0.28), transparent 34%),
+    radial-gradient(circle at 86% 12%, rgba(215, 25, 53, 0.38), transparent 34%),
+    linear-gradient(135deg, #000 0%, #25040b 48%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 38px rgba(255, 215, 106, 0.18),
+    0 0 62px rgba(215, 25, 53, 0.14);
+}
+
+.association-join-copy h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 7vw, 6.4rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.36),
+    0 0 30px rgba(255, 215, 106, 0.52),
+    0 0 58px rgba(215, 25, 53, 0.36);
+}
+
+.association-join-copy p {
+  color: rgba(255,255,255,0.86);
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.association-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.association-billboard {
+  min-height: 350px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+  text-align: center;
+  border: 2px solid rgba(255, 215, 106, 0.7);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 215, 106, 0.2), transparent 42%),
+    linear-gradient(135deg, rgba(0,0,0,0.95), rgba(108,4,20,0.76));
+  box-shadow:
+    inset 0 0 28px rgba(255,255,255,0.06),
+    0 0 28px rgba(255, 215, 106, 0.22),
+    0 0 58px rgba(215, 25, 53, 0.14);
+}
+
+.association-billboard span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.association-billboard h2 {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1;
+}
+
+.association-audience-grid,
+.association-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.association-audience-grid article,
+.benefit-row {
+  padding: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.36);
+}
+
+.association-audience-grid h3,
+.benefit-row strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffd76a;
+  font-size: 1.15rem;
+}
+
+.benefit-row span {
+  color: rgba(255,255,255,0.78);
+  line-height: 1.55;
+}
+
+.association-final-cta {
+  margin-top: 26px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.16), transparent 42%),
+    rgba(0,0,0,0.38);
+}
+
+.association-final-cta h2 {
+  color: #fff;
+}
+
+@media (max-width: 980px) {
+  .association-join-hero,
+  .association-audience-grid,
+  .association-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =======================================================
+   Association member dashboard redesign
+======================================================= */
+
+.association-dashboard-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(22px, 5vw, 52px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(26px, 6vw, 70px);
+  border: 1px solid rgba(255, 215, 106, 0.55);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 215, 106, 0.28), transparent 34%),
+    radial-gradient(circle at 88% 10%, rgba(215, 25, 53, 0.38), transparent 34%),
+    linear-gradient(135deg, #000 0%, #26040b 52%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 38px rgba(255, 215, 106, 0.18),
+    0 0 62px rgba(215, 25, 53, 0.14);
+}
+
+.association-dashboard-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.6rem, 7vw, 6.1rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+
+.member-card-preview {
+  padding: 22px;
+  border: 1px solid rgba(255, 215, 106, 0.44);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    rgba(0,0,0,0.48);
+  text-align: center;
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.48),
+    0 0 25px rgba(255, 215, 106, 0.14);
+}
+
+.member-photo-frame {
+  width: min(240px, 100%);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 106, 0.55);
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  box-shadow: 0 0 26px rgba(255, 215, 106, 0.16);
+}
+
+.member-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.member-level-badge,
+.member-since-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 1000;
+  font-size: 0.82rem;
+}
+
+.member-level-badge {
+  color: #111;
+  background: linear-gradient(135deg, #f7f7f7, #bfc4cc);
+  border: 1px solid rgba(255,255,255,0.75);
+  box-shadow: 0 0 16px rgba(255,255,255,0.12);
+}
+
+.member-since-badge {
+  color: #ffd76a;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  background: rgba(255, 215, 106, 0.1);
+}
+
+.association-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-save-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 18px;
+}
+
+.member-status-card {
+  position: sticky;
+  top: 105px;
+}
+
+.member-status-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.member-status-list div {
+  padding: 14px;
+  border: 1px solid rgba(255, 215, 106, 0.24);
+  border-radius: 16px;
+  background: rgba(0,0,0,0.28);
+}
+
+.member-status-list strong,
+.member-status-list span {
+  display: block;
+}
+
+.member-status-list strong {
+  color: #ffd76a;
+  margin-bottom: 5px;
+}
+
+.empty-nominee-access {
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed rgba(255, 215, 106, 0.38);
+  border-radius: 22px;
+  background: rgba(0,0,0,0.24);
+}
+
+@media (max-width: 980px) {
+  .association-dashboard-hero,
+  .association-dashboard-grid,
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .member-status-card {
+    position: static;
+  }
+}
+
+/* =======================================================
+   Restored ballot category selector + six nominee cards
+======================================================= */
+
+.ballot-hero {
+  position: relative;
+}
+
+.ballot-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ballot-category-menu-card {
+  margin-bottom: 24px;
+}
+
+.category-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.category-select-btn {
+  display: flex;
+  min-height: 96px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid rgba(255, 215, 106, 0.36);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.14), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.36);
+  color: #fff;
+  text-decoration: none;
+  box-shadow:
+    inset 0 0 18px rgba(255,255,255,0.03),
+    0 0 18px rgba(255, 215, 106, 0.07);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.category-select-btn:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 215, 106, 0.78);
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.18),
+    0 0 34px rgba(215, 25, 53, 0.12);
+}
+
+.category-select-btn span {
+  color: #fff;
+  font-weight: 1000;
+  line-height: 1.15;
+}
+
+.category-select-btn em {
+  color: #ffd76a;
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.ballot-category-section {
+  scroll-margin-top: 100px;
+  margin-bottom: 24px;
+}
+
+.category-heading-row {
+  align-items: center;
+}
+
+.category-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.ballot-six-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.ballot-nominee-card {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 215, 106, 0.3);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.085), rgba(255,255,255,0.022)),
+    rgba(0,0,0,0.42);
+  box-shadow:
+    0 18px 38px rgba(0,0,0,0.36),
+    inset 0 0 18px rgba(255,255,255,0.025);
+}
+
+.nominee-card-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ballot-nominee-card .nominee-photo-frame {
+  width: 100%;
+  height: 158px;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 215, 106, 0.26);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.16), transparent 45%),
+    #090909;
+}
+
+.ballot-nominee-card .nominee-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nominee-card-body {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+}
+
+.nominee-card-body h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.nominee-card-body p {
+  margin: 0;
+  color: #ffd76a;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.vote-card-btn {
+  width: calc(100% - 20px);
+  margin: 0 10px 12px;
+  min-height: 42px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+}
+
+.placeholder-card {
+  border-style: dashed;
+  border-color: rgba(255, 215, 106, 0.28);
+  opacity: 0.92;
+}
+
+.placeholder-frame {
+  display: grid;
+  place-items: center;
+}
+
+.placeholder-card .photo-placeholder {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 999px;
+  color: #ffd76a;
+  font-weight: 1000;
+  background: rgba(215, 25, 53, 0.12);
+}
+
+.more-nominees-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+@media (max-width: 1180px) {
+  .ballot-six-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .category-selection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ballot-six-grid,
+  .category-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-actions {
+    justify-content: flex-start;
+  }
+
+  .ballot-nominee-card .nominee-photo-frame {
+    height: 210px;
+  }
+}
+
+/* =======================================================
+   MOBILE RESTORE — ballot category buttons + six-card previews
+   Force latest ballot design to win over older mobile rules
+======================================================= */
+
+@media (max-width: 760px) {
+  .ballot-category-menu-card,
+  .ballot-category-section {
+    display: block !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .category-selection-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .category-select-btn {
+    display: flex !important;
+    min-height: 88px !important;
+    padding: 16px !important;
+    border-radius: 18px !important;
+    color: #ffffff !important;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.18), transparent 44%),
+      linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.025)),
+      rgba(0,0,0,0.52) !important;
+  }
+
+  .ballot-six-grid,
+  .nominees-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .ballot-nominee-card,
+  .nominee-card,
+  .placeholder-card {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(255, 215, 106, 0.34) !important;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+      rgba(0,0,0,0.58) !important;
+  }
+
+  .ballot-nominee-card .nominee-photo-frame,
+  .nominee-card .nominee-photo-frame,
+  .placeholder-card .nominee-photo-frame {
+    display: grid !important;
+    place-items: center !important;
+    width: 100% !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 215, 106, 0.28) !important;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.18), transparent 45%),
+      #070707 !important;
+  }
+
+  .ballot-nominee-card .nominee-photo-frame img,
+  .nominee-card .nominee-photo-frame img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .nominee-card-body {
+    display: block !important;
+    padding: 16px !important;
+    text-align: center !important;
+  }
+
+  .nominee-card-body h3 {
+    color: #ffffff !important;
+    font-size: 1.15rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .nominee-card-body p {
+    color: #ffd76a !important;
+    font-weight: 900 !important;
+  }
+
+  .vote-card-btn {
+    display: inline-flex !important;
+    width: calc(100% - 24px) !important;
+    margin: 0 12px 14px !important;
+    justify-content: center !important;
+  }
+
+  .category-heading-row,
+  .section-title-row {
+    align-items: flex-start !important;
+  }
+
+  .category-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* =======================================================
+   Guided ballot flow — category pages, review, confirmation
+======================================================= */
+
+.guided-category-grid {
+  align-items: stretch;
+}
+
+.guided-category-btn {
+  position: relative;
+  min-height: 130px;
+}
+
+.guided-category-btn b {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #111;
+  background: linear-gradient(135deg, #ffd76a, #d69628);
+  font-size: 0.76rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.selected-category-note,
+.selected-vote-note {
+  display: inline-flex;
+  margin-top: 8px;
+  color: #ffd76a;
+  font-size: 0.86rem;
+  font-weight: 1000;
+}
+
+.ballot-menu-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.ballot-category-only-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+  height: 240px;
+}
+
+.selected-nominee-card {
+  border-color: rgba(255, 215, 106, 0.92) !important;
+  box-shadow:
+    0 0 24px rgba(255, 215, 106, 0.28),
+    0 0 48px rgba(215, 25, 53, 0.16),
+    inset 0 0 22px rgba(255, 215, 106, 0.07);
+}
+
+.select-nominee-form {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+
+.ballot-navigation-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.ballot-review-card,
+.confirmation-card {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.review-vote-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-vote-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.02)),
+    rgba(0,0,0,0.34);
+}
+
+.review-vote-row strong,
+.review-vote-row span {
+  display: block;
+}
+
+.review-vote-row strong {
+  color: #ffd76a;
+  margin-bottom: 4px;
+}
+
+.review-vote-row span {
+  color: #fff;
+}
+
+.final-ballot-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 215, 106, 0.24);
+}
+
+.final-submit-btn {
+  width: 100%;
+  min-height: 56px;
+}
+
+.confirmation-hero {
+  padding: clamp(28px, 7vw, 76px);
+  margin-bottom: 24px;
+  text-align: center;
+  border: 1px solid rgba(255, 215, 106, 0.55);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.24), transparent 42%),
+    linear-gradient(135deg, #000, #3a0610 54%, #050505);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 42px rgba(255, 215, 106, 0.18);
+}
+
+.confirmation-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.8rem, 8vw, 6.8rem);
+  line-height: 0.9;
+}
+
+.duplicate-vote-panel,
+.chosen-panel {
+  margin-top: 24px;
+}
+
+.chosen-panel {
+  text-align: center;
+  border-color: rgba(215, 25, 53, 0.58);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(215, 25, 53, 0.24), transparent 42%),
+    rgba(0,0,0,0.38);
+}
+
+.chosen-panel h2 {
+  color: #ffd76a;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+}
+
+@media (max-width: 980px) {
+  .ballot-category-only-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .guided-category-btn {
+    min-height: 116px;
+  }
+
+  .ballot-category-only-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+    height: 240px !important;
+  }
+
+  .review-vote-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .review-vote-row .btn {
+    width: 100%;
+  }
+}
+
+/* =======================================================
+   Viloud ATL's Hottest TV player
+======================================================= */
+
+.viloud-player-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.viloud-player-wrap iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* =======================================================
+   ATL's Hottest TV Page
+======================================================= */
+
+.atl-tv-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(22px, 5vw, 56px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(28px, 7vw, 78px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 215, 106, 0.28), transparent 35%),
+    radial-gradient(circle at 88% 12%, rgba(215, 25, 53, 0.36), transparent 34%),
+    linear-gradient(135deg, #000 0%, #310510 52%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 42px rgba(255, 215, 106, 0.18),
+    0 0 70px rgba(215, 25, 53, 0.16);
+}
+
+.atl-tv-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(3.1rem, 8vw, 7.4rem);
+  line-height: 0.88;
+  letter-spacing: -0.065em;
+  text-shadow:
+    0 0 14px rgba(255,255,255,0.28),
+    0 0 34px rgba(255, 215, 106, 0.42),
+    0 0 62px rgba(215, 25, 53, 0.26);
+}
+
+.atl-tv-hero p {
+  color: rgba(255,255,255,0.86);
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.atl-tv-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.atl-tv-now-card {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.18), transparent 46%),
+    linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.5);
+}
+
+.atl-tv-now-card span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.atl-tv-now-card strong {
+  color: #fff;
+  font-size: clamp(1.6rem, 3.4vw, 3.1rem);
+  line-height: 1.02;
+}
+
+.atl-tv-player-section {
+  margin-bottom: 26px;
+}
+
+.atl-tv-frame {
+  position: relative;
+  padding: clamp(10px, 2vw, 18px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 34px;
+  background:
+    linear-gradient(135deg, rgba(255,215,106,0.16), rgba(215,25,53,0.13)),
+    #030303;
+}
+
+.atl-tv-screen-glow {
+  position: absolute;
+  inset: -10px;
+  z-index: 0;
+  border-radius: 38px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 215, 106, 0.22), transparent 42%),
+    radial-gradient(circle at 50% 80%, rgba(215, 25, 53, 0.22), transparent 44%);
+  filter: blur(16px);
+  opacity: 0.7;
+}
+
+.atl-tv-player {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 215, 106, 0.5);
+  border-radius: 24px;
+  background: #000;
+}
+
+.atl-tv-player iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.viloud-player-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.viloud-player-wrap iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.atl-tv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.atl-tv-grid article {
+  padding: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.085), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.38);
+}
+
+.atl-tv-grid h3 {
+  margin-top: 0;
+  color: #ffd76a;
+}
+
+.atl-tv-submit-panel {
+  margin-top: 24px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid rgba(255, 215, 106, 0.38);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.14), transparent 42%),
+    rgba(0,0,0,0.34);
+}
+
+.atl-tv-advertise-card {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: clamp(24px, 5vw, 46px);
+  border: 1px solid rgba(215, 25, 53, 0.58);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 215, 106, 0.18), transparent 38%),
+    linear-gradient(135deg, rgba(215, 25, 53, 0.2), rgba(0,0,0,0.5));
+}
+
+.atl-tv-advertise-card h2 {
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 0.95;
+}
+
+.atl-tv-ad-options {
+  display: grid;
+  gap: 10px;
+}
+
+.atl-tv-ad-options div {
+  padding: 14px;
+  border: 1px solid rgba(255, 215, 106, 0.24);
+  border-radius: 16px;
+  background: rgba(0,0,0,0.28);
+}
+
+.atl-tv-ad-options strong,
+.atl-tv-ad-options span {
+  display: block;
+}
+
+.atl-tv-ad-options strong {
+  color: #ffd76a;
+}
+
+@media (max-width: 980px) {
+  .atl-tv-hero,
+  .atl-tv-grid,
+  .atl-tv-advertise-card {
+    grid-template-columns: 1fr;
+  }
+
+  .atl-tv-advertise-card .btn {
+    width: 100%;
+  }
+}
+
+/* ATL's Hottest front page full-width hero banner */
+.atl-hero-banner-wrap {
+  width: 100vw;
+  max-width: 100vw;
+  margin: -26px 0 34px;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: #050505;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.65),
+    0 0 44px rgba(255, 215, 106, 0.22);
+  position: relative;
+}
+
+.atl-hero-banner-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.04), transparent 24%, rgba(0,0,0,0.08)),
+    radial-gradient(circle at 50% 0%, rgba(255,215,106,0.14), transparent 38%);
+}
+
+.atl-hero-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: center center;
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap {
+    width: 100vw;
+    max-width: 100vw;
+    margin: -18px 0 24px;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+  }
+
+  .atl-hero-banner {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center center;
+  }
+}
+
+/* Final polish: remove top gap above landing hero banner on desktop only */
+@media (min-width: 721px) {
+  .landing-shell {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  .atl-hero-banner-wrap:first-child {
+    margin-top: -44px !important;
+  }
+}
+
+/* Top navigation polish */
+.site-nav,
+.nav,
+header nav {
+  font-size: 1.08rem;
+}
+
+.site-nav a,
+.nav a,
+header nav a {
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+}
+
+.site-nav a:hover,
+.nav a:hover,
+header nav a:hover {
+  color: #ffd76a;
+  text-shadow: 0 0 12px rgba(255, 215, 106, 0.55);
+}
+
+@media (max-width: 720px) {
+  .site-nav,
+  .nav,
+  header nav {
+    font-size: 1rem;
+  }
+
+  .site-nav a,
+  .nav a,
+  header nav a {
+    font-size: 1rem;
+    padding: 9px 10px;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* =========================================================
+   FINAL CLEAN MOBILE HERO POSITION
+   Keeps mobile hero visible and tight below the header.
+   ========================================================= */
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap,
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  main .atl-hero-banner-wrap:first-child {
+    margin-top: 0 !important;
+    margin-bottom: 18px !important;
+    padding-top: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .atl-hero-banner {
+    display: block !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center top !important;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   PREMIUM HEADER NAVIGATION POLISH
+   Cinematic gold/red nav buttons for ATL's Hottest Awards
+   ========================================================= */
+.site-header {
+  border-bottom: 2px solid rgba(255, 215, 106, 0.82) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.28),
+    0 12px 34px rgba(0, 0, 0, 0.68),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.brand {
+  position: relative;
+  color: #ffffff !important;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  letter-spacing: 0.12em !important;
+}
+
+.site-header nav,
+header nav,
+.site-nav,
+.nav {
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.site-header nav a,
+header nav a,
+.site-nav a,
+.nav a {
+  position: relative;
+  overflow: hidden;
+  min-height: 42px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 215, 106, 0.52) !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  color: #ffffff !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    linear-gradient(135deg, rgba(0,0,0,0.78), rgba(96,5,20,0.62)) !important;
+  font-size: 0.96rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.28),
+    0 0 14px rgba(255,215,106,0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 14px rgba(255,215,106,0.08);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
+}
+
+.site-header nav a::before,
+header nav a::before,
+.site-nav a::before,
+.nav a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255,255,255,0.20) 45%,
+    transparent 62%
+  );
+  transition: transform 0.55s ease;
+}
+
+.site-header nav a:hover,
+header nav a:hover,
+.site-nav a:hover,
+.nav a:hover {
+  color: #fff7cf !important;
+  border-color: rgba(255, 215, 106, 0.95) !important;
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.34),
+    0 0 34px rgba(215, 25, 53, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+.site-header nav a:hover::before,
+header nav a:hover::before,
+.site-nav a:hover::before,
+.nav a:hover::before {
+  transform: translateX(120%);
+}
+
+/* Make the VOTE button feel like the main action */
+.site-header nav a[href*="ballot"],
+header nav a[href*="ballot"],
+.site-nav a[href*="ballot"],
+.nav a[href*="ballot"] {
+  color: #190504 !important;
+  border-color: rgba(255, 215, 106, 1) !important;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.38),
+    0 0 34px rgba(215, 25, 53, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.62) !important;
+}
+
+.site-header nav a[href*="ballot"]:hover,
+header nav a[href*="ballot"]:hover,
+.site-nav a[href*="ballot"]:hover,
+.nav a[href*="ballot"]:hover {
+  color: #000000 !important;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.58),
+    0 0 48px rgba(255, 215, 106, 0.24),
+    0 14px 26px rgba(0,0,0,0.38) !important;
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    gap: 12px !important;
+    padding: 12px 14px !important;
+  }
+
+  .site-header nav,
+  header nav,
+  .site-nav,
+  .nav {
+    width: 100%;
+    gap: 8px !important;
+  }
+
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    min-height: 38px;
+    padding: 8px 11px !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.055em !important;
+  }
+}
+
+/* =========================================================
+   UNIFIED GOLD HEADER NAVIGATION
+   Make every nav button match the premium VOTE button style.
+   ========================================================= */
+.site-header nav a,
+header nav a,
+.site-nav a,
+.nav a {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(255, 215, 106, 1) !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  color: #190504 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.38),
+    0 0 34px rgba(215, 25, 53, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease !important;
+}
+
+.site-header nav a::before,
+header nav a::before,
+.site-nav a::before,
+.nav a::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transform: translateX(-120%) !important;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255,255,255,0.32) 45%,
+    transparent 62%
+  ) !important;
+  transition: transform 0.55s ease !important;
+}
+
+.site-header nav a:hover,
+header nav a:hover,
+.site-nav a:hover,
+.nav a:hover {
+  color: #000000 !important;
+  transform: translateY(-3px) scale(1.03) !important;
+  border-color: rgba(255, 245, 190, 1) !important;
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.58),
+    0 0 48px rgba(255, 215, 106, 0.24),
+    0 14px 26px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.72) !important;
+}
+
+.site-header nav a:hover::before,
+header nav a:hover::before,
+.site-nav a:hover::before,
+.nav a:hover::before {
+  transform: translateX(120%) !important;
+}
+
+@media (max-width: 720px) {
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    min-height: 38px !important;
+    padding: 8px 11px !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.055em !important;
+  }
+}
+
+/* =========================================================
+   UNIFIED GOLD HEADER NAVIGATION
+   Make every nav button match the premium VOTE button style.
+   ========================================================= */
+.site-header nav a,
+header nav a,
+.site-nav a,
+.nav a {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(255, 215, 106, 1) !important;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  color: #190504 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.38),
+    0 0 34px rgba(215, 25, 53, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease !important;
+}
+
+.site-header nav a::before,
+header nav a::before,
+.site-nav a::before,
+.nav a::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transform: translateX(-120%) !important;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255,255,255,0.32) 45%,
+    transparent 62%
+  ) !important;
+  transition: transform 0.55s ease !important;
+}
+
+.site-header nav a:hover,
+header nav a:hover,
+.site-nav a:hover,
+.nav a:hover {
+  color: #000000 !important;
+  transform: translateY(-3px) scale(1.03) !important;
+  border-color: rgba(255, 245, 190, 1) !important;
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.58),
+    0 0 48px rgba(255, 215, 106, 0.24),
+    0 14px 26px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.72) !important;
+}
+
+.site-header nav a:hover::before,
+header nav a:hover::before,
+.site-nav a:hover::before,
+.nav a:hover::before {
+  transform: translateX(120%) !important;
+}
+
+@media (max-width: 720px) {
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    min-height: 38px !important;
+    padding: 8px 11px !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.055em !important;
+  }
+}
+
+/* =========================================================
+   MOBILE-FIRST HEADER COMPACT POLISH
+   Keeps the gold desktop nav but makes mobile tighter,
+   cleaner, and better for phone voters.
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    align-items: center !important;
+    padding: 7px 10px 8px !important;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,0.98), rgba(70,4,17,0.96), rgba(0,0,0,0.98)) !important;
+    border-bottom: 2px solid rgba(255, 215, 106, 0.88) !important;
+    box-shadow:
+      0 0 14px rgba(255, 215, 106, 0.24),
+      0 9px 22px rgba(0,0,0,0.62) !important;
+  }
+
+  .brand {
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    font-size: 0.88rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.105em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .site-header nav,
+  header nav,
+  .site-nav,
+  .nav {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 1px 1px 3px !important;
+    margin: 0 !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .site-header nav::-webkit-scrollbar,
+  header nav::-webkit-scrollbar,
+  .site-nav::-webkit-scrollbar,
+  .nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    flex: 0 0 auto !important;
+    min-height: 30px !important;
+    padding: 6px 9px !important;
+    border-radius: 999px !important;
+    font-size: 0.69rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.045em !important;
+    white-space: nowrap !important;
+    box-shadow:
+      0 0 10px rgba(255, 215, 106, 0.22),
+      inset 0 1px 0 rgba(255,255,255,0.56) !important;
+  }
+
+  .site-header nav a:hover,
+  header nav a:hover,
+  .site-nav a:hover,
+  .nav a:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+  }
+
+  main {
+    padding-top: 14px !important;
+  }
+
+  .atl-hero-banner-wrap,
+  .landing-shell > .atl-hero-banner-wrap:first-child,
+  main .atl-hero-banner-wrap:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+/* =========================================================
+   RED CARPET GALA MOVING SPOTLIGHTS
+   Animated prestige callouts over the hero image.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  isolation: isolate;
+}
+
+.red-carpet-gala-spotlight {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 215, 106, 0.74);
+  border-radius: 999px;
+  color: #fff8d2;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 46%),
+    linear-gradient(135deg, rgba(0,0,0,0.72), rgba(108,4,20,0.56));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.76rem, 1.35vw, 1.05rem);
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.55),
+    0 0 22px rgba(255,215,106,0.58),
+    0 0 38px rgba(215,25,53,0.34);
+  box-shadow:
+    0 0 22px rgba(255, 215, 106, 0.38),
+    0 0 46px rgba(215, 25, 53, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+  opacity: 0.92;
+  mix-blend-mode: screen;
+}
+
+.red-carpet-gala-spotlight::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -72px;
+  width: 150px;
+  height: 88px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(ellipse at top, rgba(255, 235, 170, 0.34), transparent 68%);
+  filter: blur(8px);
+  opacity: 0.8;
+}
+
+.spotlight-one {
+  top: 10%;
+  left: 7%;
+  animation: redCarpetDriftOne 7s ease-in-out infinite alternate;
+}
+
+.spotlight-two {
+  right: 7%;
+  bottom: 13%;
+  animation: redCarpetDriftTwo 8.5s ease-in-out infinite alternate;
+}
+
+@keyframes redCarpetDriftOne {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+  45% {
+    transform: translate3d(18vw, 5vh, 0) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(9vw, 12vh, 0) rotate(-1deg);
+  }
+}
+
+@keyframes redCarpetDriftTwo {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(3deg);
+  }
+  45% {
+    transform: translate3d(-16vw, -7vh, 0) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(-7vw, -13vh, 0) rotate(1deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .red-carpet-gala-spotlight {
+    padding: 6px 10px;
+    font-size: 0.54rem;
+    letter-spacing: 0.095em;
+    opacity: 0.86;
+  }
+
+  .red-carpet-gala-spotlight::before {
+    width: 92px;
+    height: 56px;
+    bottom: -44px;
+  }
+
+  .spotlight-one {
+    top: 8%;
+    left: 4%;
+  }
+
+  .spotlight-two {
+    right: 4%;
+    bottom: 12%;
+  }
+
+  @keyframes redCarpetDriftOne {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(-3deg);
+    }
+    100% {
+      transform: translate3d(24vw, 5vh, 0) rotate(2deg);
+    }
+  }
+
+  @keyframes redCarpetDriftTwo {
+    0% {
+      transform: translate3d(0, 0, 0) rotate(3deg);
+    }
+    100% {
+      transform: translate3d(-24vw, -5vh, 0) rotate(-2deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .red-carpet-gala-spotlight {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   MOBILE DROPDOWN NAVIGATION
+   Desktop keeps full nav. Mobile gets compact dropdown menu.
+   ========================================================= */
+
+.mobile-nav-check,
+.mobile-nav-toggle {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  .brand {
+    width: auto !important;
+    text-align: left !important;
+    font-size: 0.82rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.075em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .mobile-nav-check {
+    display: none !important;
+  }
+
+  .mobile-nav-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 34px !important;
+    padding: 7px 12px !important;
+    border: 1px solid rgba(255, 215, 106, 1) !important;
+    border-radius: 999px !important;
+    color: #190504 !important;
+    background:
+      linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%) !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    box-shadow:
+      0 0 14px rgba(255, 215, 106, 0.35),
+      inset 0 1px 0 rgba(255,255,255,0.62) !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1rem !important;
+    line-height: 1 !important;
+  }
+
+  .site-header nav,
+  header nav,
+  .site-nav,
+  .nav {
+    grid-column: 1 / -1 !important;
+    display: none !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 8px 0 0 !important;
+    margin: 0 !important;
+    gap: 7px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .mobile-nav-check:checked ~ nav {
+    display: flex !important;
+  }
+
+  .site-header nav a,
+  header nav a,
+  .site-nav a,
+  .nav a {
+    flex: 0 1 auto !important;
+    min-height: 32px !important;
+    padding: 7px 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.045em !important;
+    white-space: nowrap !important;
+  }
+
+  .site-header nav a:hover,
+  header nav a:hover,
+  .site-nav a:hover,
+  .nav a:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+  }
+}
+
+/* =========================================================
+   MOBILE MENU BUTTON READABILITY + BREATHING ROOM
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    padding: 10px 14px 11px !important;
+  }
+
+  .brand {
+    padding-right: 4px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .mobile-nav-toggle {
+    min-width: 92px !important;
+    min-height: 38px !important;
+    padding: 8px 14px !important;
+    color: #050505 !important;
+    background:
+      linear-gradient(135deg, #fffbe2 0%, #ffd76a 34%, #d69628 68%, #8a4a09 100%) !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span,
+  .mobile-nav-toggle b {
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1.05rem !important;
+  }
+}
+
+/* =========================================================
+   MOVIE PREMIERE SPOTLIGHTS
+   Replaces floating text with cinematic moving light beams.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  position: relative;
+  isolation: isolate;
+}
+
+.atl-hero-banner-wrap::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: -18%;
+  bottom: -18%;
+  width: 58%;
+  height: 125%;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      72deg,
+      transparent 0%,
+      rgba(255, 248, 210, 0.00) 27%,
+      rgba(255, 248, 210, 0.22) 46%,
+      rgba(255, 215, 106, 0.16) 53%,
+      rgba(255, 248, 210, 0.00) 70%,
+      transparent 100%
+    );
+  filter: blur(10px);
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+  animation: moviePremiereSpotlightLeft 6.8s ease-in-out infinite alternate;
+}
+
+.atl-hero-banner-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  right: -18%;
+  bottom: -18%;
+  width: 58%;
+  height: 125%;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      rgba(255, 248, 210, 0.00) 27%,
+      rgba(255, 248, 210, 0.20) 46%,
+      rgba(255, 215, 106, 0.14) 53%,
+      rgba(255, 248, 210, 0.00) 70%,
+      transparent 100%
+    );
+  filter: blur(10px);
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  transform-origin: 50% 100%;
+  animation: moviePremiereSpotlightRight 7.4s ease-in-out infinite alternate;
+}
+
+@keyframes moviePremiereSpotlightLeft {
+  0% {
+    transform: rotate(-16deg) translateX(-4%);
+  }
+  50% {
+    transform: rotate(8deg) translateX(10%);
+  }
+  100% {
+    transform: rotate(22deg) translateX(18%);
+  }
+}
+
+@keyframes moviePremiereSpotlightRight {
+  0% {
+    transform: rotate(16deg) translateX(4%);
+  }
+  50% {
+    transform: rotate(-8deg) translateX(-10%);
+  }
+  100% {
+    transform: rotate(-22deg) translateX(-18%);
+  }
+}
+
+/* Hide old floating gala text styles if any duplicate markup remains */
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    width: 72%;
+    height: 112%;
+    bottom: -14%;
+    filter: blur(9px);
+    opacity: 0.5;
+  }
+
+  .atl-hero-banner-wrap::before {
+    left: -34%;
+  }
+
+  .atl-hero-banner-wrap::after {
+    right: -34%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   FINAL MOBILE MENU BUTTON ALIGNMENT
+   Centers the Menu button vertically and makes it square.
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    align-items: center !important;
+    padding: 12px 14px 13px !important;
+    min-height: 58px !important;
+  }
+
+  .mobile-nav-toggle {
+    width: 76px !important;
+    min-width: 76px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    align-self: center !important;
+    justify-self: end !important;
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span,
+  .mobile-nav-toggle b {
+    color: #050505 !important;
+    text-shadow: none !important;
+  }
+
+  .mobile-nav-toggle span {
+    font-size: 0.76rem !important;
+  }
+
+  .mobile-nav-toggle b {
+    font-size: 1rem !important;
+  }
+}
+
+/* =========================================================
+   STRONGER MOVING PREMIERE SPOTLIGHTS
+   More visible cinematic beams over the hero image.
+   ========================================================= */
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner-wrap .atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.atl-hero-banner-wrap::before,
+.atl-hero-banner-wrap::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 3 !important;
+  bottom: -30% !important;
+  width: 54% !important;
+  height: 145% !important;
+  pointer-events: none !important;
+  mix-blend-mode: screen !important;
+  filter: blur(8px) !important;
+  opacity: 0.74 !important;
+}
+
+.atl-hero-banner-wrap::before {
+  left: -18% !important;
+  background:
+    linear-gradient(
+      68deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(255, 255, 245, 0.22) 43%,
+      rgba(255, 215, 106, 0.18) 51%,
+      rgba(255, 255, 245, 0.12) 58%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  transform-origin: 50% 100% !important;
+  animation: premiereSpotlightSweepLeft 6.4s ease-in-out infinite alternate !important;
+}
+
+.atl-hero-banner-wrap::after {
+  right: -18% !important;
+  background:
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(255, 255, 245, 0.20) 43%,
+      rgba(255, 215, 106, 0.16) 51%,
+      rgba(255, 255, 245, 0.11) 58%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  transform-origin: 50% 100% !important;
+  animation: premiereSpotlightSweepRight 7s ease-in-out infinite alternate !important;
+}
+
+@keyframes premiereSpotlightSweepLeft {
+  0% {
+    transform: rotate(-24deg) translateX(-8%);
+  }
+  50% {
+    transform: rotate(6deg) translateX(12%);
+  }
+  100% {
+    transform: rotate(26deg) translateX(22%);
+  }
+}
+
+@keyframes premiereSpotlightSweepRight {
+  0% {
+    transform: rotate(24deg) translateX(8%);
+  }
+  50% {
+    transform: rotate(-6deg) translateX(-12%);
+  }
+  100% {
+    transform: rotate(-26deg) translateX(-22%);
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    width: 82% !important;
+    height: 130% !important;
+    bottom: -24% !important;
+    opacity: 0.58 !important;
+    filter: blur(7px) !important;
+  }
+
+  .atl-hero-banner-wrap::before {
+    left: -46% !important;
+  }
+
+  .atl-hero-banner-wrap::after {
+    right: -46% !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   CENTER CROSSING MOVIE PREMIERE SPOTLIGHTS
+   Thin bright beams crossing over the hero image.
+   ========================================================= */
+
+/* Turn off older pseudo-element spotlight beams */
+.atl-hero-banner-wrap::before,
+.atl-hero-banner-wrap::after {
+  display: none !important;
+  content: none !important;
+}
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.premiere-spotlight-beam {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: -24%;
+  width: 12%;
+  height: 150%;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  opacity: 0.92;
+  mix-blend-mode: screen;
+  filter: blur(3px);
+  background:
+    linear-gradient(
+      to top,
+      rgba(255, 255, 255, 0.00) 0%,
+      rgba(255, 245, 190, 0.18) 18%,
+      rgba(255, 255, 255, 0.62) 48%,
+      rgba(255, 215, 106, 0.42) 58%,
+      rgba(255, 255, 255, 0.18) 76%,
+      rgba(255, 255, 255, 0.00) 100%
+    );
+  clip-path: polygon(44% 100%, 56% 100%, 100% 0%, 0% 0%);
+}
+
+.premiere-spotlight-beam::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2%;
+  width: 44px;
+  height: 44px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.82), rgba(255,215,106,0.22), transparent 68%);
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.56),
+    0 0 34px rgba(255,215,106,0.38);
+}
+
+.beam-left {
+  animation: centerSpotlightLeft 4.8s ease-in-out infinite alternate;
+}
+
+.beam-right {
+  animation: centerSpotlightRight 5.2s ease-in-out infinite alternate;
+}
+
+@keyframes centerSpotlightLeft {
+  0% {
+    transform: translateX(-50%) rotate(-28deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(6deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(28deg);
+  }
+}
+
+@keyframes centerSpotlightRight {
+  0% {
+    transform: translateX(-50%) rotate(28deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(-6deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(-28deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .premiere-spotlight-beam {
+    bottom: -20%;
+    width: 18%;
+    height: 135%;
+    opacity: 0.95;
+    filter: blur(2px);
+  }
+
+  .premiere-spotlight-beam::after {
+    width: 30px;
+    height: 30px;
+  }
+
+  @keyframes centerSpotlightLeft {
+    0% {
+      transform: translateX(-50%) rotate(-24deg);
+    }
+    50% {
+      transform: translateX(-50%) rotate(5deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(24deg);
+    }
+  }
+
+  @keyframes centerSpotlightRight {
+    0% {
+      transform: translateX(-50%) rotate(24deg);
+    }
+    50% {
+      transform: translateX(-50%) rotate(-5deg);
+    }
+    100% {
+      transform: translateX(-50%) rotate(-24deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premiere-spotlight-beam {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   FRONT PAGE VIDEO PLAYER SECTION
+   Premium ATL TV feature block for homepage.
+   ========================================================= */
+.front-page-video-section {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(20px, 5vw, 52px);
+  align-items: center;
+  margin: 28px 0 34px;
+  padding: clamp(22px, 5vw, 52px);
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 215, 106, 0.22), transparent 38%),
+    radial-gradient(circle at 88% 18%, rgba(215, 25, 53, 0.26), transparent 42%),
+    linear-gradient(135deg, rgba(0,0,0,0.82), rgba(62,5,17,0.68), rgba(0,0,0,0.86));
+  box-shadow:
+    0 28px 90px rgba(0,0,0,0.62),
+    0 0 34px rgba(255, 215, 106, 0.14),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.front-page-video-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 54%);
+  opacity: 0.6;
+}
+
+.front-video-copy,
+.front-video-frame {
+  position: relative;
+  z-index: 1;
+}
+
+.front-video-copy h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-shadow:
+    0 0 14px rgba(255,255,255,0.26),
+    0 0 30px rgba(255, 215, 106, 0.36),
+    0 0 52px rgba(215, 25, 53, 0.2);
+}
+
+.front-video-copy p {
+  max-width: 560px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.front-video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.front-video-frame {
+  position: relative;
+  padding: clamp(8px, 1.8vw, 16px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 26px;
+  background:
+    linear-gradient(135deg, rgba(255,215,106,0.18), rgba(215,25,53,0.14)),
+    #030303;
+  box-shadow:
+    0 0 28px rgba(255, 215, 106, 0.18),
+    0 0 48px rgba(215, 25, 53, 0.12),
+    0 18px 48px rgba(0,0,0,0.58);
+}
+
+.front-video-glow {
+  position: absolute;
+  inset: -10px;
+  z-index: 0;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 215, 106, 0.24), transparent 44%),
+    radial-gradient(circle at 50% 86%, rgba(215, 25, 53, 0.22), transparent 48%);
+  filter: blur(16px);
+  opacity: 0.75;
+}
+
+.front-video-player {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 215, 106, 0.44);
+  border-radius: 18px;
+  background: #000;
+}
+
+.front-video-player iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 860px) {
+  .front-page-video-section {
+    grid-template-columns: 1fr;
+    margin: 22px 0 28px;
+    padding: 20px 14px;
+    border-radius: 24px;
+  }
+
+  .front-video-copy {
+    text-align: center;
+  }
+
+  .front-video-copy p {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.96rem;
+  }
+
+  .front-video-actions {
+    justify-content: center;
+  }
+
+  .front-video-frame {
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .front-video-player {
+    border-radius: 14px;
+  }
+}
+
+/* =========================================================
+   PREMIUM HERO CINEMATIC SHIMMER
+   Replaces cheesy spotlights with subtle luxury motion.
+   ========================================================= */
+
+/* Hide old spotlight beam system */
+.premiere-spotlight-beam,
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+/* Restore hero overlay pseudo-elements for premium motion */
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.atl-hero-banner-wrap::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  z-index: 3 !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 34%,
+      rgba(255, 255, 255, 0.00) 40%,
+      rgba(255, 248, 210, 0.18) 48%,
+      rgba(255, 255, 255, 0.30) 50%,
+      rgba(255, 215, 106, 0.16) 53%,
+      rgba(255, 255, 255, 0.00) 60%,
+      transparent 70%,
+      transparent 100%
+    ) !important;
+  transform: translateX(-125%) skewX(-12deg) !important;
+  mix-blend-mode: screen !important;
+  animation: premiumHeroShimmer 7.5s ease-in-out infinite !important;
+}
+
+.atl-hero-banner-wrap::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.16), transparent 34%),
+    linear-gradient(to bottom, rgba(0,0,0,0.02), transparent 32%, rgba(0,0,0,0.10)) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.8 !important;
+}
+
+@keyframes premiumHeroShimmer {
+  0% {
+    transform: translateX(-125%) skewX(-12deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.72;
+  }
+  42% {
+    transform: translateX(125%) skewX(-12deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(125%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before {
+    background:
+      linear-gradient(
+        115deg,
+        transparent 0%,
+        transparent 32%,
+        rgba(255, 248, 210, 0.16) 47%,
+        rgba(255, 255, 255, 0.26) 50%,
+        rgba(255, 215, 106, 0.14) 54%,
+        transparent 66%,
+        transparent 100%
+      ) !important;
+    animation-duration: 8.5s !important;
+  }
+
+  .atl-hero-banner-wrap::after {
+    opacity: 0.65 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+}
+
+
+/* =========================================================
+   ATL HERO CINEMATIC SHIMMER + CAMERA FLASH EFFECT
+   Replaces bottom-up spotlights with a cleaner red-carpet feel.
+   ========================================================= */
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide any leftover spotlight elements just in case */
+.premiere-spotlight-beam,
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+/* Moving shimmer sweep */
+.atl-hero-banner-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,255,255,0.00) 36%,
+      rgba(255,255,255,0.05) 44%,
+      rgba(255,215,106,0.14) 48%,
+      rgba(255,255,255,0.26) 50%,
+      rgba(255,215,106,0.14) 52%,
+      rgba(255,255,255,0.05) 56%,
+      rgba(255,255,255,0.00) 64%,
+      rgba(255,255,255,0.00) 100%
+    );
+  background-size: 220% 100%;
+  animation: atlHeroShimmer 8s ease-in-out infinite;
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+
+/* Camera flashes */
+.atl-hero-banner-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.28) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 82% 18%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.25) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 70% 36%, rgba(255,215,106,0.78) 0%, rgba(255,255,255,0.20) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 34% 40%, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.24) 3%, rgba(255,255,255,0.00) 8%);
+  opacity: 0;
+  animation: atlCameraFlashes 7s linear infinite;
+}
+
+/* soft golden vignette */
+.atl-hero-banner-wrap .hero-glow-overlay,
+.atl-hero-banner-wrap .atl-hero-glow-overlay {
+  display: none !important;
+}
+
+@keyframes atlHeroShimmer {
+  0% {
+    background-position: 130% 0;
+    opacity: 0.20;
+  }
+  18% {
+    opacity: 0.65;
+  }
+  34% {
+    background-position: 72% 0;
+    opacity: 0.95;
+  }
+  45% {
+    opacity: 0.35;
+  }
+  100% {
+    background-position: -80% 0;
+    opacity: 0.12;
+  }
+}
+
+@keyframes atlCameraFlashes {
+  0%, 8%, 16%, 27%, 42%, 58%, 76%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  3% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+  4% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+  12% {
+    opacity: 0.75;
+    transform: scale(1.01);
+  }
+  13% {
+    opacity: 0.10;
+    transform: scale(1);
+  }
+  24% {
+    opacity: 0.88;
+    transform: scale(1.015);
+  }
+  25% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  39% {
+    opacity: 0.68;
+    transform: scale(1.01);
+  }
+  40% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+  54% {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+  55% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  71% {
+    opacity: 0.80;
+    transform: scale(1.01);
+  }
+  72% {
+    opacity: 0.10;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before {
+    opacity: 0.88;
+    animation: atlHeroShimmerMobile 9s ease-in-out infinite;
+  }
+
+  .atl-hero-banner-wrap::after {
+    background:
+      radial-gradient(circle at 15% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 85% 14%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.30) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 72% 32%, rgba(255,215,106,0.84) 0%, rgba(255,255,255,0.25) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 32% 36%, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.24) 4%, rgba(255,255,255,0.00) 10%);
+    animation: atlCameraFlashesMobile 6.8s linear infinite;
+  }
+}
+
+@keyframes atlHeroShimmerMobile {
+  0% {
+    background-position: 135% 0;
+    opacity: 0.18;
+  }
+  28% {
+    opacity: 0.88;
+  }
+  40% {
+    background-position: 75% 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: -85% 0;
+    opacity: 0.12;
+  }
+}
+
+@keyframes atlCameraFlashesMobile {
+  0%, 10%, 22%, 38%, 57%, 79%, 100% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0.15;
+  }
+  16% {
+    opacity: 0.86;
+  }
+  17% {
+    opacity: 0.10;
+  }
+  31% {
+    opacity: 0.98;
+  }
+  32% {
+    opacity: 0.12;
+  }
+  49% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 0.08;
+  }
+  69% {
+    opacity: 0.94;
+  }
+  70% {
+    opacity: 0.10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   ATL HERO CINEMATIC SHIMMER + CAMERA FLASH EFFECT
+   Replaces bottom-up spotlights with a cleaner red-carpet feel.
+   ========================================================= */
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide any leftover spotlight elements just in case */
+.premiere-spotlight-beam,
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+/* Moving shimmer sweep */
+.atl-hero-banner-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,255,255,0.00) 36%,
+      rgba(255,255,255,0.05) 44%,
+      rgba(255,215,106,0.14) 48%,
+      rgba(255,255,255,0.26) 50%,
+      rgba(255,215,106,0.14) 52%,
+      rgba(255,255,255,0.05) 56%,
+      rgba(255,255,255,0.00) 64%,
+      rgba(255,255,255,0.00) 100%
+    );
+  background-size: 220% 100%;
+  animation: atlHeroShimmer 8s ease-in-out infinite;
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+
+/* Camera flashes */
+.atl-hero-banner-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.28) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 82% 18%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.25) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 70% 36%, rgba(255,215,106,0.78) 0%, rgba(255,255,255,0.20) 3%, rgba(255,255,255,0.00) 8%),
+    radial-gradient(circle at 34% 40%, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.24) 3%, rgba(255,255,255,0.00) 8%);
+  opacity: 0;
+  animation: atlCameraFlashes 7s linear infinite;
+}
+
+/* soft golden vignette */
+.atl-hero-banner-wrap .hero-glow-overlay,
+.atl-hero-banner-wrap .atl-hero-glow-overlay {
+  display: none !important;
+}
+
+@keyframes atlHeroShimmer {
+  0% {
+    background-position: 130% 0;
+    opacity: 0.20;
+  }
+  18% {
+    opacity: 0.65;
+  }
+  34% {
+    background-position: 72% 0;
+    opacity: 0.95;
+  }
+  45% {
+    opacity: 0.35;
+  }
+  100% {
+    background-position: -80% 0;
+    opacity: 0.12;
+  }
+}
+
+@keyframes atlCameraFlashes {
+  0%, 8%, 16%, 27%, 42%, 58%, 76%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  3% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+  4% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+  12% {
+    opacity: 0.75;
+    transform: scale(1.01);
+  }
+  13% {
+    opacity: 0.10;
+    transform: scale(1);
+  }
+  24% {
+    opacity: 0.88;
+    transform: scale(1.015);
+  }
+  25% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  39% {
+    opacity: 0.68;
+    transform: scale(1.01);
+  }
+  40% {
+    opacity: 0.08;
+    transform: scale(1);
+  }
+  54% {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+  55% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  71% {
+    opacity: 0.80;
+    transform: scale(1.01);
+  }
+  72% {
+    opacity: 0.10;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-banner-wrap::before {
+    opacity: 0.88;
+    animation: atlHeroShimmerMobile 9s ease-in-out infinite;
+  }
+
+  .atl-hero-banner-wrap::after {
+    background:
+      radial-gradient(circle at 15% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 85% 14%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.30) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 72% 32%, rgba(255,215,106,0.84) 0%, rgba(255,255,255,0.25) 4%, rgba(255,255,255,0.00) 10%),
+      radial-gradient(circle at 32% 36%, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.24) 4%, rgba(255,255,255,0.00) 10%);
+    animation: atlCameraFlashesMobile 6.8s linear infinite;
+  }
+}
+
+@keyframes atlHeroShimmerMobile {
+  0% {
+    background-position: 135% 0;
+    opacity: 0.18;
+  }
+  28% {
+    opacity: 0.88;
+  }
+  40% {
+    background-position: 75% 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: -85% 0;
+    opacity: 0.12;
+  }
+}
+
+@keyframes atlCameraFlashesMobile {
+  0%, 10%, 22%, 38%, 57%, 79%, 100% {
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0.15;
+  }
+  16% {
+    opacity: 0.86;
+  }
+  17% {
+    opacity: 0.10;
+  }
+  31% {
+    opacity: 0.98;
+  }
+  32% {
+    opacity: 0.12;
+  }
+  49% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 0.08;
+  }
+  69% {
+    opacity: 0.94;
+  }
+  70% {
+    opacity: 0.10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-banner-wrap::before,
+  .atl-hero-banner-wrap::after {
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   REAL HERO SHIMMER + CAMERA FLASH LAYERS
+   Uses actual overlay divs so effects are visible on desktop/mobile.
+   ========================================================= */
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-banner {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+}
+
+/* Permanently hide old spotlight system */
+.premiere-spotlight-beam,
+.red-carpet-gala-spotlight {
+  display: none !important;
+}
+
+.atl-hero-shimmer-layer,
+.atl-camera-flash-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+}
+
+/* Wide luxury sweep across the red carpet image */
+.atl-hero-shimmer-layer {
+  background:
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 32%,
+      rgba(255, 255, 255, 0.00) 39%,
+      rgba(255, 245, 190, 0.24) 46%,
+      rgba(255, 255, 255, 0.58) 50%,
+      rgba(255, 215, 106, 0.26) 54%,
+      rgba(255, 255, 255, 0.00) 62%,
+      transparent 72%,
+      transparent 100%
+    ) !important;
+  width: 180% !important;
+  left: -180% !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.95 !important;
+  animation: atlRealHeroShimmer 5.8s ease-in-out infinite !important;
+}
+
+/* Camera flash pops */
+.atl-camera-flash-layer {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.48) 4%, rgba(255,255,255,0.00) 11%),
+    radial-gradient(circle at 82% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.42) 4%, rgba(255,255,255,0.00) 11%),
+    radial-gradient(circle at 68% 42%, rgba(255,215,106,0.92) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 12%),
+    radial-gradient(circle at 34% 48%, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.34) 4%, rgba(255,255,255,0.00) 12%) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0 !important;
+  animation: atlRealCameraFlashes 4.8s linear infinite !important;
+}
+
+@keyframes atlRealHeroShimmer {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  35% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateX(220%);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateX(220%);
+    opacity: 0;
+  }
+}
+
+@keyframes atlRealCameraFlashes {
+  0%, 9%, 22%, 37%, 54%, 74%, 100% {
+    opacity: 0;
+  }
+
+  4% {
+    opacity: 1;
+  }
+
+  5% {
+    opacity: 0.12;
+  }
+
+  16% {
+    opacity: 0.82;
+  }
+
+  17% {
+    opacity: 0.08;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  31% {
+    opacity: 0.12;
+  }
+
+  47% {
+    opacity: 0.78;
+  }
+
+  48% {
+    opacity: 0.08;
+  }
+
+  66% {
+    opacity: 0.95;
+  }
+
+  67% {
+    opacity: 0.1;
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-shimmer-layer {
+    opacity: 1 !important;
+    animation-duration: 5.2s !important;
+    background:
+      linear-gradient(
+        112deg,
+        transparent 0%,
+        transparent 28%,
+        rgba(255, 245, 190, 0.32) 44%,
+        rgba(255, 255, 255, 0.72) 50%,
+        rgba(255, 215, 106, 0.34) 56%,
+        transparent 70%,
+        transparent 100%
+      ) !important;
+  }
+
+  .atl-camera-flash-layer {
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.58) 6%, rgba(255,255,255,0.00) 15%),
+      radial-gradient(circle at 84% 16%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.52) 6%, rgba(255,255,255,0.00) 15%),
+      radial-gradient(circle at 72% 38%, rgba(255,215,106,1) 0%, rgba(255,255,255,0.44) 6%, rgba(255,255,255,0.00) 16%),
+      radial-gradient(circle at 30% 42%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.44) 6%, rgba(255,255,255,0.00) 16%) !important;
+    animation-duration: 4.5s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-hero-shimmer-layer,
+  .atl-camera-flash-layer {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   HERO LIGHT STREAK OVERRIDE
+   Replaces flash effect with one sweeping spotlight streak
+   across the ATL's Hottest homepage hero image.
+   ========================================================= */
+
+.atl-camera-flash-layer {
+  display: none !important;
+}
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-shimmer-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+  overflow: hidden !important;
+  background: none !important;
+  opacity: 1 !important;
+}
+
+.atl-hero-shimmer-layer::before {
+  content: "";
+  position: absolute;
+  top: -18%;
+  left: -42%;
+  width: 34%;
+  height: 145%;
+  transform: rotate(16deg);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,255,255,0.06) 18%,
+      rgba(255,215,106,0.18) 34%,
+      rgba(255,255,255,0.88) 50%,
+      rgba(255,215,106,0.24) 66%,
+      rgba(255,255,255,0.06) 82%,
+      rgba(255,255,255,0.00) 100%
+    );
+  filter: blur(2px);
+  box-shadow:
+    0 0 30px rgba(255,255,255,0.32),
+    0 0 60px rgba(255,215,106,0.18);
+  mix-blend-mode: screen;
+  animation: atlLightSweep 7.5s ease-in-out infinite;
+}
+
+.atl-hero-shimmer-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.08), transparent 28%),
+    linear-gradient(to bottom, rgba(255,255,255,0.04), transparent 26%, rgba(0,0,0,0.10));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+@keyframes atlLightSweep {
+  0% {
+    left: -45%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.25;
+  }
+  25% {
+    opacity: 0.92;
+  }
+  50% {
+    left: 36%;
+    opacity: 0.80;
+  }
+  75% {
+    left: 92%;
+    opacity: 0.30;
+  }
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-shimmer-layer::before {
+    width: 42%;
+    height: 150%;
+    top: -16%;
+    left: -55%;
+    transform: rotate(14deg);
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.07) 20%,
+        rgba(255,215,106,0.22) 36%,
+        rgba(255,255,255,0.95) 50%,
+        rgba(255,215,106,0.28) 64%,
+        rgba(255,255,255,0.08) 80%,
+        rgba(255,255,255,0.00) 100%
+      );
+    box-shadow:
+      0 0 34px rgba(255,255,255,0.40),
+      0 0 70px rgba(255,215,106,0.22);
+    animation: atlLightSweepMobile 7.2s ease-in-out infinite;
+  }
+}
+
+@keyframes atlLightSweepMobile {
+  0% {
+    left: -58%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.30;
+  }
+  30% {
+    opacity: 1;
+  }
+  55% {
+    left: 28%;
+    opacity: 0.88;
+  }
+  82% {
+    left: 92%;
+    opacity: 0.34;
+  }
+  100% {
+    left: 122%;
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   HERO LIGHT STREAK OVERRIDE
+   Replaces flash effect with one sweeping spotlight streak
+   across the ATL's Hottest homepage hero image.
+   ========================================================= */
+
+.atl-camera-flash-layer {
+  display: none !important;
+}
+
+.atl-hero-banner-wrap {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+.atl-hero-shimmer-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+  overflow: hidden !important;
+  background: none !important;
+  opacity: 1 !important;
+}
+
+.atl-hero-shimmer-layer::before {
+  content: "";
+  position: absolute;
+  top: -18%;
+  left: -42%;
+  width: 34%;
+  height: 145%;
+  transform: rotate(16deg);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.00) 0%,
+      rgba(255,255,255,0.06) 18%,
+      rgba(255,215,106,0.18) 34%,
+      rgba(255,255,255,0.88) 50%,
+      rgba(255,215,106,0.24) 66%,
+      rgba(255,255,255,0.06) 82%,
+      rgba(255,255,255,0.00) 100%
+    );
+  filter: blur(2px);
+  box-shadow:
+    0 0 30px rgba(255,255,255,0.32),
+    0 0 60px rgba(255,215,106,0.18);
+  mix-blend-mode: screen;
+  animation: atlLightSweep 7.5s ease-in-out infinite;
+}
+
+.atl-hero-shimmer-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.08), transparent 28%),
+    linear-gradient(to bottom, rgba(255,255,255,0.04), transparent 26%, rgba(0,0,0,0.10));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+@keyframes atlLightSweep {
+  0% {
+    left: -45%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.25;
+  }
+  25% {
+    opacity: 0.92;
+  }
+  50% {
+    left: 36%;
+    opacity: 0.80;
+  }
+  75% {
+    left: 92%;
+    opacity: 0.30;
+  }
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-hero-shimmer-layer::before {
+    width: 42%;
+    height: 150%;
+    top: -16%;
+    left: -55%;
+    transform: rotate(14deg);
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.07) 20%,
+        rgba(255,215,106,0.22) 36%,
+        rgba(255,255,255,0.95) 50%,
+        rgba(255,215,106,0.28) 64%,
+        rgba(255,255,255,0.08) 80%,
+        rgba(255,255,255,0.00) 100%
+      );
+    box-shadow:
+      0 0 34px rgba(255,255,255,0.40),
+      0 0 70px rgba(255,215,106,0.22);
+    animation: atlLightSweepMobile 7.2s ease-in-out infinite;
+  }
+}
+
+@keyframes atlLightSweepMobile {
+  0% {
+    left: -58%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.30;
+  }
+  30% {
+    opacity: 1;
+  }
+  55% {
+    left: 28%;
+    opacity: 0.88;
+  }
+  82% {
+    left: 92%;
+    opacity: 0.34;
+  }
+  100% {
+    left: 122%;
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   HERO CAMERA FLASH EFFECT
+   Replaces shimmer/streak effects with camera flashes
+   like photographers are gathered at the end of the carpet.
+   ========================================================= */
+
+.atl-hero-shimmer-layer {
+  display: none !important;
+}
+
+.atl-camera-flash-layer {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 9 !important;
+  overflow: hidden !important;
+  background: none !important;
+}
+
+/* soft photographer area glow near end of carpet */
+.atl-camera-flash-layer::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 24%;
+  background:
+    radial-gradient(circle at 12% 82%, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.10) 3%, transparent 9%),
+    radial-gradient(circle at 24% 76%, rgba(255,215,106,0.18) 0, rgba(255,255,255,0.10) 3%, transparent 10%),
+    radial-gradient(circle at 36% 80%, rgba(255,255,255,0.22) 0, rgba(255,255,255,0.12) 3%, transparent 9%),
+    radial-gradient(circle at 50% 74%, rgba(255,255,255,0.24) 0, rgba(255,255,255,0.14) 4%, transparent 10%),
+    radial-gradient(circle at 64% 80%, rgba(255,215,106,0.18) 0, rgba(255,255,255,0.10) 3%, transparent 9%),
+    radial-gradient(circle at 78% 75%, rgba(255,255,255,0.20) 0, rgba(255,255,255,0.10) 3%, transparent 9%),
+    radial-gradient(circle at 90% 82%, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.08) 3%, transparent 9%);
+  opacity: 0.55;
+}
+
+/* flash burst group 1 */
+.atl-camera-flash-layer::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 11%;
+  transform: translateX(-50%);
+  width: 76%;
+  height: 34%;
+  background:
+    radial-gradient(circle at 14% 78%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,255,255,0.95) 3%, rgba(255,255,255,0.26) 7%, transparent 16%),
+    radial-gradient(circle at 28% 64%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,215,106,0.95) 3%, rgba(255,255,255,0.22) 7%, transparent 16%),
+    radial-gradient(circle at 43% 80%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,255,255,1) 3%, rgba(255,255,255,0.24) 8%, transparent 17%),
+    radial-gradient(circle at 58% 60%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,215,106,0.95) 3%, rgba(255,255,255,0.20) 7%, transparent 16%),
+    radial-gradient(circle at 72% 76%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,255,255,1) 3%, rgba(255,255,255,0.24) 8%, transparent 17%),
+    radial-gradient(circle at 87% 66%, rgba(255,255,255,0.00) 0, rgba(255,255,255,0.00) 2%, rgba(255,215,106,0.95) 3%, rgba(255,255,255,0.20) 7%, transparent 16%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: atlCameraFlashBurst 5.6s linear infinite;
+  filter: blur(0.2px);
+}
+
+.atl-hero-banner-wrap .atl-camera-flash-layer {
+  animation: atlAmbientFlashPop 8.8s ease-in-out infinite;
+}
+
+@keyframes atlCameraFlashBurst {
+  0%   { opacity: 0; }
+  4%   { opacity: 0; }
+  5%   { opacity: 1; }
+  6%   { opacity: 0.25; }
+  7%   { opacity: 0; }
+
+  20%  { opacity: 0; }
+  21%  { opacity: 0.95; }
+  22%  { opacity: 0.18; }
+  23%  { opacity: 0; }
+
+  38%  { opacity: 0; }
+  39%  { opacity: 1; }
+  40%  { opacity: 0.2; }
+  41%  { opacity: 0; }
+
+  57%  { opacity: 0; }
+  58%  { opacity: 0.92; }
+  59%  { opacity: 0.2; }
+  60%  { opacity: 0; }
+
+  78%  { opacity: 0; }
+  79%  { opacity: 1; }
+  80%  { opacity: 0.25; }
+  81%  { opacity: 0; }
+
+  100% { opacity: 0; }
+}
+
+@keyframes atlAmbientFlashPop {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  5% {
+    filter: brightness(1.03);
+  }
+  6% {
+    filter: brightness(1);
+  }
+  21% {
+    filter: brightness(1.05);
+  }
+  22% {
+    filter: brightness(1);
+  }
+  39% {
+    filter: brightness(1.04);
+  }
+  40% {
+    filter: brightness(1);
+  }
+  58% {
+    filter: brightness(1.05);
+  }
+  59% {
+    filter: brightness(1);
+  }
+  79% {
+    filter: brightness(1.06);
+  }
+  80% {
+    filter: brightness(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .atl-camera-flash-layer::before {
+    width: 88%;
+    height: 22%;
+    bottom: 8%;
+    opacity: 0.68;
+  }
+
+  .atl-camera-flash-layer::after {
+    width: 94%;
+    height: 30%;
+    bottom: 12%;
+    animation: atlCameraFlashBurstMobile 5s linear infinite;
+  }
+
+  @keyframes atlCameraFlashBurstMobile {
+    0%   { opacity: 0; }
+    6%   { opacity: 0; }
+    7%   { opacity: 1; }
+    8%   { opacity: 0.25; }
+    9%   { opacity: 0; }
+
+    24%  { opacity: 0; }
+    25%  { opacity: 1; }
+    26%  { opacity: 0.2; }
+    27%  { opacity: 0; }
+
+    46%  { opacity: 0; }
+    47%  { opacity: 0.95; }
+    48%  { opacity: 0.22; }
+    49%  { opacity: 0; }
+
+    69%  { opacity: 0; }
+    70%  { opacity: 1; }
+    71%  { opacity: 0.2; }
+    72%  { opacity: 0; }
+
+    88%  { opacity: 0; }
+    89%  { opacity: 1; }
+    90%  { opacity: 0.24; }
+    91%  { opacity: 0; }
+
+    100% { opacity: 0; }
+  }
+}
+
+
+/* =========================================================
+   ATL BILLBOARD AD SYSTEM
+   Powered By The MajesticMall Megaverse Advertising Platform
+   ========================================================= */
+
+.mm-billboard {
+  position: relative;
+  margin: 26px 0 30px;
+  border: 1px solid rgba(255, 215, 106, 0.54);
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 215, 106, 0.22), transparent 36%),
+    radial-gradient(circle at 88% 20%, rgba(215, 25, 53, 0.26), transparent 42%),
+    linear-gradient(135deg, rgba(0,0,0,0.88), rgba(74,5,18,0.72), rgba(0,0,0,0.9));
+  box-shadow:
+    0 24px 76px rgba(0,0,0,0.58),
+    0 0 32px rgba(255, 215, 106, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.mm-billboard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, transparent 0%, rgba(255,255,255,0.09) 42%, transparent 54%);
+  opacity: 0.56;
+}
+
+.mm-billboard-link {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(18px, 4vw, 34px);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mm-billboard-kicker {
+  margin: 0 0 8px;
+  color: #ffd76a;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mm-billboard h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.6rem, 3.5vw, 3.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  text-shadow:
+    0 0 14px rgba(255,255,255,0.22),
+    0 0 30px rgba(255, 215, 106, 0.3),
+    0 0 48px rgba(215, 25, 53, 0.18);
+}
+
+.mm-billboard p {
+  max-width: 620px;
+  margin-bottom: 10px;
+}
+
+.mm-billboard-powered {
+  display: inline-flex;
+  margin-top: 8px;
+  color: rgba(255,255,255,0.78);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mm-billboard-art {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.42);
+}
+
+.mm-billboard-art img {
+  width: 100%;
+  height: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.mm-billboard-cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 215, 106, 0.95);
+  border-radius: 999px;
+  color: #160704;
+  background:
+    linear-gradient(135deg, #fff8d2 0%, #ffd76a 36%, #d69628 68%, #8a4a09 100%);
+  font-weight: 1000;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow:
+    0 0 18px rgba(255, 215, 106, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.62);
+}
+
+.mm-billboard-link:hover .mm-billboard-cta {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 24px rgba(255, 215, 106, 0.45),
+    0 0 40px rgba(215, 25, 53, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+@media (max-width: 820px) {
+  .mm-billboard {
+    margin: 18px 0 22px;
+    border-radius: 22px;
+  }
+
+  .mm-billboard-link {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px 14px;
+    text-align: center;
+  }
+
+  .mm-billboard p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .mm-billboard-powered {
+    justify-content: center;
+    font-size: 0.65rem;
+    line-height: 1.35;
+  }
+
+  .mm-billboard-art {
+    min-height: 110px;
+  }
+
+  .mm-billboard-art img {
+    max-height: 150px;
+  }
+
+  .mm-billboard-cta {
+    justify-self: center;
+    width: 100%;
+    max-width: 260px;
+  }
+}
+
+/* =========================================================
+   BILLBOARD HEIGHT UPGRADE
+   Gives ATL's Hottest billboard placements more presence.
+   ========================================================= */
+
+.mm-billboard {
+  min-height: 260px !important;
+}
+
+.mm-billboard-link {
+  min-height: 260px !important;
+}
+
+.mm-billboard-copy {
+  display: grid;
+  align-content: center;
+}
+
+.mm-billboard h2 {
+  font-size: clamp(2rem, 4.4vw, 4.2rem) !important;
+}
+
+.mm-billboard p {
+  font-size: 1.08rem !important;
+  line-height: 1.6 !important;
+}
+
+.mm-billboard-art {
+  min-height: 170px !important;
+}
+
+.mm-billboard-art img {
+  max-height: 230px !important;
+}
+
+@media (max-width: 820px) {
+  .mm-billboard {
+    min-height: 300px !important;
+  }
+
+  .mm-billboard-link {
+    min-height: 300px !important;
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .mm-billboard h2 {
+    font-size: clamp(2rem, 9vw, 3.2rem) !important;
+  }
+
+  .mm-billboard-art {
+    min-height: 150px !important;
+  }
+}
+
+
+/* =========================================================
+   ATL ADVERTISE COMMAND CENTER
+   Powered By The MajesticMall Megaverse Advertising Platform
+   ========================================================= */
+
+.advertise-command-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(20px, 5vw, 54px);
+  align-items: center;
+  margin-bottom: 26px;
+  padding: clamp(26px, 6vw, 70px);
+  border: 1px solid rgba(255, 215, 106, 0.58);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 215, 106, 0.28), transparent 36%),
+    radial-gradient(circle at 88% 14%, rgba(215, 25, 53, 0.34), transparent 38%),
+    linear-gradient(135deg, #000 0%, #2d0510 54%, #050505 100%);
+  box-shadow:
+    0 32px 100px rgba(0,0,0,0.68),
+    0 0 42px rgba(255, 215, 106, 0.18),
+    0 0 70px rgba(215, 25, 53, 0.14);
+}
+
+.advertise-command-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 7vw, 6.3rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+}
+
+.advertise-powered {
+  display: inline-flex;
+  margin-top: 12px;
+  color: #ffd76a;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.advertise-command-card {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.18), transparent 44%),
+    linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.03)),
+    rgba(0,0,0,0.5);
+}
+
+.advertise-command-card span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.advertise-command-card strong {
+  color: #fff;
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+  line-height: 1.02;
+}
+
+.advertise-package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.advertise-package-grid article {
+  padding: 20px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.38);
+}
+
+.advertise-package-grid span {
+  color: #ffd76a;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+}
+
+.advertise-package-grid h2 {
+  margin-top: 8px;
+  color: #fff;
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+}
+
+.advertise-form-section {
+  display: grid;
+  grid-template-columns: 0.82fr 1.18fr;
+  gap: clamp(20px, 5vw, 48px);
+  align-items: start;
+}
+
+.advertise-form-copy h2 {
+  color: #fff;
+  font-size: clamp(2rem, 4.4vw, 4rem);
+  line-height: 0.95;
+}
+
+.advertise-form {
+  margin: 0;
+}
+
+.advertise-submit-btn {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .advertise-command-hero,
+  .advertise-package-grid,
+  .advertise-form-section {
+    grid-template-columns: 1fr;
+  }
+
+  .advertise-command-hero {
+    padding: 26px 16px;
+    border-radius: 24px;
+  }
+
+  .advertise-command-card,
+  .advertise-package-grid article {
+    text-align: center;
+  }
+}
+
+/* Advertise Command Center upload note */
+.advertise-upload-note {
+  margin: 8px 0 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.advertise-form input[type="file"] {
+  width: 100%;
+  border: 1px dashed rgba(255, 215, 106, 0.45);
+  border-radius: 14px;
+  padding: 13px;
+  color: rgba(255,255,255,0.82);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.48);
+}
+
+/* =========================================================
+   BILLBOARD CREATIVE IMAGE UPGRADE
+   Makes uploaded billboard artwork display like a real billboard.
+   ========================================================= */
+
+.mm-billboard {
+  max-width: 100%;
+  min-height: 0 !important;
+}
+
+.mm-billboard-link {
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  min-height: 0 !important;
+  padding: clamp(12px, 2vw, 20px) !important;
+}
+
+.mm-billboard-art {
+  order: -1 !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 215, 106, 0.58) !important;
+  background: #000 !important;
+  box-shadow:
+    0 0 26px rgba(255, 215, 106, 0.22),
+    0 18px 50px rgba(0,0,0,0.55) !important;
+}
+
+.mm-billboard-art img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.mm-billboard-copy {
+  text-align: center !important;
+  justify-items: center !important;
+  align-content: center !important;
+}
+
+.mm-billboard-copy h2 {
+  font-size: clamp(1.65rem, 3.8vw, 3.8rem) !important;
+}
+
+.mm-billboard-copy p {
+  max-width: 860px !important;
+}
+
+.mm-billboard-powered {
+  justify-content: center !important;
+}
+
+.mm-billboard-cta {
+  justify-self: center !important;
+  min-width: 220px !important;
+}
+
+@media (max-width: 820px) {
+  .mm-billboard-link {
+    padding: 10px !important;
+    gap: 12px !important;
+  }
+
+  .mm-billboard-art {
+    border-radius: 16px !important;
+  }
+
+  .mm-billboard-copy h2 {
+    font-size: clamp(1.45rem, 8vw, 2.7rem) !important;
+  }
+
+  .mm-billboard-copy p {
+    font-size: 0.95rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .mm-billboard-powered {
+    font-size: 0.62rem !important;
+  }
+
+  .mm-billboard-cta {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+}
+
+/* =========================================================
+   LIVE BILLBOARD IMAGE STRUCTURE
+   Fresh classes so older mobile rules cannot hide the creative.
+   ========================================================= */
+
+.mm-billboard-live {
+  width: min(1180px, 96vw) !important;
+  margin: clamp(18px, 4vw, 42px) auto !important;
+  padding: clamp(10px, 1.5vw, 18px) !important;
+}
+
+.mm-billboard-live .mm-billboard-link {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(12px, 2vw, 20px) !important;
+  width: 100% !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+}
+
+.mm-billboard-image-wrap {
+  display: block !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  background: #000 !important;
+  border: 1px solid rgba(255, 215, 106, 0.72) !important;
+  box-shadow:
+    0 0 28px rgba(255, 215, 106, 0.30),
+    0 24px 70px rgba(0,0,0,0.68) !important;
+}
+
+.mm-billboard-creative-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.mm-billboard-live .mm-billboard-copy {
+  text-align: center !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 8px !important;
+}
+
+.mm-billboard-live .mm-billboard-copy p {
+  max-width: 850px !important;
+}
+
+.mm-billboard-live .mm-billboard-cta {
+  margin-top: 6px !important;
+}
+
+@media (max-width: 820px) {
+  .mm-billboard-live {
+    width: calc(100vw - 20px) !important;
+    margin: 18px auto 26px !important;
+    padding: 8px !important;
+  }
+
+  .mm-billboard-image-wrap {
+    display: block !important;
+    width: 100% !important;
+    min-height: 190px !important;
+    aspect-ratio: 16 / 9 !important;
+    border-radius: 16px !important;
+  }
+
+  .mm-billboard-creative-img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 190px !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 8px 10px !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy h2 {
+    font-size: clamp(1.45rem, 7vw, 2.65rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .mm-billboard-live .mm-billboard-copy p {
+    font-size: 0.94rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* Nomination nominee information helper note */
+.nomination-info-note {
+  max-width: 780px;
+  margin: 14px auto 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff7d6;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.14);
+}
+
+/* Nomination nominee information helper note */
+.nomination-info-note {
+  max-width: 780px;
+  margin: 14px auto 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff7d6;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.14);
+}
+
+/* Nomination nominee information helper note */
+.nomination-info-note {
+  max-width: 780px;
+  margin: 14px auto 10px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff7d6;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.14);
+}
+
+/* Clean nominee signup helper notes */
+.nomination-info-note,
+.nomination-contact-note {
+  max-width: 780px;
+  margin: 14px auto;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.42);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff7d6;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.14);
+}
+
+.nomination-contact-note {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+
+
+/* =========================================================
+   ATL'S HOTTEST AUTOPILOT MEMBERSHIP STYLES
+   ========================================================= */
+
+.membership-hero,
+.membership-detail,
+.membership-dashboard {
+  width: min(1120px, 94vw);
+  margin: 34px auto;
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid rgba(255, 215, 106, 0.34);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 215, 106, 0.16), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(180, 0, 30, 0.20), transparent 38%),
+    rgba(0, 0, 0, 0.72);
+  box-shadow:
+    0 0 35px rgba(255, 215, 106, 0.12),
+    0 24px 80px rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+
+.membership-hero .eyebrow,
+.membership-dashboard .eyebrow {
+  margin: 0 0 10px;
+  color: #ffd76a;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.membership-hero h1,
+.membership-detail h1,
+.membership-dashboard h1 {
+  margin: 0 auto 14px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 4.6rem);
+  line-height: 0.98;
+  text-shadow: 0 0 24px rgba(255, 215, 106, 0.20);
+}
+
+.membership-hero p,
+.membership-detail p,
+.membership-dashboard p {
+  max-width: 850px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
+.membership-grid {
+  width: min(1220px, 94vw);
+  margin: 30px auto 60px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.membership-card {
+  position: relative;
+  padding: 26px 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  background:
+    linear-gradient(145deg, rgba(20, 0, 6, 0.88), rgba(0, 0, 0, 0.82)),
+    rgba(0, 0, 0, 0.72);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.42);
+  color: #fff;
+  overflow: hidden;
+}
+
+.membership-card.featured {
+  border-color: rgba(255, 215, 106, 0.70);
+  box-shadow:
+    0 0 32px rgba(255, 215, 106, 0.22),
+    0 24px 72px rgba(0,0,0,0.60);
+}
+
+.membership-card h2 {
+  margin: 8px 0 8px;
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+.membership-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff2ad, #d8a92c, #7b4d00);
+  color: #160900;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.membership-tagline {
+  color: #ffd76a !important;
+  font-weight: 800;
+}
+
+.membership-price {
+  margin: 18px 0;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: 1000;
+}
+
+.membership-price span {
+  color: rgba(255,255,255,0.62);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.membership-description {
+  margin-bottom: 18px !important;
+  color: rgba(255,255,255,0.78) !important;
+}
+
+.membership-section-title {
+  margin: 18px 0 8px;
+  color: #ffd76a;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+}
+
+.membership-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.membership-list li {
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.045);
+}
+
+.membership-list strong {
+  display: block;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.membership-list span,
+.membership-list em {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255,255,255,0.68);
+  font-style: normal;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.membership-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.membership-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 106, 0.55);
+  color: #ffd76a;
+  background: rgba(0,0,0,0.35);
+  font-weight: 1000;
+  text-decoration: none;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.10);
+}
+
+.membership-btn.primary {
+  color: #170a00;
+  background: linear-gradient(135deg, #fff4ba, #e5b949, #996500);
+  border-color: rgba(255, 241, 178, 0.9);
+}
+
+.membership-btn.large {
+  margin-top: 26px;
+  min-width: 280px;
+}
+
+.membership-back {
+  display: inline-flex;
+  margin-bottom: 20px;
+  color: #ffd76a;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.membership-detail-panels,
+.membership-dashboard-grid {
+  margin: 28px auto 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  text-align: left;
+}
+
+.membership-detail-panels > div,
+.membership-dashboard-grid > article {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 215, 106, 0.24);
+  background: rgba(0,0,0,0.42);
+}
+
+.membership-detail-panels h2,
+.membership-dashboard-grid h2 {
+  margin-top: 0;
+  color: #ffd76a;
+}
+
+.membership-status {
+  color: #ffd76a !important;
+  font-weight: 900;
+}
+
+.membership-empty {
+  grid-column: 1 / -1;
+  padding: 34px;
+  border-radius: 24px;
+  background: rgba(0,0,0,0.62);
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  color: #fff;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .membership-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .membership-detail-panels,
+  .membership-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   JOIN TAAHAA MEMBERSHIP BUTTON
+   ========================================================= */
+
+.taahaa-membership-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin: 10px 8px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 106, 0.78);
+  background:
+    linear-gradient(135deg, #fff4ba, #e6b94c 45%, #8c5a00),
+    radial-gradient(circle at top left, rgba(255,255,255,0.45), transparent 38%);
+  color: #170900 !important;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  box-shadow:
+    0 0 24px rgba(255, 215, 106, 0.30),
+    0 14px 34px rgba(0, 0, 0, 0.42);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.taahaa-membership-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 34px rgba(255, 215, 106, 0.45),
+    0 18px 42px rgba(0, 0, 0, 0.52);
+}
+
+@media (max-width: 760px) {
+  .taahaa-membership-btn {
+    width: min(92vw, 340px);
+    margin: 10px auto;
+    padding: 13px 18px;
+    font-size: 0.88rem;
+  }
+}
+
+
+/* =========================================================
+   VOTING CLOSED / CAMPAIGN PERIOD SCREEN
+   ========================================================= */
+
+.voting-closed-panel {
+  width: min(960px, 94vw);
+  margin: 42px auto 70px;
+  padding: clamp(28px, 6vw, 64px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 215, 106, 0.36);
+  background:
+    radial-gradient(circle at top left, rgba(255, 215, 106, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(160, 0, 35, 0.22), transparent 38%),
+    rgba(0, 0, 0, 0.76);
+  box-shadow:
+    0 0 34px rgba(255, 215, 106, 0.14),
+    0 24px 80px rgba(0, 0, 0, 0.62);
+  color: #fff;
+  text-align: center;
+}
+
+.voting-closed-panel .eyebrow {
+  margin: 0 0 10px;
+  color: #ffd76a;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 1000;
+  font-size: 0.78rem;
+}
+
+.voting-closed-panel h1 {
+  margin: 0 auto 16px;
+  font-size: clamp(2.1rem, 7vw, 5rem);
+  line-height: 0.96;
+  color: #fff;
+  text-shadow: 0 0 24px rgba(255, 215, 106, 0.24);
+}
+
+.voting-closed-panel p {
+  max-width: 760px;
+  margin: 0 auto 22px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.campaign-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px auto;
+  max-width: 760px;
+}
+
+.campaign-dates div {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.campaign-dates strong {
+  display: block;
+  color: #ffd76a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.campaign-dates span {
+  display: block;
+  color: #fff;
+  font-weight: 800;
+}
+
+.voting-closed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+@media (max-width: 760px) {
+  .campaign-dates {
+    grid-template-columns: 1fr;
+  }
+
+  .voting-closed-actions .btn {
+    width: min(92vw, 340px);
+  }
+}
+
+
+/* =========================================================
+   BALLOT PREVIEW MODE — VOTING CLOSED
+   ========================================================= */
+
+.voting-preview-notice {
+  width: min(980px, 94vw);
+  margin: 18px auto 24px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.46);
+  background:
+    radial-gradient(circle at top left, rgba(255, 215, 106, 0.16), transparent 34%),
+    rgba(0, 0, 0, 0.66);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 0 24px rgba(255, 215, 106, 0.12);
+}
+
+.voting-preview-notice strong {
+  display: block;
+  color: #ffd76a;
+  font-size: 1.05rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+}
+
+.voting-preview-notice span {
+  display: block;
+  color: rgba(255,255,255,0.82);
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.disabled-vote-btn,
+.btn.disabled-vote-btn {
+  cursor: not-allowed !important;
+  opacity: 0.72 !important;
+  color: rgba(255,255,255,0.82) !important;
+  background: rgba(80,80,80,0.42) !important;
+  border-color: rgba(255,255,255,0.20) !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+
+/* =========================================================
+   ATL'S HOTTEST MEMBERSHIP PAYMENT CENTER
+   ========================================================= */
+
+.membership-payment-hero {
+  width: min(1080px, 94vw);
+  margin: 34px auto 24px;
+  padding: clamp(28px, 6vw, 70px);
+  border-radius: 32px;
+  border: 1px solid rgba(255, 215, 106, 0.35);
+  background:
+    radial-gradient(circle at top left, rgba(255, 215, 106, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(160, 0, 35, 0.24), transparent 42%),
+    rgba(0, 0, 0, 0.78);
+  box-shadow:
+    0 0 34px rgba(255, 215, 106, 0.14),
+    0 24px 80px rgba(0, 0, 0, 0.58);
+  color: #fff;
+  text-align: center;
+}
+
+.membership-payment-hero .eyebrow,
+.membership-payment-panel .eyebrow {
+  color: #ffd76a;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 1000;
+  font-size: 0.78rem;
+}
+
+.membership-payment-hero h1 {
+  margin: 10px auto 18px;
+  font-size: clamp(2.2rem, 7vw, 5.4rem);
+  line-height: 0.95;
+  color: #fff;
+}
+
+.membership-payment-hero p {
+  max-width: 860px;
+  margin: 0 auto 18px;
+  color: rgba(255,255,255,0.84);
+  line-height: 1.65;
+}
+
+.payment-summary-card {
+  max-width: 760px;
+  margin: 28px auto 0;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 215, 106, 0.32);
+  background: rgba(255,255,255,0.055);
+}
+
+.payment-summary-card h2 {
+  margin: 4px 0 10px;
+  color: #fff;
+}
+
+.payment-price {
+  margin: 12px auto;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 1000;
+  color: #ffd76a;
+}
+
+.payment-price span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255,255,255,0.76);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.intro-price-note {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  background: rgba(0,0,0,0.34);
+  color: rgba(255,255,255,0.82);
+  line-height: 1.55;
+}
+
+.membership-payment-grid {
+  width: min(1080px, 94vw);
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.membership-payment-panel {
+  padding: 26px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 215, 106, 0.28);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.70);
+  color: #fff;
+}
+
+.membership-payment-panel h2 {
+  margin: 8px 0 18px;
+  color: #fff;
+}
+
+.membership-payment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.membership-payment-list li {
+  padding: 14px 0;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.membership-payment-list li:first-child {
+  border-top: 0;
+}
+
+.membership-payment-list strong {
+  display: block;
+  color: #ffd76a;
+  margin-bottom: 5px;
+}
+
+.membership-payment-list span {
+  display: block;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.5;
+}
+
+.membership-payment-list em {
+  display: inline-block;
+  margin-top: 8px;
+  color: #fff;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.membership-payment-actions {
+  width: min(1080px, 94vw);
+  margin: 20px auto 70px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .membership-payment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .membership-payment-actions .btn {
+    width: min(92vw, 340px);
+  }
+}
+
+
+/* =========================================================
+   ATL'S HOTTEST MEMBERSHIP MARKETPLACE + PAYMENT CTA
+   ========================================================= */
+
+.membership-marketplace-btn {
+  display: flex;
+  width: min(420px, 92vw);
+  margin: 22px auto 56px;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 106, 0.62);
+  background: rgba(0, 0, 0, 0.64);
+  color: #ffd76a !important;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(255, 215, 106, 0.14);
+}
+
+.membership-marketplace-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(255, 215, 106, 0.24);
+}
+
+.payment-button-stack {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  margin-top: 20px;
+}
+
+.payment-pay-now-btn {
+  width: min(360px, 92vw);
+  justify-content: center;
+}
+
+.payment-link-note {
+  max-width: 640px;
+  margin: 4px auto 0 !important;
+  color: rgba(255,255,255,0.72) !important;
+  font-size: 0.92rem;
+}
+
+.marketplace-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.marketplace-item-card p {
+  color: rgba(255,255,255,0.82);
+  line-height: 1.55;
+}
+
+.marketplace-price {
+  margin: 8px 0 14px;
+  color: #ffd76a;
+  font-weight: 1000;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 980px) {
+  .marketplace-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .marketplace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   ATL'S HOTTEST PREMIUM NAV POLISH
+   Sleeker navigation buttons + fancy top-left brand mark
+   ========================================================= */
+
+/* Top-left brand / logo text */
+.site-brand,
+.brand,
+.logo,
+.nav-brand,
+.header-brand,
+.site-logo,
+.navbar-brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff !important;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  text-decoration: none !important;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.20),
+    0 0 20px rgba(255, 215, 106, 0.38),
+    0 0 34px rgba(215, 25, 53, 0.20);
+}
+
+.site-brand::first-letter,
+.brand::first-letter,
+.logo::first-letter,
+.nav-brand::first-letter,
+.header-brand::first-letter,
+.site-logo::first-letter,
+.navbar-brand::first-letter {
+  color: #ffd76a;
+}
+
+.site-brand::after,
+.brand::after,
+.logo::after,
+.nav-brand::after,
+.header-brand::after,
+.site-logo::after,
+.navbar-brand::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 8%;
+  bottom: -7px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #ffd76a, #d71935, transparent);
+  box-shadow: 0 0 14px rgba(255, 215, 106, 0.42);
+  opacity: 0.95;
+}
+
+/* Sleeker nav links/buttons */
+.site-nav a,
+.nav a,
+.navbar a,
+.main-nav a,
+.header-nav a,
+.top-nav a {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 999px !important;
+  padding: 10px 16px !important;
+  border: 1px solid rgba(255, 215, 106, 0.38) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.11), rgba(255,255,255,0.025)),
+    rgba(0, 0, 0, 0.52) !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.055em !important;
+  text-transform: uppercase;
+  font-size: 0.78rem !important;
+  text-decoration: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 0 14px rgba(255, 215, 106, 0.08) !important;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.site-nav a::before,
+.nav a::before,
+.navbar a::before,
+.main-nav a::before,
+.header-nav a::before,
+.top-nav a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.22) 44%, transparent 62%);
+  transform: translateX(-130%);
+  transition: transform 420ms ease;
+}
+
+.site-nav a:hover,
+.nav a:hover,
+.navbar a:hover,
+.main-nav a:hover,
+.header-nav a:hover,
+.top-nav a:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 215, 106, 0.72) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 215, 106, 0.22), rgba(215, 25, 53, 0.14)),
+    rgba(0, 0, 0, 0.68) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 0 20px rgba(255, 215, 106, 0.22),
+    0 0 34px rgba(215, 25, 53, 0.12) !important;
+}
+
+.site-nav a:hover::before,
+.nav a:hover::before,
+.navbar a:hover::before,
+.main-nav a:hover::before,
+.header-nav a:hover::before,
+.top-nav a:hover::before {
+  transform: translateX(130%);
+}
+
+/* Make the strongest action feel premium without becoming bulky */
+.site-nav a[href*="ballot"],
+.nav a[href*="ballot"],
+.navbar a[href*="ballot"],
+.main-nav a[href*="ballot"],
+.header-nav a[href*="ballot"],
+.top-nav a[href*="ballot"] {
+  color: #050505 !important;
+  border-color: rgba(255, 215, 106, 0.84) !important;
+  background:
+    linear-gradient(135deg, #fff2a8 0%, #ffd76a 42%, #b67812 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.52),
+    0 0 20px rgba(255, 215, 106, 0.28) !important;
+}
+
+/* Mobile: keep nav elegant and not too tall */
+@media (max-width: 760px) {
+  .site-nav a,
+  .nav a,
+  .navbar a,
+  .main-nav a,
+  .header-nav a,
+  .top-nav a {
+    padding: 9px 13px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .site-brand,
+  .brand,
+  .logo,
+  .nav-brand,
+  .header-brand,
+  .site-logo,
+  .navbar-brand {
+    font-size: clamp(1.15rem, 5vw, 1.6rem);
+  }
+}

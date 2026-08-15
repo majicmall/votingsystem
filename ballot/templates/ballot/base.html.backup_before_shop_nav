@@ -1,0 +1,462 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}ATL’s Hottest Awards{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="{% static 'ballot/favicon.svg' %}">
+
+  <link rel="stylesheet" href="{% static 'ballot/site.css' %}?v=guided-vote-2026-08-07-6">
+  <link rel="stylesheet" href="{% static 'ballot/mobile_force.css' %}?v=mobile-guided-vote-2026-08-07-6">
+
+  <style>
+    :root {
+      --atl-black: #020202;
+      --atl-red: #d71935;
+      --atl-deep-red: #650310;
+      --atl-gold: #ffd76a;
+      --atl-gold-dark: #a7610d;
+      --atl-white: #ffffff;
+    }
+
+    html,
+    body {
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.32), transparent 30%),
+        radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.45), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.14), transparent 35%),
+        linear-gradient(135deg, #000000 0%, #160207 40%, #3a0610 62%, #050505 100%) !important;
+      color: #ffffff !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 52%),
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.12), transparent 45%);
+      opacity: 0.9;
+    }
+
+    .site-header {
+      background: linear-gradient(90deg, #000000 0%, #640412 48%, #000000 100%) !important;
+      border-bottom: 2px solid rgba(255, 215, 106, 0.75) !important;
+      box-shadow:
+        0 0 22px rgba(255, 215, 106, 0.28),
+        0 0 44px rgba(215, 25, 53, 0.2),
+        0 14px 40px rgba(0,0,0,0.55) !important;
+    }
+
+    .brand,
+    .site-header a,
+    nav a {
+      color: #ffffff !important;
+    }
+
+    .brand {
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.45),
+        0 0 22px rgba(255, 215, 106, 0.75),
+        0 0 44px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    nav a {
+      border: 1px solid rgba(255, 215, 106, 0.35) !important;
+      background: rgba(0,0,0,0.28) !important;
+    }
+
+    nav a:hover {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.85) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.35) !important;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero,
+    .card,
+    .nominee-card,
+    .manager-card,
+    .nominee-detail-card,
+    .stat-card {
+      border-color: rgba(255, 215, 106, 0.45) !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.14), transparent 36%),
+        linear-gradient(135deg, rgba(0,0,0,0.9), rgba(98, 4, 18, 0.72)) !important;
+      box-shadow:
+        0 26px 85px rgba(0,0,0,0.65),
+        0 0 30px rgba(255, 215, 106, 0.14),
+        0 0 50px rgba(215, 25, 53, 0.12),
+        inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+    }
+
+    .hero h1,
+    h1 {
+      color: #ffffff !important;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 28px rgba(255, 215, 106, 0.58),
+        0 0 55px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    h2,
+    .eyebrow,
+    .field-label,
+    .category-block h2 {
+      color: #ffd76a !important;
+      text-shadow:
+        0 0 12px rgba(255, 215, 106, 0.48),
+        0 0 25px rgba(215, 25, 53, 0.24) !important;
+    }
+
+    p,
+    .muted,
+    label,
+    span {
+      color: rgba(255,255,255,0.84);
+    }
+
+    .ballot-nominee-card {
+      border-color: rgba(255, 215, 106, 0.46) !important;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        linear-gradient(135deg, #050505, #5c0615 62%, #050505) !important;
+    }
+
+    .ballot-nominee-card:hover {
+      border-color: rgba(255, 215, 106, 0.95) !important;
+      box-shadow:
+        0 18px 45px rgba(0,0,0,0.62),
+        0 0 28px rgba(255, 215, 106, 0.28),
+        0 0 48px rgba(215, 25, 53, 0.2) !important;
+    }
+
+    .nominee-photo-frame,
+    .dashboard-photo-frame,
+    .nominee-detail-photo {
+      border-color: rgba(255,255,255,0.18) !important;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 215, 106, 0.18), transparent 40%),
+        rgba(0,0,0,0.66) !important;
+    }
+
+    .photo-placeholder {
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at top, rgba(255, 215, 106, 0.34), transparent 40%),
+        linear-gradient(135deg, rgba(215,25,53,0.48), rgba(0,0,0,0.72)) !important;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.65) !important;
+    }
+
+    .btn.primary,
+    button.primary,
+    .submit-vote-btn,
+    .detail-vote-btn,
+    input[type="submit"] {
+      color: #160704 !important;
+      border-color: rgba(255, 215, 106, 0.98) !important;
+      background:
+        linear-gradient(135deg, #fff9d6 0%, #ffd76a 35%, #d69628 68%, #8a4a09 100%) !important;
+      box-shadow:
+        0 0 18px rgba(255, 215, 106, 0.35),
+        0 0 34px rgba(255, 215, 106, 0.14),
+        inset 0 1px 0 rgba(255,255,255,0.65) !important;
+    }
+
+    .btn,
+    button,
+    .about-btn,
+    .see-more-btn {
+      color: #ffffff !important;
+      border-color: rgba(255,255,255,0.28) !important;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045)) !important;
+    }
+
+    .see-more-btn {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.72) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.16) !important;
+    }
+
+    input,
+    select,
+    textarea {
+      color: #ffffff !important;
+      background: rgba(0,0,0,0.72) !important;
+      border-color: rgba(255, 215, 106, 0.32) !important;
+    }
+
+    .messages {
+      display: grid;
+      gap: 16px;
+      margin: 0 0 24px;
+    }
+
+    .message,
+    .alert,
+    .result {
+      border: 1px solid rgba(255, 215, 106, 0.55) !important;
+      border-radius: 20px !important;
+      padding: 18px 20px !important;
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255, 215, 106, 0.18), transparent 38%),
+        linear-gradient(135deg, rgba(0,0,0,0.86), rgba(110, 5, 20, 0.75)) !important;
+      box-shadow:
+        0 0 24px rgba(255, 215, 106, 0.18),
+        0 16px 40px rgba(0,0,0,0.45) !important;
+    }
+
+    .vote-thank-you-panel {
+      position: relative;
+      overflow: hidden;
+      margin: 0 0 28px;
+      padding: clamp(22px, 4vw, 36px);
+      border: 1px solid rgba(255, 215, 106, 0.72);
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.24), transparent 36%),
+        linear-gradient(135deg, #000000, #7d0616 58%, #050505);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,0.66),
+        0 0 32px rgba(255, 215, 106, 0.24),
+        0 0 58px rgba(215, 25, 53, 0.18);
+    }
+
+    .vote-thank-you-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.12) 42%, transparent 54%);
+      pointer-events: none;
+    }
+
+    .vote-thank-you-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .vote-thank-you-panel h2 {
+      margin: 0 0 8px;
+      color: #ffffff !important;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: 1;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 26px rgba(255, 215, 106, 0.62),
+        0 0 55px rgba(215, 25, 53, 0.36) !important;
+    }
+
+    .vote-thank-you-panel .special-email {
+      color: #ffd76a !important;
+      font-weight: 1000;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.45);
+    }
+  </style>
+
+  <style>
+    /* INLINE MOBILE GUIDED BALLOT FORCE */
+    @media screen and (max-width: 820px) {
+      .category-selection-grid,
+      .guided-category-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+      }
+
+      .category-select-btn,
+      .guided-category-btn {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        width: 100% !important;
+        min-height: 116px !important;
+        padding: 18px !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 215, 106, 0.48) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.2), transparent 46%),
+          linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .guided-category-btn b {
+        display: inline-flex !important;
+        width: fit-content !important;
+        margin-top: 10px !important;
+        padding: 8px 11px !important;
+        border-radius: 999px !important;
+        color: #111 !important;
+        background: linear-gradient(135deg, #ffd76a, #d69628) !important;
+        font-size: 0.75rem !important;
+        font-weight: 1000 !important;
+        text-transform: uppercase !important;
+      }
+
+      .ballot-six-grid,
+      .nominees-grid,
+      .ballot-category-only-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      .ballot-nominee-card,
+      .nominee-card,
+      .placeholder-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        overflow: hidden !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 215, 106, 0.42) !important;
+        background:
+          linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame,
+      .nominee-card .nominee-photo-frame,
+      .placeholder-card .nominee-photo-frame,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+        display: grid !important;
+        place-items: center !important;
+        width: 100% !important;
+        height: 240px !important;
+        min-height: 240px !important;
+        border-radius: 0 !important;
+        border: 0 !important;
+        border-bottom: 1px solid rgba(255, 215, 106, 0.32) !important;
+        background:
+          radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.18), transparent 45%),
+          #070707 !important;
+        overflow: hidden !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame img,
+      .nominee-card .nominee-photo-frame img,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+
+      .nominee-card-body {
+        display: block !important;
+        padding: 18px !important;
+        text-align: center !important;
+      }
+
+      .nominee-card-body h3 {
+        margin: 0 0 8px !important;
+        color: #ffffff !important;
+        font-size: 1.22rem !important;
+        line-height: 1.12 !important;
+        font-weight: 1000 !important;
+      }
+
+      .nominee-card-body p {
+        margin: 0 !important;
+        color: #ffd76a !important;
+        font-size: 0.92rem !important;
+        font-weight: 900 !important;
+      }
+
+      .select-nominee-form {
+        display: grid !important;
+        gap: 9px !important;
+        padding: 0 12px 14px !important;
+      }
+
+      .vote-card-btn,
+      .select-nominee-form .btn {
+        display: inline-flex !important;
+        width: 100% !important;
+        min-height: 48px !important;
+        margin: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+      }
+
+      .review-vote-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+      }
+
+      .review-vote-row .btn,
+      .ballot-status-row .btn,
+      .ballot-navigation-strip .btn,
+      .ballot-menu-footer .btn {
+        width: 100% !important;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards</a>
+
+    <input class="mobile-nav-check" type="checkbox" id="mobile-nav-check">
+<label class="mobile-nav-toggle" for="mobile-nav-check">
+  <span>Menu</span>
+  <b>☰</b>
+</label>
+<nav>
+      <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'ballot' %}">VOTE</a>
+        <a href="{% url 'atl_tv' %}">ATL TV</a>
+        <a href="{% url 'membership_plans' %}">Memberships</a>
+      <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
+      <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
+      {% if request.user.is_staff %}
+        <a href="{% url 'staff_dashboard' %}">Staff</a>
+        <a href="{% url 'admin:index' %}">Admin</a>
+      {% endif %}
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'logout_then_home' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
