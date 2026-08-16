@@ -421,6 +421,226 @@
       }
     }
 
+  
+    /* =========================================================
+       ATL'S HOTTEST MOBILE BRAND + NAV FINAL POLISH
+       ========================================================= */
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(14px, 3vw, 28px);
+    }
+
+    .brand {
+      display: inline-grid !important;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      max-width: min(420px, 48vw);
+      text-decoration: none !important;
+    }
+
+    .brand::before {
+      display: none !important;
+      content: none !important;
+    }
+
+    .brand::after {
+      left: 32px !important;
+      right: 0 !important;
+      bottom: -7px !important;
+    }
+
+    .brand-mark {
+      width: 19px;
+      height: 26px;
+      display: inline-block;
+      flex: 0 0 auto;
+      border-radius: 62% 38% 58% 42% / 68% 38% 62% 32%;
+      background:
+        radial-gradient(circle at 52% 68%, #fff3a6 0 12%, transparent 18%),
+        radial-gradient(circle at 48% 60%, #ffd76a 0 24%, transparent 34%),
+        linear-gradient(145deg, #ffd76a 0%, #ff8a00 34%, #d71935 68%, #76000f 100%);
+      transform: rotate(-9deg);
+      box-shadow:
+        0 0 8px rgba(255, 215, 106, 0.82),
+        0 0 16px rgba(255, 119, 0, 0.42),
+        0 0 26px rgba(215, 25, 53, 0.34);
+      clip-path: polygon(
+        52% 0%,
+        72% 22%,
+        86% 44%,
+        78% 72%,
+        58% 100%,
+        33% 88%,
+        16% 64%,
+        23% 38%,
+        38% 22%
+      );
+      animation: atlBrandFlameFlicker 2.6s ease-in-out infinite;
+    }
+
+    .brand-words {
+      display: grid;
+      gap: 1px;
+      line-height: 0.94;
+      text-align: left;
+    }
+
+    .brand-line-one {
+      color: #ffffff !important;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(1.05rem, 2.3vw, 1.9rem);
+      font-weight: 1000;
+      letter-spacing: -0.045em;
+      white-space: nowrap;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.20),
+        0 0 18px rgba(255, 215, 106, 0.50),
+        0 0 34px rgba(215, 25, 53, 0.26);
+    }
+
+    .brand-line-two {
+      color: #ffd76a !important;
+      font-size: clamp(0.82rem, 1.65vw, 1.12rem);
+      font-weight: 950;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-shadow:
+        0 0 10px rgba(255, 215, 106, 0.44),
+        0 0 22px rgba(215, 25, 53, 0.18);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    nav a {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 13px !important;
+      font-size: 0.68rem !important;
+      letter-spacing: 0.055em !important;
+      white-space: nowrap;
+    }
+
+    nav a[href*="advertise"] {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.66) !important;
+      background:
+        linear-gradient(135deg, rgba(215, 25, 53, 0.28), rgba(0,0,0,0.72)),
+        rgba(0,0,0,0.72) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        0 0 18px rgba(215, 25, 53, 0.18),
+        0 0 18px rgba(255, 215, 106, 0.10) !important;
+    }
+
+    @media (max-width: 900px) {
+      .site-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      .brand {
+        max-width: 100%;
+        gap: 8px;
+      }
+
+      .brand-mark {
+        width: 17px;
+        height: 23px;
+      }
+
+      .brand-line-one {
+        font-size: clamp(1rem, 5.2vw, 1.42rem);
+      }
+
+      .brand-line-two {
+        font-size: clamp(0.72rem, 3.2vw, 0.92rem);
+        letter-spacing: 0.13em;
+      }
+
+      .mobile-nav-toggle {
+        justify-self: end;
+      }
+
+      nav {
+        grid-column: 1 / -1;
+        justify-content: center;
+        width: 100%;
+        gap: 7px;
+        padding-top: 10px;
+      }
+
+      nav a {
+        min-height: 38px;
+        padding: 8px 10px !important;
+        font-size: 0.62rem !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .site-header {
+        padding: 10px 10px 12px;
+      }
+
+      .brand {
+        grid-template-columns: auto 1fr;
+      }
+
+      .brand::after {
+        left: 28px !important;
+        bottom: -6px !important;
+      }
+
+      .brand-mark {
+        width: 16px;
+        height: 22px;
+        margin-top: -1px;
+      }
+
+      .brand-line-one {
+        font-size: clamp(1rem, 6vw, 1.25rem);
+      }
+
+      .brand-line-two {
+        font-size: 0.72rem;
+        letter-spacing: 0.095em;
+      }
+
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      nav a {
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 7px !important;
+        font-size: 0.58rem !important;
+        letter-spacing: 0.035em !important;
+        text-align: center;
+      }
+
+      nav a[href*="advertise"] {
+        grid-column: 1 / -1;
+      }
+    }
+
   </style>
 
   <style>
@@ -580,7 +800,13 @@
 
 <body>
   <header class="site-header">
-    <a class="brand" href="{% url 'ballot' %}">ATL’s Hottest Awards Association</a>
+    <a class="brand" href="{% url 'ballot' %}">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-words">
+        <span class="brand-line-one">The ATL’s Hottest</span>
+        <span class="brand-line-two">Awards Association</span>
+      </span>
+    </a>
 
     <input class="mobile-nav-check" type="checkbox" id="mobile-nav-check">
 <label class="mobile-nav-toggle" for="mobile-nav-check">
@@ -593,6 +819,7 @@
         <a href="{% url 'atl_tv' %}">ATL TV</a>
         <a href="{% url 'membership_plans' %}">Memberships</a>
         <a href="{% url 'atls_hottest_marketplace' %}">Shop</a>
+        <a href="{% url 'advertise_command_center' %}">Advertise With ATL’s Hottest</a>
       <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
       <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
       {% if request.user.is_staff %}

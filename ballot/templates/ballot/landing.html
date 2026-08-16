@@ -1,6 +1,79 @@
 {% extends "ballot/base.html" %}
 {% load static billboard_ads %}
-{% block title %}ATL’s Hottest Awards Association{% endblock %}
+{% block title %}ATL’s Hottest Awards Association
+  <style>
+    /* Keep middle homepage banner headline on one line */
+    .atl-banner-feature-card h2,
+    .atl-banner-feature-card h3,
+    .ad-billboard h2,
+    .ad-billboard h3 {
+      white-space: nowrap !important;
+      font-size: clamp(1.35rem, 4.6vw, 2.35rem) !important;
+      line-height: 1.05 !important;
+    }
+
+    @media (max-width: 430px) {
+      .atl-banner-feature-card h2,
+      .atl-banner-feature-card h3,
+      .ad-billboard h2,
+      .ad-billboard h3 {
+        font-size: clamp(1.05rem, 7.2vw, 1.65rem) !important;
+        letter-spacing: -0.035em !important;
+      }
+    }
+  </style>
+
+
+  <style>
+    /* MOBILE ONLY: keep "Advertise With ATL’s Hottest" on one line */
+    @media (max-width: 600px) {
+      .atl-banner-feature-card,
+      .ad-billboard {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+      }
+
+      .atl-banner-feature-card h1,
+      .atl-banner-feature-card h2,
+      .atl-banner-feature-card h3,
+      .ad-billboard h1,
+      .ad-billboard h2,
+      .ad-billboard h3,
+      .billboard-ad h1,
+      .billboard-ad h2,
+      .billboard-ad h3,
+      .billboard-title,
+      .ad-title {
+        white-space: nowrap !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: clamp(0.92rem, 5.1vw, 1.28rem) !important;
+        line-height: 1.05 !important;
+        letter-spacing: -0.055em !important;
+        text-align: center !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .atl-banner-feature-card h1,
+      .atl-banner-feature-card h2,
+      .atl-banner-feature-card h3,
+      .ad-billboard h1,
+      .ad-billboard h2,
+      .ad-billboard h3,
+      .billboard-ad h1,
+      .billboard-ad h2,
+      .billboard-ad h3,
+      .billboard-title,
+      .ad-title {
+        font-size: clamp(0.82rem, 4.8vw, 1.05rem) !important;
+        letter-spacing: -0.075em !important;
+      }
+    }
+  </style>
+
+{% endblock %}
 
 {% block content %}
 
