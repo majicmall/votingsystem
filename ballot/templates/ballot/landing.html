@@ -73,6 +73,77 @@
     }
   </style>
 
+
+  <style>
+    /* MOBILE ONLY: replace image-text banner with real one-line text */
+    @media (max-width: 700px) {
+      .atl-banner-feature-card {
+        position: relative !important;
+        display: grid !important;
+        place-items: center !important;
+        min-height: 118px !important;
+        padding: 18px 10px !important;
+        overflow: hidden !important;
+        border-radius: 22px !important;
+        text-align: center !important;
+        background:
+          radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.30), transparent 42%),
+          linear-gradient(135deg, rgba(0,0,0,0.94), rgba(116, 6, 24, 0.88), rgba(0,0,0,0.94)) !important;
+        border: 1px solid rgba(255, 215, 106, 0.65) !important;
+        box-shadow:
+          0 0 24px rgba(255, 215, 106, 0.20),
+          0 18px 45px rgba(0,0,0,0.55) !important;
+      }
+
+      .atl-banner-feature-card img,
+      .atl-banner-feature-img {
+        display: none !important;
+      }
+
+      .atl-banner-feature-card::before {
+        content: "Advertise With ATL’s Hottest";
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        color: #ffffff !important;
+        font-family: "Playfair Display", Georgia, serif !important;
+        font-size: clamp(1.03rem, 5.35vw, 1.42rem) !important;
+        line-height: 1 !important;
+        letter-spacing: -0.055em !important;
+        font-weight: 1000 !important;
+        text-align: center !important;
+        text-shadow:
+          0 0 8px rgba(255,255,255,0.30),
+          0 0 20px rgba(255, 215, 106, 0.56),
+          0 0 34px rgba(215, 25, 53, 0.35) !important;
+      }
+
+      .atl-banner-feature-card::after {
+        content: "Powered By The MajesticMall Megaverse Advertising Platform";
+        display: block !important;
+        margin-top: 9px !important;
+        color: #ffd76a !important;
+        font-size: 0.58rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        font-weight: 900 !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .atl-banner-feature-card::before {
+        font-size: clamp(0.9rem, 4.75vw, 1.08rem) !important;
+        letter-spacing: -0.075em !important;
+      }
+
+      .atl-banner-feature-card::after {
+        font-size: 0.52rem !important;
+      }
+    }
+  </style>
+
 {% endblock %}
 
 {% block content %}
