@@ -73,6 +73,7 @@ OFFICIAL_CATEGORIES = [
     ("Hottest Social Hangout Spot", "Venues"),
     ("Hottest Event", "Venues"),
     ("Hottest Food Lounge", "Venues"),
+    ("Hottest Fine Dining", "Venues"),
     ("Hottest Rooftop Experience", "Venues"),
 ]
 
