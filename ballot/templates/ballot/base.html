@@ -641,6 +641,38 @@
       }
     }
 
+  
+    /* Force Advertise With ATL’s Hottest to stay one line on mobile */
+    .atl-advertise-nowrap {
+      white-space: nowrap !important;
+      display: inline-block !important;
+      max-width: 100% !important;
+    }
+
+    @media (max-width: 600px) {
+      .atl-advertise-nowrap {
+        white-space: nowrap !important;
+        font-size: clamp(0.86rem, 4.6vw, 1.12rem) !important;
+        letter-spacing: -0.075em !important;
+        line-height: 1 !important;
+      }
+
+      h1 .atl-advertise-nowrap,
+      h2 .atl-advertise-nowrap,
+      h3 .atl-advertise-nowrap,
+      .billboard-title .atl-advertise-nowrap,
+      .ad-title .atl-advertise-nowrap {
+        font-size: clamp(0.86rem, 4.6vw, 1.12rem) !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .atl-advertise-nowrap {
+        font-size: clamp(0.76rem, 4.15vw, 0.98rem) !important;
+        letter-spacing: -0.09em !important;
+      }
+    }
+
   </style>
 
   <style>
@@ -819,7 +851,7 @@
         <a href="{% url 'atl_tv' %}">ATL TV</a>
         <a href="{% url 'membership_plans' %}">Memberships</a>
         <a href="{% url 'atls_hottest_marketplace' %}">Shop</a>
-        <a href="{% url 'advertise_command_center' %}">Advertise With ATL’s Hottest</a>
+        <a href="{% url 'advertise_command_center' %}"><span class="atl-advertise-nowrap">Advertise&nbsp;With&nbsp;ATL’s&nbsp;Hottest</span></a>
       <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
       <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
       {% if request.user.is_staff %}
