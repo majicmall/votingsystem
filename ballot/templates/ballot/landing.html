@@ -1,150 +1,6 @@
 {% extends "ballot/base.html" %}
 {% load static billboard_ads %}
-{% block title %}ATL’s Hottest Awards Association
-  <style>
-    /* Keep middle homepage banner headline on one line */
-    .atl-banner-feature-card h2,
-    .atl-banner-feature-card h3,
-    .ad-billboard h2,
-    .ad-billboard h3 {
-      white-space: nowrap !important;
-      font-size: clamp(1.35rem, 4.6vw, 2.35rem) !important;
-      line-height: 1.05 !important;
-    }
-
-    @media (max-width: 430px) {
-      .atl-banner-feature-card h2,
-      .atl-banner-feature-card h3,
-      .ad-billboard h2,
-      .ad-billboard h3 {
-        font-size: clamp(1.05rem, 7.2vw, 1.65rem) !important;
-        letter-spacing: -0.035em !important;
-      }
-    }
-  </style>
-
-
-  <style>
-    /* MOBILE ONLY: keep "<span class="atl-advertise-nowrap">Advertise&nbsp;With&nbsp;ATL’s&nbsp;Hottest</span>" on one line */
-    @media (max-width: 600px) {
-      .atl-banner-feature-card,
-      .ad-billboard {
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-      }
-
-      .atl-banner-feature-card h1,
-      .atl-banner-feature-card h2,
-      .atl-banner-feature-card h3,
-      .ad-billboard h1,
-      .ad-billboard h2,
-      .ad-billboard h3,
-      .billboard-ad h1,
-      .billboard-ad h2,
-      .billboard-ad h3,
-      .billboard-title,
-      .ad-title {
-        white-space: nowrap !important;
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        font-size: clamp(0.92rem, 5.1vw, 1.28rem) !important;
-        line-height: 1.05 !important;
-        letter-spacing: -0.055em !important;
-        text-align: center !important;
-      }
-    }
-
-    @media (max-width: 390px) {
-      .atl-banner-feature-card h1,
-      .atl-banner-feature-card h2,
-      .atl-banner-feature-card h3,
-      .ad-billboard h1,
-      .ad-billboard h2,
-      .ad-billboard h3,
-      .billboard-ad h1,
-      .billboard-ad h2,
-      .billboard-ad h3,
-      .billboard-title,
-      .ad-title {
-        font-size: clamp(0.82rem, 4.8vw, 1.05rem) !important;
-        letter-spacing: -0.075em !important;
-      }
-    }
-  </style>
-
-
-  <style>
-    /* MOBILE ONLY: replace image-text banner with real one-line text */
-    @media (max-width: 700px) {
-      .atl-banner-feature-card {
-        position: relative !important;
-        display: grid !important;
-        place-items: center !important;
-        min-height: 118px !important;
-        padding: 18px 10px !important;
-        overflow: hidden !important;
-        border-radius: 22px !important;
-        text-align: center !important;
-        background:
-          radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.30), transparent 42%),
-          linear-gradient(135deg, rgba(0,0,0,0.94), rgba(116, 6, 24, 0.88), rgba(0,0,0,0.94)) !important;
-        border: 1px solid rgba(255, 215, 106, 0.65) !important;
-        box-shadow:
-          0 0 24px rgba(255, 215, 106, 0.20),
-          0 18px 45px rgba(0,0,0,0.55) !important;
-      }
-
-      .atl-banner-feature-card img,
-      .atl-banner-feature-img {
-        display: none !important;
-      }
-
-      .atl-banner-feature-card::before {
-        content: "Advertise With ATL’s Hottest";
-        display: block !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        white-space: nowrap !important;
-        color: #ffffff !important;
-        font-family: "Playfair Display", Georgia, serif !important;
-        font-size: clamp(1.03rem, 5.35vw, 1.42rem) !important;
-        line-height: 1 !important;
-        letter-spacing: -0.055em !important;
-        font-weight: 1000 !important;
-        text-align: center !important;
-        text-shadow:
-          0 0 8px rgba(255,255,255,0.30),
-          0 0 20px rgba(255, 215, 106, 0.56),
-          0 0 34px rgba(215, 25, 53, 0.35) !important;
-      }
-
-      .atl-banner-feature-card::after {
-        content: "Powered By The MajesticMall Megaverse Advertising Platform";
-        display: block !important;
-        margin-top: 9px !important;
-        color: #ffd76a !important;
-        font-size: 0.58rem !important;
-        line-height: 1.15 !important;
-        letter-spacing: 0.08em !important;
-        text-transform: uppercase !important;
-        font-weight: 900 !important;
-      }
-    }
-
-    @media (max-width: 390px) {
-      .atl-banner-feature-card::before {
-        font-size: clamp(0.9rem, 4.75vw, 1.08rem) !important;
-        letter-spacing: -0.075em !important;
-      }
-
-      .atl-banner-feature-card::after {
-        font-size: 0.52rem !important;
-      }
-    }
-  </style>
-
-{% endblock %}
+{% block title %}ATL’s Hottest Awards Association{% endblock %}
 
 {% block content %}
 
@@ -454,8 +310,13 @@
         <img
           class="atl-banner-feature-img"
           src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
-          alt="ATL’s Hottest Awards 2026 red carpet banner"
+          alt="Advertise With ATL’s Hottest"
         >
+
+        <div class="atl-mobile-ad-banner-text" aria-label="Advertise With ATL’s Hottest">
+          <strong>Advertise&nbsp;With&nbsp;ATL’s&nbsp;Hottest</strong>
+          <span>Powered By The MajesticMall Megaverse Advertising Platform</span>
+        </div>
       </aside>
     </div>
   </section>
@@ -543,4 +404,95 @@
     </section>
   {% endif %}
 </div>
+
+
+
+
+<style>
+  /* FINAL MOBILE FIX: homepage middle ad banner */
+  .atl-mobile-ad-banner-text {
+    display: none;
+  }
+
+  @media (max-width: 980px) {
+    .landing-hero .atl-banner-feature-card {
+      min-height: 120px !important;
+      padding: 16px 8px !important;
+      display: grid !important;
+      place-items: center !important;
+      text-align: center !important;
+      overflow: hidden !important;
+      border-radius: 22px !important;
+      border: 1px solid rgba(255, 215, 106, 0.68) !important;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.32), transparent 44%),
+        linear-gradient(135deg, rgba(0,0,0,0.96), rgba(120, 4, 22, 0.92), rgba(0,0,0,0.96)) !important;
+      box-shadow:
+        0 0 26px rgba(255, 215, 106, 0.22),
+        0 18px 44px rgba(0,0,0,0.58) !important;
+    }
+
+    .landing-hero .atl-banner-feature-card .atl-banner-feature-img {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .landing-hero .atl-mobile-ad-banner-text {
+      display: grid !important;
+      place-items: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 2px !important;
+    }
+
+    .landing-hero .atl-mobile-ad-banner-text strong {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      white-space: nowrap !important;
+      color: #ffffff !important;
+      font-family: "Playfair Display", Georgia, serif !important;
+      font-size: clamp(0.78rem, 4.2vw, 1.08rem) !important;
+      line-height: 1 !important;
+      letter-spacing: -0.105em !important;
+      font-weight: 1000 !important;
+      text-align: center !important;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.32),
+        0 0 20px rgba(255, 215, 106, 0.58),
+        0 0 34px rgba(215, 25, 53, 0.35) !important;
+    }
+
+    .landing-hero .atl-mobile-ad-banner-text span {
+      display: block !important;
+      max-width: 94% !important;
+      color: #ffd76a !important;
+      font-size: 0.49rem !important;
+      line-height: 1.16 !important;
+      letter-spacing: 0.04em !important;
+      text-transform: uppercase !important;
+      font-weight: 900 !important;
+      text-align: center !important;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .landing-hero .atl-mobile-ad-banner-text strong {
+      font-size: clamp(0.72rem, 3.95vw, 0.92rem) !important;
+      letter-spacing: -0.12em !important;
+    }
+
+    .landing-hero .atl-mobile-ad-banner-text span {
+      font-size: 0.46rem !important;
+    }
+  }
+</style>
+
 {% endblock %}
