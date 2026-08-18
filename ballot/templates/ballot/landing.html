@@ -307,23 +307,18 @@
       </div>
 
       <aside class="ad-billboard atl-banner-feature-card atl-banner-rotator" aria-label="Rotating homepage banner ad space">
-        <div class="atl-banner-slide-track">
-          <img
-            class="atl-banner-feature-img atl-banner-slide atl-banner-slide-one"
-            src="{% static 'ballot/img/landingbanner2.png' %}"
-            alt="Featured Banner Ad Space powered by The Majestic Advertising Network"
-          >
-
-          <img
-            class="atl-banner-feature-img atl-banner-slide atl-banner-slide-two"
-            src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
-            alt="ATL’s Hottest Awards Association banner"
-          >
-        </div>
+        <img
+          id="atlLandingBannerRotator"
+          class="atl-banner-feature-img"
+          src="{% static 'ballot/img/landingbanner2.png' %}?v=landingbanner2-js-1"
+          data-slide-one="{% static 'ballot/img/landingbanner2.png' %}?v=landingbanner2-js-1"
+          data-slide-two="{% static 'ballot/img/atl_hottest_hero_banner.png' %}?v=hero-js-1"
+          alt="Featured Banner Ad Space powered by The Majestic Advertising Network"
+        >
 
         <div class="atl-banner-rotator-dots" aria-hidden="true">
-          <span></span>
-          <span></span>
+          <span class="atl-banner-dot active"></span>
+          <span class="atl-banner-dot"></span>
         </div>
       </aside>
     </div>
@@ -504,8 +499,11 @@
 </style>
 
 
+
+
+
 <style>
-  /* ROTATING HOMEPAGE MIDDLE BANNER AD SPACE */
+  /* JS ROTATING HOMEPAGE MIDDLE BANNER */
   .atl-banner-rotator {
     position: relative !important;
     overflow: hidden !important;
@@ -515,61 +513,21 @@
     border-radius: 26px !important;
   }
 
-  .atl-banner-slide-track {
-    position: relative !important;
-    width: 100% !important;
-    min-height: 360px !important;
-    overflow: hidden !important;
-    border-radius: 24px !important;
-  }
-
-  .atl-banner-slide {
-    position: absolute !important;
-    inset: 0 !important;
+  .atl-banner-rotator .atl-banner-feature-img {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     min-height: 360px !important;
     object-fit: cover !important;
     border-radius: 24px !important;
-    opacity: 0;
-    transform: scale(1.015);
-    animation: atlHomepageBannerRotate 12s infinite ease-in-out;
+    transition: opacity 420ms ease, transform 520ms ease;
   }
 
-  .atl-banner-slide-one {
-    animation-delay: 0s;
-  }
-
-  .atl-banner-slide-two {
-    animation-delay: 6s;
-  }
-
-  @keyframes atlHomepageBannerRotate {
-    0% {
-      opacity: 0;
-      transform: scale(1.025);
-    }
-
-    8% {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    44% {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    52% {
-      opacity: 0;
-      transform: scale(1.02);
-    }
-
-    100% {
-      opacity: 0;
-      transform: scale(1.025);
-    }
+  .atl-banner-rotator.is-fading .atl-banner-feature-img {
+    opacity: 0.18 !important;
+    transform: scale(1.012);
   }
 
   .atl-banner-rotator-dots {
@@ -583,7 +541,7 @@
     pointer-events: none;
   }
 
-  .atl-banner-rotator-dots span {
+  .atl-banner-dot {
     width: 8px;
     height: 8px;
     border-radius: 999px;
@@ -592,55 +550,70 @@
     box-shadow: 0 0 10px rgba(255, 215, 106, 0.28);
   }
 
-  .atl-banner-rotator-dots span:first-child {
-    animation: atlHomepageBannerDotOne 12s infinite ease-in-out;
-  }
-
-  .atl-banner-rotator-dots span:last-child {
-    animation: atlHomepageBannerDotTwo 12s infinite ease-in-out;
-  }
-
-  @keyframes atlHomepageBannerDotOne {
-    0%, 49% {
-      background: #d71935;
-      box-shadow: 0 0 14px rgba(255, 215, 106, 0.65), 0 0 18px rgba(215, 25, 53, 0.45);
-    }
-
-    50%, 100% {
-      background: rgba(0,0,0,0.65);
-    }
-  }
-
-  @keyframes atlHomepageBannerDotTwo {
-    0%, 49% {
-      background: rgba(0,0,0,0.65);
-    }
-
-    50%, 100% {
-      background: #d71935;
-      box-shadow: 0 0 14px rgba(255, 215, 106, 0.65), 0 0 18px rgba(215, 25, 53, 0.45);
-    }
+  .atl-banner-dot.active {
+    background: #d71935;
+    box-shadow:
+      0 0 14px rgba(255, 215, 106, 0.65),
+      0 0 18px rgba(215, 25, 53, 0.45);
   }
 
   @media (max-width: 980px) {
     .atl-banner-rotator,
-    .atl-banner-slide-track,
-    .atl-banner-slide {
+    .atl-banner-rotator .atl-banner-feature-img {
       min-height: 280px !important;
     }
   }
 
   @media (max-width: 560px) {
     .atl-banner-rotator,
-    .atl-banner-slide-track,
-    .atl-banner-slide {
+    .atl-banner-rotator .atl-banner-feature-img {
       min-height: 260px !important;
-    }
-
-    .atl-banner-rotator-dots {
-      bottom: 10px;
     }
   }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const img = document.getElementById("atlLandingBannerRotator");
+    if (!img) return;
+
+    const banner = img.closest(".atl-banner-rotator");
+    const dots = banner ? banner.querySelectorAll(".atl-banner-dot") : [];
+    const slides = [
+      {
+        src: img.dataset.slideOne,
+        alt: "Featured Banner Ad Space powered by The Majestic Advertising Network"
+      },
+      {
+        src: img.dataset.slideTwo,
+        alt: "ATL’s Hottest Awards Association banner"
+      }
+    ];
+
+    let index = 0;
+
+    function showSlide(nextIndex) {
+      if (!banner || !slides[nextIndex]) return;
+
+      banner.classList.add("is-fading");
+
+      window.setTimeout(function () {
+        img.src = slides[nextIndex].src;
+        img.alt = slides[nextIndex].alt;
+
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle("active", i === nextIndex);
+        });
+
+        banner.classList.remove("is-fading");
+        index = nextIndex;
+      }, 260);
+    }
+
+    window.setInterval(function () {
+      showSlide(index === 0 ? 1 : 0);
+    }, 5200);
+  });
+</script>
 
 {% endblock %}
