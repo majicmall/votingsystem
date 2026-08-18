@@ -309,8 +309,8 @@
       <aside class="ad-billboard atl-banner-feature-card">
         <img
           class="atl-banner-feature-img"
-          src="{% static 'ballot/img/atl_hottest_hero_banner.png' %}"
-          alt="Advertise With ATL’s Hottest"
+          src="{% static 'ballot/img/landingbanner2.png' %}"
+          alt="Featured Banner Ad Space powered by The Majestic Advertising Network"
         >
 
         <div class="atl-mobile-ad-banner-text" aria-label="Advertise With ATL’s Hottest">
@@ -408,89 +408,89 @@
 
 
 
-<style>
-  /* FINAL MOBILE FIX: homepage middle ad banner */
-  .atl-mobile-ad-banner-text {
-    display: none;
-  }
 
+
+
+<style>
+  /* RESTORE MIDDLE HERO IMAGE BILLBOARD */
   @media (max-width: 980px) {
     .landing-hero .atl-banner-feature-card {
-      min-height: 120px !important;
-      padding: 16px 8px !important;
-      display: grid !important;
-      place-items: center !important;
-      text-align: center !important;
+      display: block !important;
+      min-height: auto !important;
+      padding: 0 !important;
       overflow: hidden !important;
-      border-radius: 22px !important;
-      border: 1px solid rgba(255, 215, 106, 0.68) !important;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.32), transparent 44%),
-        linear-gradient(135deg, rgba(0,0,0,0.96), rgba(120, 4, 22, 0.92), rgba(0,0,0,0.96)) !important;
-      box-shadow:
-        0 0 26px rgba(255, 215, 106, 0.22),
-        0 18px 44px rgba(0,0,0,0.58) !important;
+      background: #000 !important;
+      border-radius: 26px !important;
     }
 
     .landing-hero .atl-banner-feature-card .atl-banner-feature-img {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 240px !important;
+      max-height: none !important;
+      object-fit: cover !important;
+      border-radius: 24px !important;
+    }
+
+    .landing-hero .atl-banner-feature-card .atl-mobile-ad-banner-text,
+    .landing-hero .atl-banner-feature-card::before,
+    .landing-hero .atl-banner-feature-card::after {
       display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      width: 0 !important;
-      height: 0 !important;
-      min-height: 0 !important;
-      max-height: 0 !important;
-      overflow: hidden !important;
-    }
-
-    .landing-hero .atl-mobile-ad-banner-text {
-      display: grid !important;
-      place-items: center !important;
-      gap: 8px !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      padding: 0 2px !important;
-    }
-
-    .landing-hero .atl-mobile-ad-banner-text strong {
-      display: block !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      white-space: nowrap !important;
-      color: #ffffff !important;
-      font-family: "Playfair Display", Georgia, serif !important;
-      font-size: clamp(0.78rem, 4.2vw, 1.08rem) !important;
-      line-height: 1 !important;
-      letter-spacing: -0.105em !important;
-      font-weight: 1000 !important;
-      text-align: center !important;
-      text-shadow:
-        0 0 8px rgba(255,255,255,0.32),
-        0 0 20px rgba(255, 215, 106, 0.58),
-        0 0 34px rgba(215, 25, 53, 0.35) !important;
-    }
-
-    .landing-hero .atl-mobile-ad-banner-text span {
-      display: block !important;
-      max-width: 94% !important;
-      color: #ffd76a !important;
-      font-size: 0.49rem !important;
-      line-height: 1.16 !important;
-      letter-spacing: 0.04em !important;
-      text-transform: uppercase !important;
-      font-weight: 900 !important;
-      text-align: center !important;
+      content: none !important;
     }
   }
 
-  @media (max-width: 390px) {
-    .landing-hero .atl-mobile-ad-banner-text strong {
-      font-size: clamp(0.72rem, 3.95vw, 0.92rem) !important;
-      letter-spacing: -0.12em !important;
+  @media (max-width: 560px) {
+    .landing-hero .atl-banner-feature-card .atl-banner-feature-img {
+      min-height: 260px !important;
     }
+  }
+</style>
 
-    .landing-hero .atl-mobile-ad-banner-text span {
-      font-size: 0.46rem !important;
+
+<style>
+  /* RESTORE: middle homepage image banner */
+  .landing-hero .atl-banner-feature-card {
+    padding: 0 !important;
+    min-height: auto !important;
+    background: #000 !important;
+    border-radius: 26px !important;
+  }
+
+  .landing-hero .atl-banner-feature-card::before,
+  .landing-hero .atl-banner-feature-card::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .landing-hero .atl-banner-feature-img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 360px !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    border-radius: 24px !important;
+  }
+
+  .landing-hero .atl-mobile-ad-banner-text {
+    display: none !important;
+  }
+
+  @media (max-width: 980px) {
+    .landing-hero .atl-banner-feature-img {
+      min-height: 280px !important;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .landing-hero .atl-banner-feature-img {
+      min-height: 260px !important;
     }
   }
 </style>
