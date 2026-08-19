@@ -174,6 +174,17 @@ class NomineeQuerySet(models.QuerySet):
 
 
 class Nominee(models.Model):
+
+    nominator_name = models.CharField(
+        "ATL's Hottest Fan (Name of Person Nominating)",
+        max_length=160,
+        blank=True,
+    )
+    nominator_email = models.EmailField(
+        "Valid Email Address",
+        blank=True,
+    )
+
     APPROVAL_PENDING = "pending"
     APPROVAL_APPROVED = "approved"
     APPROVAL_REJECTED = "rejected"

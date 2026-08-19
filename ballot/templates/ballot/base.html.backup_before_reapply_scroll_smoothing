@@ -22,11 +22,6 @@
 
     html,
     body {
-      min-height: 100%;
-      overflow-x: hidden;
-      overflow-y: auto;
-      touch-action: pan-y;
-      -webkit-overflow-scrolling: touch;
       background:
         radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.32), transparent 30%),
         radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.45), transparent 34%),
@@ -670,7 +665,7 @@
         radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.12), transparent 38%),
         linear-gradient(135deg, #000000 0%, #180207 34%, #3a0610 66%, #000000 100%) !important;
       background-size: 160% 160%;
-      /* Keep body stable for smooth mobile scrolling; animated glow stays on overlays. */
+      animation: atlLuxuryBackgroundShift 18s ease-in-out infinite alternate;
     }
 
     body::before {
@@ -716,14 +711,17 @@
     @keyframes atlLuxuryBackgroundShift {
       0% {
         background-position: 0% 50%;
+        filter: saturate(1.02);
       }
 
       45% {
         background-position: 65% 35%;
+        filter: saturate(1.12);
       }
 
       100% {
         background-position: 100% 55%;
+        filter: saturate(1.05);
       }
     }
 
@@ -764,23 +762,6 @@
         height: 30vh;
         bottom: -15%;
         opacity: 0.48;
-      }
-    }
-
-
-    /* Smooth mobile/desktop scrolling safety */
-    @media (max-width: 900px) {
-      html,
-      body {
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        touch-action: pan-y !important;
-        -webkit-overflow-scrolling: touch !important;
-      }
-
-      body::before,
-      body::after {
-        will-change: opacity, transform;
       }
     }
 

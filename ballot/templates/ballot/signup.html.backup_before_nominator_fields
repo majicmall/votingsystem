@@ -6,10 +6,6 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-        <div class="nomination-optin-notice">
-          *By voting you opt in to receive nomination, voting and awards association information, updates and notifications.
-        </div>
-
     <button class="btn primary" type="submit">Create Account</button>
   </form>
 </section>

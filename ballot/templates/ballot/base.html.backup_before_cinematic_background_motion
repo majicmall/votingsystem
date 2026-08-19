@@ -22,11 +22,6 @@
 
     html,
     body {
-      min-height: 100%;
-      overflow-x: hidden;
-      overflow-y: auto;
-      touch-action: pan-y;
-      -webkit-overflow-scrolling: touch;
       background:
         radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.32), transparent 30%),
         radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.45), transparent 34%),
@@ -539,6 +534,18 @@
       white-space: nowrap;
     }
 
+    nav a[href*="advertise"] {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.66) !important;
+      background:
+        linear-gradient(135deg, rgba(215, 25, 53, 0.28), rgba(0,0,0,0.72)),
+        rgba(0,0,0,0.72) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        0 0 18px rgba(215, 25, 53, 0.18),
+        0 0 18px rgba(255, 215, 106, 0.10) !important;
+    }
+
     @media (max-width: 900px) {
       .site-header {
         display: grid;
@@ -628,8 +635,19 @@
         letter-spacing: 0.035em !important;
         text-align: center;
       }
+
+      nav a[href*="advertise"] {
+        grid-column: 1 / -1;
+      }
     }
 
+  
+    /* Force Advertise With ATL’s Hottest to stay one line on mobile */
+    .atl-advertise-nowrap {
+      white-space: nowrap !important;
+      display: inline-block !important;
+      max-width: 100% !important;
+    }
 
     @media (max-width: 600px) {
       .atl-advertise-nowrap {
@@ -652,143 +670,6 @@
       .atl-advertise-nowrap {
         font-size: clamp(0.76rem, 4.15vw, 0.98rem) !important;
         letter-spacing: -0.09em !important;
-      }
-    }
-
-  
-    /* =========================================================
-       CINEMATIC LUXURY BACKGROUND MOTION
-       Deep red / black / gold atmosphere
-       ========================================================= */
-
-    body {
-      position: relative;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.24), transparent 30%),
-        radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.34), transparent 34%),
-        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.12), transparent 38%),
-        linear-gradient(135deg, #000000 0%, #180207 34%, #3a0610 66%, #000000 100%) !important;
-      background-size: 160% 160%;
-      /* Keep body stable for smooth mobile scrolling; animated glow stays on overlays. */
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 18% 18%, rgba(255, 215, 106, 0.10), transparent 28%),
-        radial-gradient(circle at 82% 22%, rgba(215, 25, 53, 0.16), transparent 32%),
-        radial-gradient(circle at 50% 82%, rgba(255, 215, 106, 0.10), transparent 34%),
-        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.055) 42%, transparent 53%);
-      opacity: 0.86;
-      mix-blend-mode: screen;
-      animation: atlAtmosphereGlow 15s ease-in-out infinite alternate;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      left: -25%;
-      right: -25%;
-      bottom: -18%;
-      height: 38vh;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse at center, rgba(255, 215, 106, 0.30), transparent 58%),
-        linear-gradient(90deg, transparent 0%, rgba(215, 25, 53, 0.24) 28%, rgba(255, 215, 106, 0.26) 50%, rgba(215, 25, 53, 0.18) 72%, transparent 100%);
-      filter: blur(18px);
-      opacity: 0.64;
-      transform: translateX(-8%);
-      animation: atlUnderGlowSweep 12s ease-in-out infinite alternate;
-    }
-
-    main,
-    .site-header {
-      position: relative;
-      z-index: 2;
-    }
-
-    @keyframes atlLuxuryBackgroundShift {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      45% {
-        background-position: 65% 35%;
-      }
-
-      100% {
-        background-position: 100% 55%;
-      }
-    }
-
-    @keyframes atlAtmosphereGlow {
-      0% {
-        opacity: 0.72;
-        transform: scale(1);
-      }
-
-      100% {
-        opacity: 0.95;
-        transform: scale(1.035);
-      }
-    }
-
-    @keyframes atlUnderGlowSweep {
-      0% {
-        transform: translateX(-12%) translateY(0);
-        opacity: 0.42;
-      }
-
-      50% {
-        opacity: 0.72;
-      }
-
-      100% {
-        transform: translateX(12%) translateY(-2%);
-        opacity: 0.58;
-      }
-    }
-
-    @media (max-width: 700px) {
-      body {
-        animation-duration: 22s;
-      }
-
-      body::after {
-        height: 30vh;
-        bottom: -15%;
-        opacity: 0.48;
-      }
-    }
-
-
-    /* Smooth mobile/desktop scrolling safety */
-    @media (max-width: 900px) {
-      html,
-      body {
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        touch-action: pan-y !important;
-        -webkit-overflow-scrolling: touch !important;
-      }
-
-      body::before,
-      body::after {
-        will-change: opacity, transform;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      body,
-      body::before,
-      body::after {
-        animation: none !important;
       }
     }
 
@@ -970,7 +851,7 @@
         <a href="{% url 'atl_tv' %}">ATL TV</a>
         <a href="{% url 'membership_plans' %}">Memberships</a>
         <a href="{% url 'atls_hottest_marketplace' %}">Shop</a>
-        <a href="{% url 'advertise_command_center' %}">Advertise With ATL’s Hottest</a>
+        <a href="{% url 'advertise_command_center' %}"><span class="atl-advertise-nowrap">Advertise&nbsp;With&nbsp;ATL’s&nbsp;Hottest</span></a>
       <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
       <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
       {% if request.user.is_staff %}

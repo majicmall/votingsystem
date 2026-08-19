@@ -18,29 +18,6 @@
   If you know the nominee’s social media or email address, please include it. If not, you can still submit the nomination.
 </p>
 <form class="nomination-form" method="post" enctype="multipart/form-data">
-
-        <div class="nomination-fan-fields">
-          <div class="field-group">
-            <label for="{{ form.nominator_name.id_for_label }}">ATL's Hottest Fan (Name of Person Nominating)</label>
-            {{ form.nominator_name }}
-            {% if form.nominator_name.errors %}
-              <div class="field-error">{{ form.nominator_name.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.nominator_email.id_for_label }}">Valid Email Address</label>
-            {{ form.nominator_email }}
-            {% if form.nominator_email.errors %}
-              <div class="field-error">{{ form.nominator_email.errors }}</div>
-            {% endif %}
-          </div>
-
-          <div class="nomination-optin-notice">
-            *By voting you opt in to receive nomination, voting and awards association information, updates and notifications.
-          </div>
-        </div>
-
     {% csrf_token %}
 
     {% if form.non_field_errors %}

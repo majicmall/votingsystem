@@ -6048,3 +6048,86 @@ header nav a:hover::before,
     letter-spacing: -0.06em !important;
   }
 }
+
+
+/* Nomination opt-in notice */
+.nomination-optin-notice {
+  margin: 18px 0 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.88);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.58);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.10);
+}
+
+@media (max-width: 700px) {
+  .nomination-optin-notice {
+    font-size: 0.86rem;
+    padding: 12px 13px;
+  }
+}
+
+
+/* Visible nominator fields on Submit Nominee form */
+.nomination-fan-fields {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 1px solid rgba(255, 215, 106, 0.46);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 215, 106, 0.13), transparent 42%),
+    linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.58);
+  box-shadow: 0 0 22px rgba(255, 215, 106, 0.10);
+}
+
+.nomination-fan-fields label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffd76a !important;
+  font-weight: 1000;
+}
+
+.nomination-fan-fields input {
+  width: 100%;
+}
+
+.field-error {
+  margin-top: 7px;
+  color: #ffd76a;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.nomination-optin-notice {
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 215, 106, 0.48);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.88);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.58);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .nomination-fan-fields {
+    padding: 14px;
+  }
+
+  .nomination-optin-notice {
+    font-size: 0.86rem;
+    padding: 12px 13px;
+  }
+}

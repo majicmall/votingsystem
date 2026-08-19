@@ -7,6 +7,25 @@ from .models import Category, Nominee, AdvertisingInquiry
 
 
 class NomineePhotoForm(forms.Form):
+    nominator_name = forms.CharField(
+        label="ATL's Hottest Fan (Name of Person Nominating)",
+        required=True,
+        max_length=160,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Your name",
+            "autocomplete": "name",
+        }),
+    )
+    nominator_email = forms.EmailField(
+        label="Valid Email Address",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            "placeholder": "your@email.com",
+            "autocomplete": "email",
+        }),
+    )
+
+
     photo = forms.ImageField()
 
 
@@ -58,6 +77,27 @@ class CategoryRequestForm(forms.Form):
 
 
 class NomineeSignupForm(forms.Form):
+    nominator_name = forms.CharField(
+        label="ATL's Hottest Fan (Name of Person Nominating)",
+        required=True,
+        max_length=160,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter your name",
+            "autocomplete": "name",
+        }),
+    )
+    nominator_email = forms.EmailField(
+        label="Valid Email Address",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            "class": "form-control",
+            "placeholder": "Enter your valid email address",
+            "autocomplete": "email",
+        }),
+    )
+
+
     nominee_name = forms.CharField(max_length=160)
     categories = forms.ModelMultipleChoiceField(
         queryset=Category.objects.filter(is_active=True).order_by("group", "sort_order", "name"),
