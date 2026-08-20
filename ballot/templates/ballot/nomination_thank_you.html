@@ -1,0 +1,56 @@
+{% extends "ballot/base.html" %}
+{% block title %}Thank You for Nominating | ATL’s Hottest Awards{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1000px; margin: 0 auto;">
+  <p class="eyebrow">Nomination Received</p>
+  <h1>Thank You for Nominating ATL’s Hottest.</h1>
+
+  <p>
+    Your nomination has been received. Thank you for helping recognize the people,
+    places, businesses, creators, professionals, venues, personalities, events,
+    and culture-makers moving Atlanta forward.
+  </p>
+
+  <div class="card" style="margin-top: 22px;">
+    <h2>Nominee</h2>
+    <p><strong>{{ nominee.name|default:nominee }}</strong></p>
+
+    <h2>Category / Categories</h2>
+    {% if category_names %}
+      {% for category_name in category_names %}
+        <p><strong>{{ category_name }}</strong></p>
+      {% endfor %}
+    {% else %}
+      <p><strong>Category submitted for review</strong></p>
+    {% endif %}
+  </div>
+
+  <p>
+    While you are here, explore the ATL’s Hottest App and get the scoop on ATL’s
+    Hottest Events, Venues, Media, Professionals, Personalities, People, Places,
+    Things, and Things To Do. Watch ATL’s Hottest Awards TV, shop The ATL’s Hottest
+    Marketplace, discover amazing brands, services, and products, attend events,
+    networking opportunities, awards, rewards, and much more.
+  </p>
+
+  <div class="landing-buttons" style="margin-top: 24px;">
+    <a class="btn primary" href="{% url 'atl_tv' %}">Watch ATL’s Hottest TV</a>
+    <a class="btn" href="{% url 'atls_hottest_marketplace' %}">Shop The Marketplace</a>
+    <a class="btn" href="{% url 'membership_plans' %}">Join The Association</a>
+    <a class="btn" href="{% url 'association_signup' %}">Create Association Account</a>
+    <a class="btn" href="{% url 'advertise_command_center' %}">Advertise With Us</a>
+    <a class="btn" href="{% url 'ballot' %}">Explore Categories</a>
+  </div>
+
+  <div class="card" style="margin-top: 26px;">
+    <h2>Are you a business owner, entrepreneur, or creator?</h2>
+    <p>
+      Join The ATL’s Hottest Awards Association and connect your brand with Atlanta’s
+      culture, nominations, voting, awards, events, media, marketplace opportunities,
+      promotions, networking, and more.
+    </p>
+    <a class="btn primary" href="{% url 'membership_plans' %}">View Membership Options</a>
+  </div>
+</div>
+{% endblock %}

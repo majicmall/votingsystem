@@ -166,6 +166,37 @@ def landing_page(request):
     )
 
 
+
+
+@require_http_methods(["GET"])
+def nomination_thank_you(request, nominee_id):
+    nominee = (
+        Nominee.objects.filter(pk=nominee_id).first()
+        or Nominee.objects.filter(nominee_id=nominee_id).first()
+        if hasattr(Nominee, "nominee_id")
+        else None
+    )
+
+    if nominee is None:
+        nominee = get_object_or_404(Nominee, pk=nominee_id)
+
+    category_names = []
+
+    category = getattr(nominee, "category", None)
+    if category:
+        category_names.append(str(getattr(category, "name", category)))
+
+    categories = getattr(nominee, "categories", None)
+    if categories is not None and hasattr(categories, "all"):
+        category_names.extend([str(getattr(cat, "name", cat)) for cat in categories.all()])
+
+    category_names = list(dict.fromkeys([name for name in category_names if name]))
+
+    return render(request, "ballot/nomination_thank_you.html", {
+        "nominee": nominee,
+        "category_names": category_names,
+    })
+
 @require_http_methods(["GET"])
 def ballot_view(request):
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
@@ -584,7 +615,7 @@ def nominee_signup(request):
         )
 
         if request.user.is_authenticated:
-            return redirect("assoc_dashboard")
+            return redirect("nomination_thank_you", nominee_id=nominee.pk)
 
         return redirect("ballot")
 

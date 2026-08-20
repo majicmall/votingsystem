@@ -792,6 +792,126 @@
       }
     }
 
+
+    /* =========================================================
+       SAFE CINEMATIC BACKGROUND MOTION
+       Red / black / gold animated atmosphere behind all content
+       ========================================================= */
+
+    html,
+    body {
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+      position: relative;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.20), transparent 30%),
+        radial-gradient(circle at 88% 10%, rgba(215, 25, 53, 0.34), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.10), transparent 40%),
+        linear-gradient(135deg, #000000 0%, #180207 38%, #3a0610 64%, #000000 100%) !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 215, 106, 0.16), transparent 28%),
+        radial-gradient(circle at 82% 20%, rgba(215, 25, 53, 0.18), transparent 32%),
+        radial-gradient(circle at 48% 86%, rgba(255, 215, 106, 0.12), transparent 34%),
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.05) 44%, transparent 56%);
+      opacity: 0.72;
+      transform: translate3d(-2%, 0, 0) scale(1);
+      animation: atlSafeAtmosphereDrift 18s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      left: -35%;
+      right: -35%;
+      bottom: -20%;
+      height: 42vh;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, rgba(255, 215, 106, 0.26), transparent 58%),
+        linear-gradient(90deg, transparent 0%, rgba(215, 25, 53, 0.24) 30%, rgba(255, 215, 106, 0.22) 50%, rgba(215, 25, 53, 0.16) 72%, transparent 100%);
+      filter: blur(18px);
+      opacity: 0.56;
+      transform: translate3d(-10%, 0, 0);
+      animation: atlSafeUnderGlowSweep 14s ease-in-out infinite alternate;
+    }
+
+    main,
+    .site-header {
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes atlSafeAtmosphereDrift {
+      0% {
+        opacity: 0.58;
+        transform: translate3d(-3%, -1%, 0) scale(1);
+      }
+
+      50% {
+        opacity: 0.88;
+        transform: translate3d(2%, 1%, 0) scale(1.035);
+      }
+
+      100% {
+        opacity: 0.66;
+        transform: translate3d(4%, -1%, 0) scale(1.02);
+      }
+    }
+
+    @keyframes atlSafeUnderGlowSweep {
+      0% {
+        opacity: 0.38;
+        transform: translate3d(-14%, 0, 0);
+      }
+
+      50% {
+        opacity: 0.68;
+      }
+
+      100% {
+        opacity: 0.52;
+        transform: translate3d(14%, -2%, 0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      body::before {
+        animation-duration: 24s;
+        opacity: 0.62;
+      }
+
+      body::after {
+        height: 30vh;
+        bottom: -15%;
+        opacity: 0.44;
+        animation-duration: 20s;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before,
+      body::after {
+        animation: none !important;
+      }
+    }
+
+
   </style>
 
   <style>
@@ -943,6 +1063,136 @@
       .ballot-navigation-strip .btn,
       .ballot-menu-footer .btn {
         width: 100% !important;
+      }
+    }
+  </style>
+
+  <style>
+    /* FORCE VISIBLE CINEMATIC BACKGROUND MOTION */
+    html,
+    body {
+      min-height: 100%;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      touch-action: pan-y !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    body {
+      position: relative !important;
+      isolation: isolate !important;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(255, 215, 106, 0.34), transparent 30%),
+        radial-gradient(circle at 92% 12%, rgba(215, 25, 53, 0.55), transparent 38%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.20), transparent 42%),
+        linear-gradient(135deg, #000000 0%, #1e0208 34%, #640817 64%, #000000 100%) !important;
+      background-attachment: fixed !important;
+    }
+
+    body::before {
+      content: "" !important;
+      position: fixed !important;
+      inset: -25% !important;
+      z-index: 1 !important;
+      pointer-events: none !important;
+      background:
+        radial-gradient(circle at 14% 18%, rgba(255, 215, 106, 0.34), transparent 24%),
+        radial-gradient(circle at 82% 22%, rgba(215, 25, 53, 0.46), transparent 30%),
+        radial-gradient(circle at 48% 78%, rgba(255, 215, 106, 0.28), transparent 32%),
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.16) 42%, transparent 55%) !important;
+      opacity: 0.95 !important;
+      mix-blend-mode: screen !important;
+      transform: translate3d(-8%, -2%, 0) scale(1.04);
+      animation: atlVisibleAtmosphereDrift 8s ease-in-out infinite alternate !important;
+    }
+
+    body::after {
+      content: "" !important;
+      position: fixed !important;
+      left: -55% !important;
+      right: -55% !important;
+      bottom: -16% !important;
+      height: 55vh !important;
+      z-index: 1 !important;
+      pointer-events: none !important;
+      background:
+        radial-gradient(ellipse at center, rgba(255, 215, 106, 0.52), transparent 56%),
+        linear-gradient(90deg, transparent 0%, rgba(215, 25, 53, 0.42) 24%, rgba(255, 215, 106, 0.50) 50%, rgba(215, 25, 53, 0.34) 76%, transparent 100%) !important;
+      filter: blur(14px);
+      opacity: 0.88 !important;
+      transform: translate3d(-22%, 0, 0);
+      animation: atlVisibleUnderGlowSweep 6.5s ease-in-out infinite alternate !important;
+    }
+
+    main {
+      position: relative !important;
+      z-index: 3 !important;
+    }
+
+    .site-header {
+      position: sticky !important;
+      z-index: 1000 !important;
+    }
+
+    .landing-shell,
+    .landing-hero,
+    .card,
+    .front-page-video-section {
+      position: relative;
+      z-index: 4;
+    }
+
+    @keyframes atlVisibleAtmosphereDrift {
+      0% {
+        opacity: 0.58;
+        transform: translate3d(-10%, -3%, 0) scale(1.02);
+      }
+
+      45% {
+        opacity: 1;
+        transform: translate3d(3%, 2%, 0) scale(1.075);
+      }
+
+      100% {
+        opacity: 0.72;
+        transform: translate3d(10%, -2%, 0) scale(1.035);
+      }
+    }
+
+    @keyframes atlVisibleUnderGlowSweep {
+      0% {
+        opacity: 0.48;
+        transform: translate3d(-28%, 0, 0);
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.72;
+        transform: translate3d(28%, -4%, 0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      body::before {
+        opacity: 0.82 !important;
+        animation-duration: 10s !important;
+      }
+
+      body::after {
+        height: 40vh !important;
+        bottom: -12% !important;
+        opacity: 0.76 !important;
+        animation-duration: 8s !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before,
+      body::after {
+        animation: none !important;
       }
     }
   </style>

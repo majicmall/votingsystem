@@ -44,6 +44,7 @@ urlpatterns = [
 
     # Nominee signup MUST come before nominee detail
     path("nominee/signup/", ballot_views.nominee_signup, name="nominee_signup"),
+    path("nomination/thank-you/<slug:nominee_id>/", ballot_views.nomination_thank_you, name="nomination_thank_you"),
 
     # Nominee public upload
     path("u/<uuid:token>/", ballot_views.nominee_upload, name="nominee_upload"),
