@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import EmailMultiAlternatives
 from django.db import IntegrityError
-from django.http import JsonResponse, HttpResponse, JsonResponse
+from django.http import JsonResponse, HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
@@ -172,14 +172,18 @@ def landing_page(request):
 def nomination_thank_you(request, nominee_id):
     nominee = None
 
+    # Numeric thank-you URLs use the database primary key.
     if str(nominee_id).isdigit():
-        nominee = Nominee.objects.filter(pk=nominee_id).first()
+        nominee = Nominee.objects.filter(pk=int(nominee_id)).first()
+
+    # Older/generated slug thank-you URLs use nominee_id if that field exists.
+    if nominee is None:
+        nominee_field_names = {field.name for field in Nominee._meta.get_fields()}
+        if "nominee_id" in nominee_field_names:
+            nominee = Nominee.objects.filter(nominee_id=nominee_id).first()
 
     if nominee is None:
-        nominee = Nominee.objects.filter(nominee_id=nominee_id).first()
-
-    if nominee is None:
-        nominee = get_object_or_404(Nominee, pk=nominee_id)
+        raise Http404("Nomination thank-you page not found.")
 
     category_names = []
 
