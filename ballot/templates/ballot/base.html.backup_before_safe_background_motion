@@ -1,0 +1,1000 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}ATL’s Hottest Awards{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="{% static 'ballot/favicon.svg' %}">
+
+  <link rel="stylesheet" href="{% static 'ballot/site.css' %}?v=guided-vote-2026-08-07-6">
+  <link rel="stylesheet" href="{% static 'ballot/mobile_force.css' %}?v=mobile-guided-vote-2026-08-07-6">
+
+  <style>
+    :root {
+      --atl-black: #020202;
+      --atl-red: #d71935;
+      --atl-deep-red: #650310;
+      --atl-gold: #ffd76a;
+      --atl-gold-dark: #a7610d;
+      --atl-white: #ffffff;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.32), transparent 30%),
+        radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.45), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.14), transparent 35%),
+        linear-gradient(135deg, #000000 0%, #160207 40%, #3a0610 62%, #050505 100%) !important;
+      color: #ffffff !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.08) 42%, transparent 52%),
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 106, 0.12), transparent 45%);
+      opacity: 0.9;
+    }
+
+    .site-header {
+      background: linear-gradient(90deg, #000000 0%, #640412 48%, #000000 100%) !important;
+      border-bottom: 2px solid rgba(255, 215, 106, 0.75) !important;
+      box-shadow:
+        0 0 22px rgba(255, 215, 106, 0.28),
+        0 0 44px rgba(215, 25, 53, 0.2),
+        0 14px 40px rgba(0,0,0,0.55) !important;
+    }
+
+    .brand,
+    .site-header a,
+    nav a {
+      color: #ffffff !important;
+    }
+
+    .brand {
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.45),
+        0 0 22px rgba(255, 215, 106, 0.75),
+        0 0 44px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    nav a {
+      border: 1px solid rgba(255, 215, 106, 0.35) !important;
+      background: rgba(0,0,0,0.28) !important;
+    }
+
+    nav a:hover {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.85) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.35) !important;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero,
+    .card,
+    .nominee-card,
+    .manager-card,
+    .nominee-detail-card,
+    .stat-card {
+      border-color: rgba(255, 215, 106, 0.45) !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.14), transparent 36%),
+        linear-gradient(135deg, rgba(0,0,0,0.9), rgba(98, 4, 18, 0.72)) !important;
+      box-shadow:
+        0 26px 85px rgba(0,0,0,0.65),
+        0 0 30px rgba(255, 215, 106, 0.14),
+        0 0 50px rgba(215, 25, 53, 0.12),
+        inset 0 0 0 1px rgba(255,255,255,0.05) !important;
+    }
+
+    .hero h1,
+    h1 {
+      color: #ffffff !important;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 28px rgba(255, 215, 106, 0.58),
+        0 0 55px rgba(215, 25, 53, 0.38) !important;
+    }
+
+    h2,
+    .eyebrow,
+    .field-label,
+    .category-block h2 {
+      color: #ffd76a !important;
+      text-shadow:
+        0 0 12px rgba(255, 215, 106, 0.48),
+        0 0 25px rgba(215, 25, 53, 0.24) !important;
+    }
+
+    p,
+    .muted,
+    label,
+    span {
+      color: rgba(255,255,255,0.84);
+    }
+
+    .ballot-nominee-card {
+      border-color: rgba(255, 215, 106, 0.46) !important;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        linear-gradient(135deg, #050505, #5c0615 62%, #050505) !important;
+    }
+
+    .ballot-nominee-card:hover {
+      border-color: rgba(255, 215, 106, 0.95) !important;
+      box-shadow:
+        0 18px 45px rgba(0,0,0,0.62),
+        0 0 28px rgba(255, 215, 106, 0.28),
+        0 0 48px rgba(215, 25, 53, 0.2) !important;
+    }
+
+    .nominee-photo-frame,
+    .dashboard-photo-frame,
+    .nominee-detail-photo {
+      border-color: rgba(255,255,255,0.18) !important;
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 215, 106, 0.18), transparent 40%),
+        rgba(0,0,0,0.66) !important;
+    }
+
+    .photo-placeholder {
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at top, rgba(255, 215, 106, 0.34), transparent 40%),
+        linear-gradient(135deg, rgba(215,25,53,0.48), rgba(0,0,0,0.72)) !important;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.65) !important;
+    }
+
+    .btn.primary,
+    button.primary,
+    .submit-vote-btn,
+    .detail-vote-btn,
+    input[type="submit"] {
+      color: #160704 !important;
+      border-color: rgba(255, 215, 106, 0.98) !important;
+      background:
+        linear-gradient(135deg, #fff9d6 0%, #ffd76a 35%, #d69628 68%, #8a4a09 100%) !important;
+      box-shadow:
+        0 0 18px rgba(255, 215, 106, 0.35),
+        0 0 34px rgba(255, 215, 106, 0.14),
+        inset 0 1px 0 rgba(255,255,255,0.65) !important;
+    }
+
+    .btn,
+    button,
+    .about-btn,
+    .see-more-btn {
+      color: #ffffff !important;
+      border-color: rgba(255,255,255,0.28) !important;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045)) !important;
+    }
+
+    .see-more-btn {
+      color: #ffd76a !important;
+      border-color: rgba(255, 215, 106, 0.72) !important;
+      box-shadow: 0 0 18px rgba(255, 215, 106, 0.16) !important;
+    }
+
+    input,
+    select,
+    textarea {
+      color: #ffffff !important;
+      background: rgba(0,0,0,0.72) !important;
+      border-color: rgba(255, 215, 106, 0.32) !important;
+    }
+
+    .messages {
+      display: grid;
+      gap: 16px;
+      margin: 0 0 24px;
+    }
+
+    .message,
+    .alert,
+    .result {
+      border: 1px solid rgba(255, 215, 106, 0.55) !important;
+      border-radius: 20px !important;
+      padding: 18px 20px !important;
+      color: #ffffff !important;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255, 215, 106, 0.18), transparent 38%),
+        linear-gradient(135deg, rgba(0,0,0,0.86), rgba(110, 5, 20, 0.75)) !important;
+      box-shadow:
+        0 0 24px rgba(255, 215, 106, 0.18),
+        0 16px 40px rgba(0,0,0,0.45) !important;
+    }
+
+    .vote-thank-you-panel {
+      position: relative;
+      overflow: hidden;
+      margin: 0 0 28px;
+      padding: clamp(22px, 4vw, 36px);
+      border: 1px solid rgba(255, 215, 106, 0.72);
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035)),
+        radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.24), transparent 36%),
+        linear-gradient(135deg, #000000, #7d0616 58%, #050505);
+      box-shadow:
+        0 28px 90px rgba(0,0,0,0.66),
+        0 0 32px rgba(255, 215, 106, 0.24),
+        0 0 58px rgba(215, 25, 53, 0.18);
+    }
+
+    .vote-thank-you-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.12) 42%, transparent 54%);
+      pointer-events: none;
+    }
+
+    .vote-thank-you-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .vote-thank-you-panel h2 {
+      margin: 0 0 8px;
+      color: #ffffff !important;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: 1;
+      text-shadow:
+        0 0 10px rgba(255,255,255,0.38),
+        0 0 26px rgba(255, 215, 106, 0.62),
+        0 0 55px rgba(215, 25, 53, 0.36) !important;
+    }
+
+    .vote-thank-you-panel .special-email {
+      color: #ffd76a !important;
+      font-weight: 1000;
+      text-shadow: 0 0 14px rgba(255, 215, 106, 0.45);
+    }
+  
+    /* =========================================================
+       ATL'S HOTTEST HEADER BRAND + NAV POLISH
+       ========================================================= */
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.86), rgba(42, 2, 10, 0.82)),
+        rgba(0,0,0,0.82) !important;
+      border-bottom: 1px solid rgba(255, 215, 106, 0.28);
+      box-shadow:
+        0 12px 34px rgba(0,0,0,0.38),
+        0 0 24px rgba(255, 215, 106, 0.08);
+    }
+
+    .brand {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      color: #fff !important;
+      font-family: "Playfair Display", Georgia, serif !important;
+      font-size: clamp(1.25rem, 2.5vw, 2rem) !important;
+      font-weight: 1000 !important;
+      letter-spacing: -0.045em !important;
+      line-height: 1.05;
+      text-decoration: none !important;
+      text-transform: none !important;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.20),
+        0 0 18px rgba(255, 215, 106, 0.50),
+        0 0 34px rgba(215, 25, 53, 0.26);
+    }
+
+    .brand::before {
+      content: "";
+      width: 18px;
+      height: 24px;
+      margin-right: 10px;
+      display: inline-block;
+      flex: 0 0 auto;
+      border-radius: 62% 38% 58% 42% / 68% 38% 62% 32%;
+      background:
+        radial-gradient(circle at 52% 68%, #fff3a6 0 12%, transparent 18%),
+        radial-gradient(circle at 48% 60%, #ffd76a 0 24%, transparent 34%),
+        linear-gradient(145deg, #ffd76a 0%, #ff8a00 34%, #d71935 68%, #76000f 100%);
+      transform: rotate(-9deg);
+      box-shadow:
+        0 0 8px rgba(255, 215, 106, 0.82),
+        0 0 16px rgba(255, 119, 0, 0.42),
+        0 0 26px rgba(215, 25, 53, 0.34);
+      clip-path: polygon(
+        52% 0%,
+        72% 22%,
+        86% 44%,
+        78% 72%,
+        58% 100%,
+        33% 88%,
+        16% 64%,
+        23% 38%,
+        38% 22%
+      );
+      animation: atlBrandFlameFlicker 2.6s ease-in-out infinite;
+    }
+
+    @keyframes atlBrandFlameFlicker {
+      0%, 100% {
+        transform: rotate(-9deg) scale(1);
+        filter: brightness(1);
+      }
+      45% {
+        transform: rotate(-6deg) scale(1.06);
+        filter: brightness(1.18);
+      }
+      72% {
+        transform: rotate(-12deg) scale(0.97);
+        filter: brightness(0.96);
+      }
+    }
+
+
+    .brand::after {
+      content: "";
+      position: absolute;
+      left: 1.45em;
+      right: 8%;
+      bottom: -8px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, #ffd76a, #d71935, transparent);
+      box-shadow: 0 0 16px rgba(255, 215, 106, 0.55);
+    }
+
+    nav a {
+      position: relative;
+      overflow: hidden;
+      border-radius: 999px !important;
+      padding: 9px 15px !important;
+      border: 1px solid rgba(255, 215, 106, 0.42) !important;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.025)),
+        rgba(0, 0, 0, 0.54) !important;
+      color: #fff !important;
+      font-size: 0.74rem !important;
+      font-weight: 950 !important;
+      letter-spacing: 0.065em !important;
+      text-transform: uppercase !important;
+      text-decoration: none !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        0 0 14px rgba(255, 215, 106, 0.10);
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
+    }
+
+    nav a:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 215, 106, 0.82) !important;
+      background:
+        linear-gradient(135deg, rgba(255, 215, 106, 0.24), rgba(215, 25, 53, 0.16)),
+        rgba(0, 0, 0, 0.74) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        0 0 22px rgba(255, 215, 106, 0.24),
+        0 0 34px rgba(215, 25, 53, 0.12);
+    }
+
+    nav a[href*="ballot"] {
+      color: #080808 !important;
+      border-color: rgba(255, 215, 106, 0.9) !important;
+      background:
+        linear-gradient(135deg, #fff4b0 0%, #ffd76a 42%, #b67812 100%) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.62),
+        0 0 22px rgba(255, 215, 106, 0.30) !important;
+    }
+
+    @media (max-width: 760px) {
+      .brand {
+        font-size: clamp(1rem, 4.7vw, 1.35rem) !important;
+      }
+
+      .brand::before {
+        margin-right: 6px;
+      }
+
+      nav a {
+        padding: 8px 12px !important;
+        font-size: 0.68rem !important;
+      }
+    }
+
+  
+    /* =========================================================
+       ATL'S HOTTEST MOBILE BRAND + NAV FINAL POLISH
+       ========================================================= */
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(14px, 3vw, 28px);
+    }
+
+    .brand {
+      display: inline-grid !important;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      max-width: min(420px, 48vw);
+      text-decoration: none !important;
+    }
+
+    .brand::before {
+      display: none !important;
+      content: none !important;
+    }
+
+    .brand::after {
+      left: 32px !important;
+      right: 0 !important;
+      bottom: -7px !important;
+    }
+
+    .brand-mark {
+      width: 19px;
+      height: 26px;
+      display: inline-block;
+      flex: 0 0 auto;
+      border-radius: 62% 38% 58% 42% / 68% 38% 62% 32%;
+      background:
+        radial-gradient(circle at 52% 68%, #fff3a6 0 12%, transparent 18%),
+        radial-gradient(circle at 48% 60%, #ffd76a 0 24%, transparent 34%),
+        linear-gradient(145deg, #ffd76a 0%, #ff8a00 34%, #d71935 68%, #76000f 100%);
+      transform: rotate(-9deg);
+      box-shadow:
+        0 0 8px rgba(255, 215, 106, 0.82),
+        0 0 16px rgba(255, 119, 0, 0.42),
+        0 0 26px rgba(215, 25, 53, 0.34);
+      clip-path: polygon(
+        52% 0%,
+        72% 22%,
+        86% 44%,
+        78% 72%,
+        58% 100%,
+        33% 88%,
+        16% 64%,
+        23% 38%,
+        38% 22%
+      );
+      animation: atlBrandFlameFlicker 2.6s ease-in-out infinite;
+    }
+
+    .brand-words {
+      display: grid;
+      gap: 1px;
+      line-height: 0.94;
+      text-align: left;
+    }
+
+    .brand-line-one {
+      color: #ffffff !important;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(1.05rem, 2.3vw, 1.9rem);
+      font-weight: 1000;
+      letter-spacing: -0.045em;
+      white-space: nowrap;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.20),
+        0 0 18px rgba(255, 215, 106, 0.50),
+        0 0 34px rgba(215, 25, 53, 0.26);
+    }
+
+    .brand-line-two {
+      color: #ffd76a !important;
+      font-size: clamp(0.82rem, 1.65vw, 1.12rem);
+      font-weight: 950;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-shadow:
+        0 0 10px rgba(255, 215, 106, 0.44),
+        0 0 22px rgba(215, 25, 53, 0.18);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    nav a {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 13px !important;
+      font-size: 0.68rem !important;
+      letter-spacing: 0.055em !important;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .site-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      .brand {
+        max-width: 100%;
+        gap: 8px;
+      }
+
+      .brand-mark {
+        width: 17px;
+        height: 23px;
+      }
+
+      .brand-line-one {
+        font-size: clamp(1rem, 5.2vw, 1.42rem);
+      }
+
+      .brand-line-two {
+        font-size: clamp(0.72rem, 3.2vw, 0.92rem);
+        letter-spacing: 0.13em;
+      }
+
+      .mobile-nav-toggle {
+        justify-self: end;
+      }
+
+      nav {
+        grid-column: 1 / -1;
+        justify-content: center;
+        width: 100%;
+        gap: 7px;
+        padding-top: 10px;
+      }
+
+      nav a {
+        min-height: 38px;
+        padding: 8px 10px !important;
+        font-size: 0.62rem !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .site-header {
+        padding: 10px 10px 12px;
+      }
+
+      .brand {
+        grid-template-columns: auto 1fr;
+      }
+
+      .brand::after {
+        left: 28px !important;
+        bottom: -6px !important;
+      }
+
+      .brand-mark {
+        width: 16px;
+        height: 22px;
+        margin-top: -1px;
+      }
+
+      .brand-line-one {
+        font-size: clamp(1rem, 6vw, 1.25rem);
+      }
+
+      .brand-line-two {
+        font-size: 0.72rem;
+        letter-spacing: 0.095em;
+      }
+
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      nav a {
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 7px !important;
+        font-size: 0.58rem !important;
+        letter-spacing: 0.035em !important;
+        text-align: center;
+      }
+    }
+
+
+    @media (max-width: 600px) {
+      .atl-advertise-nowrap {
+        white-space: nowrap !important;
+        font-size: clamp(0.86rem, 4.6vw, 1.12rem) !important;
+        letter-spacing: -0.075em !important;
+        line-height: 1 !important;
+      }
+
+      h1 .atl-advertise-nowrap,
+      h2 .atl-advertise-nowrap,
+      h3 .atl-advertise-nowrap,
+      .billboard-title .atl-advertise-nowrap,
+      .ad-title .atl-advertise-nowrap {
+        font-size: clamp(0.86rem, 4.6vw, 1.12rem) !important;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .atl-advertise-nowrap {
+        font-size: clamp(0.76rem, 4.15vw, 0.98rem) !important;
+        letter-spacing: -0.09em !important;
+      }
+    }
+
+  
+    /* =========================================================
+       CINEMATIC LUXURY BACKGROUND MOTION
+       Deep red / black / gold atmosphere
+       ========================================================= */
+
+    body {
+      position: relative;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 215, 106, 0.24), transparent 30%),
+        radial-gradient(circle at 86% 8%, rgba(215, 25, 53, 0.34), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255, 215, 106, 0.12), transparent 38%),
+        linear-gradient(135deg, #000000 0%, #180207 34%, #3a0610 66%, #000000 100%) !important;
+      background-size: 160% 160%;
+      /* Keep body stable for smooth mobile scrolling; animated glow stays on overlays. */
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 215, 106, 0.10), transparent 28%),
+        radial-gradient(circle at 82% 22%, rgba(215, 25, 53, 0.16), transparent 32%),
+        radial-gradient(circle at 50% 82%, rgba(255, 215, 106, 0.10), transparent 34%),
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.055) 42%, transparent 53%);
+      opacity: 0.86;
+      mix-blend-mode: screen;
+      animation: atlAtmosphereGlow 15s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      left: -25%;
+      right: -25%;
+      bottom: -18%;
+      height: 38vh;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, rgba(255, 215, 106, 0.30), transparent 58%),
+        linear-gradient(90deg, transparent 0%, rgba(215, 25, 53, 0.24) 28%, rgba(255, 215, 106, 0.26) 50%, rgba(215, 25, 53, 0.18) 72%, transparent 100%);
+      filter: blur(18px);
+      opacity: 0.64;
+      transform: translateX(-8%);
+      animation: atlUnderGlowSweep 12s ease-in-out infinite alternate;
+    }
+
+    main,
+    .site-header {
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes atlLuxuryBackgroundShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      45% {
+        background-position: 65% 35%;
+      }
+
+      100% {
+        background-position: 100% 55%;
+      }
+    }
+
+    @keyframes atlAtmosphereGlow {
+      0% {
+        opacity: 0.72;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0.95;
+        transform: scale(1.035);
+      }
+    }
+
+    @keyframes atlUnderGlowSweep {
+      0% {
+        transform: translateX(-12%) translateY(0);
+        opacity: 0.42;
+      }
+
+      50% {
+        opacity: 0.72;
+      }
+
+      100% {
+        transform: translateX(12%) translateY(-2%);
+        opacity: 0.58;
+      }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        animation-duration: 22s;
+      }
+
+      body::after {
+        height: 30vh;
+        bottom: -15%;
+        opacity: 0.48;
+      }
+    }
+
+
+    /* Smooth mobile/desktop scrolling safety */
+    @media (max-width: 900px) {
+      html,
+      body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        touch-action: pan-y !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      body::before,
+      body::after {
+        will-change: opacity, transform;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body,
+      body::before,
+      body::after {
+        animation: none !important;
+      }
+    }
+
+  </style>
+
+  <style>
+    /* INLINE MOBILE GUIDED BALLOT FORCE */
+    @media screen and (max-width: 820px) {
+      .category-selection-grid,
+      .guided-category-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+        width: 100% !important;
+      }
+
+      .category-select-btn,
+      .guided-category-btn {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        width: 100% !important;
+        min-height: 116px !important;
+        padding: 18px !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 215, 106, 0.48) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.2), transparent 46%),
+          linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .guided-category-btn b {
+        display: inline-flex !important;
+        width: fit-content !important;
+        margin-top: 10px !important;
+        padding: 8px 11px !important;
+        border-radius: 999px !important;
+        color: #111 !important;
+        background: linear-gradient(135deg, #ffd76a, #d69628) !important;
+        font-size: 0.75rem !important;
+        font-weight: 1000 !important;
+        text-transform: uppercase !important;
+      }
+
+      .ballot-six-grid,
+      .nominees-grid,
+      .ballot-category-only-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      .ballot-nominee-card,
+      .nominee-card,
+      .placeholder-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        overflow: hidden !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 215, 106, 0.42) !important;
+        background:
+          linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.025)),
+          rgba(0,0,0,0.72) !important;
+        box-sizing: border-box !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame,
+      .nominee-card .nominee-photo-frame,
+      .placeholder-card .nominee-photo-frame,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+        display: grid !important;
+        place-items: center !important;
+        width: 100% !important;
+        height: 240px !important;
+        min-height: 240px !important;
+        border-radius: 0 !important;
+        border: 0 !important;
+        border-bottom: 1px solid rgba(255, 215, 106, 0.32) !important;
+        background:
+          radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.18), transparent 45%),
+          #070707 !important;
+        overflow: hidden !important;
+      }
+
+      .ballot-nominee-card .nominee-photo-frame img,
+      .nominee-card .nominee-photo-frame img,
+      .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+      }
+
+      .nominee-card-body {
+        display: block !important;
+        padding: 18px !important;
+        text-align: center !important;
+      }
+
+      .nominee-card-body h3 {
+        margin: 0 0 8px !important;
+        color: #ffffff !important;
+        font-size: 1.22rem !important;
+        line-height: 1.12 !important;
+        font-weight: 1000 !important;
+      }
+
+      .nominee-card-body p {
+        margin: 0 !important;
+        color: #ffd76a !important;
+        font-size: 0.92rem !important;
+        font-weight: 900 !important;
+      }
+
+      .select-nominee-form {
+        display: grid !important;
+        gap: 9px !important;
+        padding: 0 12px 14px !important;
+      }
+
+      .vote-card-btn,
+      .select-nominee-form .btn {
+        display: inline-flex !important;
+        width: 100% !important;
+        min-height: 48px !important;
+        margin: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+      }
+
+      .review-vote-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+      }
+
+      .review-vote-row .btn,
+      .ballot-status-row .btn,
+      .ballot-navigation-strip .btn,
+      .ballot-menu-footer .btn {
+        width: 100% !important;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'ballot' %}">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-words">
+        <span class="brand-line-one">The ATL’s Hottest</span>
+        <span class="brand-line-two">Awards Association</span>
+      </span>
+    </a>
+
+    <input class="mobile-nav-check" type="checkbox" id="mobile-nav-check">
+<label class="mobile-nav-toggle" for="mobile-nav-check">
+  <span>Menu</span>
+  <b>☰</b>
+</label>
+<nav>
+      <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'ballot' %}">VOTE</a>
+        <a href="{% url 'atl_tv' %}">ATL TV</a>
+        <a href="{% url 'membership_plans' %}">Memberships</a>
+        <a href="{% url 'atls_hottest_marketplace' %}">Shop</a>
+        <a href="{% url 'advertise_command_center' %}">Advertise With ATL’s Hottest</a>
+      <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
+      <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
+      {% if request.user.is_staff %}
+        <a href="{% url 'staff_dashboard' %}">Staff</a>
+        <a href="{% url 'admin:index' %}">Admin</a>
+      {% endif %}
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'logout_then_home' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

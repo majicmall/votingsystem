@@ -617,7 +617,7 @@ def nominee_signup(request):
         if request.user.is_authenticated:
             return redirect("nomination_thank_you", nominee_id=nominee.pk)
 
-        return redirect("ballot")
+        return redirect("nomination_thank_you", nominee_id=nominee.nominee_id or nominee.pk)
 
     return render(request, "ballot/nominee_signup.html", {"form": form})
 

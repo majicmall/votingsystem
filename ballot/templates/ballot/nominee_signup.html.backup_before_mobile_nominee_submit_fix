@@ -17,7 +17,7 @@
 <p class="nomination-contact-note">
   If you know the nominee’s social media or email address, please include it. If not, you can still submit the nomination.
 </p>
-<form class="nomination-form" method="post" enctype="multipart/form-data" action="{% url 'nominee_signup' %}">
+<form class="nomination-form" method="post" enctype="multipart/form-data">
 
         <div class="nomination-fan-fields">
           <div class="field-group">

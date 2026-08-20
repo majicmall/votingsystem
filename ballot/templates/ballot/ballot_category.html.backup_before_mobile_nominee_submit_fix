@@ -67,7 +67,7 @@
         </a>
 
         {% if voting_open %}
-          <form method="post" action="{% url 'nominee_signup' %}" class="select-nominee-form">
+          <form method="post" action="{% url 'select_ballot_nominee' category.slug nominee.id %}" class="select-nominee-form">
             {% csrf_token %}
             <button class="btn primary vote-card-btn" type="submit" name="next_action" value="review">
               Select & Review
