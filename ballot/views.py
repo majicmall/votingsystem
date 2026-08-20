@@ -170,12 +170,13 @@ def landing_page(request):
 
 @require_http_methods(["GET"])
 def nomination_thank_you(request, nominee_id):
-    nominee = (
-        Nominee.objects.filter(pk=nominee_id).first()
-        or Nominee.objects.filter(nominee_id=nominee_id).first()
-        if hasattr(Nominee, "nominee_id")
-        else None
-    )
+    nominee = None
+
+    if str(nominee_id).isdigit():
+        nominee = Nominee.objects.filter(pk=nominee_id).first()
+
+    if nominee is None:
+        nominee = Nominee.objects.filter(nominee_id=nominee_id).first()
 
     if nominee is None:
         nominee = get_object_or_404(Nominee, pk=nominee_id)
@@ -617,7 +618,7 @@ def nominee_signup(request):
         if request.user.is_authenticated:
             return redirect("nomination_thank_you", nominee_id=nominee.pk)
 
-        return redirect("nomination_thank_you", nominee_id=nominee.nominee_id or nominee.pk)
+        return redirect("nomination_thank_you", nominee_id=nominee.pk)
 
     return render(request, "ballot/nominee_signup.html", {"form": form})
 
