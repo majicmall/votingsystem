@@ -169,36 +169,50 @@ def landing_page(request):
 
 
 @require_http_methods(["GET"])
-def nomination_thank_you(request, nominee_id):
-    nominee = None
+def nomination_thank_you(request, nominee_id=None):
+    nominees = []
 
-    # Numeric thank-you URLs use the database primary key.
-    if str(nominee_id).isdigit():
-        nominee = Nominee.objects.filter(pk=int(nominee_id)).first()
+    # Preferred path: nominee IDs stored immediately after successful submission.
+    session_ids = request.session.get("last_nomination_ids") or []
+    if session_ids:
+        nominees = list(Nominee.objects.filter(pk__in=session_ids))
+        nominee_order = {pk: i for i, pk in enumerate(session_ids)}
+        nominees.sort(key=lambda item: nominee_order.get(item.pk, 999))
 
-    # Older/generated slug thank-you URLs use nominee_id if that field exists.
-    if nominee is None:
-        nominee_field_names = {field.name for field in Nominee._meta.get_fields()}
-        if "nominee_id" in nominee_field_names:
-            nominee = Nominee.objects.filter(nominee_id=nominee_id).first()
+    # Backward-compatible path for older slug/numeric thank-you URLs.
+    if not nominees and nominee_id:
+        if str(nominee_id).isdigit():
+            nominee = Nominee.objects.filter(pk=int(nominee_id)).first()
+            if nominee:
+                nominees = [nominee]
 
-    if nominee is None:
-        raise Http404("Nomination thank-you page not found.")
+        if not nominees:
+            nominee_field_names = {field.name for field in Nominee._meta.get_fields()}
+            if "nominee_id" in nominee_field_names:
+                nominee = Nominee.objects.filter(nominee_id=nominee_id).first()
+                if nominee:
+                    nominees = [nominee]
+
+    if not nominees:
+        return redirect("nominee_signup")
+
+    nominee = nominees[0]
 
     category_names = []
+    for item in nominees:
+        category = getattr(item, "category", None)
+        if category:
+            category_names.append(str(getattr(category, "name", category)))
 
-    category = getattr(nominee, "category", None)
-    if category:
-        category_names.append(str(getattr(category, "name", category)))
-
-    categories = getattr(nominee, "categories", None)
-    if categories is not None and hasattr(categories, "all"):
-        category_names.extend([str(getattr(cat, "name", cat)) for cat in categories.all()])
+        categories = getattr(item, "categories", None)
+        if categories is not None and hasattr(categories, "all"):
+            category_names.extend([str(getattr(cat, "name", cat)) for cat in categories.all()])
 
     category_names = list(dict.fromkeys([name for name in category_names if name]))
 
     return render(request, "ballot/nomination_thank_you.html", {
         "nominee": nominee,
+        "nominees": nominees,
         "category_names": category_names,
     })
 
@@ -598,12 +612,29 @@ def nominee_signup(request):
                     "website": form.cleaned_data.get("website", ""),
                     "social_link": form.cleaned_data.get("social_link", ""),
                     "contact_email": form.cleaned_data.get("contact_email", ""),
+                    "nominator_name": form.cleaned_data.get("nominator_name", ""),
+                    "nominator_email": form.cleaned_data.get("nominator_email", ""),
                     "photo": photo,
                     "photo_submitted_at": timezone.now() if photo else None,
                     "approval_status": Nominee.APPROVAL_PENDING,
                     "is_active": True,
                 },
             )
+
+            # If nominee already existed, still keep latest nominator/contact info.
+            nominee.website = form.cleaned_data.get("website", nominee.website)
+            nominee.social_link = form.cleaned_data.get("social_link", nominee.social_link)
+            nominee.contact_email = form.cleaned_data.get("contact_email", nominee.contact_email)
+            nominee.nominator_name = form.cleaned_data.get("nominator_name", nominee.nominator_name)
+            nominee.nominator_email = form.cleaned_data.get("nominator_email", nominee.nominator_email)
+
+            if photo:
+                nominee.photo = photo
+                nominee.photo_submitted_at = timezone.now()
+
+            nominee.approval_status = Nominee.APPROVAL_PENDING
+            nominee.is_active = True
+            nominee.save()
 
             created_nominees.append(nominee)
 
@@ -619,13 +650,12 @@ def nominee_signup(request):
             "Nominee submitted. Staff will review and approve before it appears on the ballot.",
         )
 
-        if request.user.is_authenticated:
-            return redirect("nomination_thank_you", nominee_id=nominee.pk)
+        request.session["last_nomination_ids"] = [nom.pk for nom in created_nominees]
+        request.session.modified = True
 
-        return redirect("nomination_thank_you", nominee_id=nominee.pk)
+        return redirect("nomination_thank_you")
 
     return render(request, "ballot/nominee_signup.html", {"form": form})
-
 
 @staff_member_required
 @require_http_methods(["GET"])
