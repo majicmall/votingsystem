@@ -596,6 +596,87 @@ def association_nominee_delete(request, nominee_id):
 
 @require_http_methods(["GET", "POST"])
 @csrf_protect
+
+
+def send_nomination_confirmation_email(nominator_name, nominator_email, nominee_name, category_names):
+    """
+    Sends a confirmation email to the person who submitted a nomination.
+    Email failures should never block the nomination flow.
+    """
+    if not nominator_email:
+        return
+
+    display_name = nominator_name or "ATL's Hottest Fan"
+    categories_text = ", ".join(category_names) if category_names else "submitted category"
+
+    subject = "Thank you for nominating ATL's Hottest"
+
+    plain_message = f"""Hi {display_name},
+
+Thank you for submitting a nomination for ATL's Hottest Awards.
+
+Nominee:
+{nominee_name}
+
+Category / Categories:
+{categories_text}
+
+Your nomination has been received and will be reviewed by the ATL's Hottest Awards Association team.
+
+While you're here, explore ATL's Hottest Awards TV, The ATL's Hottest Marketplace, events, venues, media, professionals, personalities, people, places, things to do, networking opportunities, awards, rewards, and more.
+
+Thank you for helping us celebrate Atlanta culture.
+
+ATL's Hottest Awards Association
+"""
+
+    html_message = f"""
+    <div style="font-family:Arial,sans-serif;background:#080808;color:#ffffff;padding:28px;border-radius:18px;">
+      <h1 style="color:#ffd76a;margin:0 0 14px;">Thank You for Nominating ATL's Hottest</h1>
+
+      <p>Hi {display_name},</p>
+
+      <p>
+        Thank you for submitting a nomination for <strong>ATL's Hottest Awards</strong>.
+        Your nomination has been received and will be reviewed by the ATL's Hottest Awards Association team.
+      </p>
+
+      <div style="margin:22px 0;padding:18px;border:1px solid #ffd76a;border-radius:14px;background:#140207;">
+        <p style="margin:0 0 8px;color:#ffd76a;font-weight:bold;">Nominee</p>
+        <p style="margin:0 0 16px;font-size:20px;font-weight:bold;">{nominee_name}</p>
+
+        <p style="margin:0 0 8px;color:#ffd76a;font-weight:bold;">Category / Categories</p>
+        <p style="margin:0;font-size:18px;font-weight:bold;">{categories_text}</p>
+      </div>
+
+      <p>
+        While you're here, explore ATL's Hottest Awards TV, The ATL's Hottest Marketplace,
+        events, venues, media, professionals, personalities, people, places, things to do,
+        networking opportunities, awards, rewards, and more.
+      </p>
+
+      <p style="margin-top:24px;color:#ffd76a;font-weight:bold;">
+        ATL's Hottest Awards Association
+      </p>
+    </div>
+    """
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(settings, "EMAIL_HOST_USER", None)
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=[nominator_email],
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send(fail_silently=True)
+    except Exception:
+        # Do not stop the nomination if email delivery has an issue.
+        pass
+
+
 def nominee_signup(request):
     form = NomineeSignupForm(request.POST or None, request.FILES or None)
 
@@ -652,6 +733,21 @@ def nominee_signup(request):
 
         request.session["last_nomination_ids"] = [nom.pk for nom in created_nominees]
         request.session.modified = True
+
+        confirmation_category_names = []
+        for item in created_nominees:
+            category = getattr(item, "category", None)
+            if category:
+                confirmation_category_names.append(str(getattr(category, "name", category)))
+
+        confirmation_category_names = list(dict.fromkeys([name for name in confirmation_category_names if name]))
+
+        send_nomination_confirmation_email(
+            nominator_name=form.cleaned_data.get("nominator_name", ""),
+            nominator_email=form.cleaned_data.get("nominator_email", ""),
+            nominee_name=nominee_name,
+            category_names=confirmation_category_names,
+        )
 
         return redirect("nomination_thank_you")
 
