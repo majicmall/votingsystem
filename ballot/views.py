@@ -12,6 +12,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import EmailMultiAlternatives
+from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.http import JsonResponse, HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -683,6 +684,10 @@ def nominee_signup(request):
     if request.method == "POST" and form.is_valid():
         nominee_name = form.cleaned_data["nominee_name"].strip()
         photo = form.cleaned_data.get("photo")
+        photo_name = getattr(photo, "name", "") if photo else ""
+        photo_bytes = photo.read() if photo else None
+        if photo and hasattr(photo, "seek"):
+            photo.seek(0)
         created_nominees = []
 
         for category in form.cleaned_data["categories"]:
@@ -695,7 +700,6 @@ def nominee_signup(request):
                     "contact_email": form.cleaned_data.get("contact_email", ""),
                     "nominator_name": form.cleaned_data.get("nominator_name", ""),
                     "nominator_email": form.cleaned_data.get("nominator_email", ""),
-                    "photo": photo,
                     "photo_submitted_at": timezone.now() if photo else None,
                     "approval_status": Nominee.APPROVAL_PENDING,
                     "is_active": True,
@@ -709,8 +713,8 @@ def nominee_signup(request):
             nominee.nominator_name = form.cleaned_data.get("nominator_name", nominee.nominator_name)
             nominee.nominator_email = form.cleaned_data.get("nominator_email", nominee.nominator_email)
 
-            if photo:
-                nominee.photo = photo
+            if photo_bytes and photo_name:
+                nominee.photo.save(photo_name, ContentFile(photo_bytes), save=False)
                 nominee.photo_submitted_at = timezone.now()
 
             nominee.approval_status = Nominee.APPROVAL_PENDING
@@ -742,12 +746,17 @@ def nominee_signup(request):
 
         confirmation_category_names = list(dict.fromkeys([name for name in confirmation_category_names if name]))
 
-        send_nomination_confirmation_email(
-            nominator_name=form.cleaned_data.get("nominator_name", ""),
-            nominator_email=form.cleaned_data.get("nominator_email", ""),
-            nominee_name=nominee_name,
-            category_names=confirmation_category_names,
-        )
+        try:
+            send_nomination_confirmation_email(
+                nominator_name=form.cleaned_data.get("nominator_name", ""),
+                nominator_email=form.cleaned_data.get("nominator_email", ""),
+                nominee_name=nominee_name,
+                category_names=confirmation_category_names,
+                request=request,
+            )
+        except Exception:
+            # Email should never block a successful nomination submit.
+            pass
 
         return redirect("nomination_thank_you")
 
