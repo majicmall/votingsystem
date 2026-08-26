@@ -1670,3 +1670,16 @@ def atls_hottest_marketplace(request):
     return render(request, "ballot/atls_hottest_marketplace.html", {
         "marketplace_items": marketplace_items,
     })
+
+
+def about_atls_hottest(request):
+    return render(request, "ballot/about_atls_hottest.html")
+
+
+def events_whats_happening(request):
+    return render(request, "ballot/events_whats_happening.html")
+
+
+def event_submit(request):
+    messages.info(request, "Event submissions are coming soon. This page is being prepared for ATL's Hottest event creators.")
+    return render(request, "ballot/event_submit.html")

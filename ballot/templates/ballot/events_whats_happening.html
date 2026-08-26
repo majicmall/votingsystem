@@ -1,0 +1,21 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}What’s Happening In The ATL | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1100px; margin: 0 auto;">
+  <p class="eyebrow">Events Marketplace</p>
+  <h1>What’s Happening In The ATL</h1>
+
+  <p>
+    ATL’s Hottest Events Marketplace is coming soon. This will be the destination
+    for events, happenings, attractions, showcases, pop-ups, premieres, networking
+    opportunities, and cultural experiences around Atlanta.
+  </p>
+
+  <div class="landing-buttons" style="margin-top: 24px;">
+    <a class="btn primary" href="{% url 'event_submit' %}">Submit An Event</a>
+    <a class="btn" href="{% url 'home' %}">Back Home</a>
+  </div>
+</div>
+{% endblock %}

@@ -362,27 +362,26 @@
 
   <section class="landing-section-grid">
     <article class="landing-info-card">
-      <h3>Nomination Period</h3>
+      <h3>What’s Happening In The ATL?</h3>
       <p>
-        During nomination season, nominees are accepted into categories for review and approval.
-        Voting remains inactive until the official voting period opens.
+        Discover events, happenings, attractions, showcases, pop-ups, premieres,
+        networking opportunities, and cultural experiences around Atlanta.
       </p>
+      <div class="landing-buttons" style="margin-top: 16px;">
+        <a class="btn primary" href="{% url 'events_whats_happening' %}">Explore Events</a>
+        <a class="btn" href="{% url 'event_submit' %}">Submit An Event</a>
+      </div>
     </article>
 
     <article class="landing-info-card">
-      <h3>Approved Nominees</h3>
+      <h3>About ATL’s Hottest</h3>
       <p>
-        Approved nominees receive login access to complete their nominee profile,
-        upload media, and prepare for voting season.
+        Learn how nominations, approvals, nominee access, association access,
+        and the official voting season work.
       </p>
-    </article>
-
-    <article class="landing-info-card">
-      <h3>Association Access</h3>
-      <p>
-        Join the ATL’s Hottest Awards Association to manage nominees, submit nominations,
-        and participate in the official awards platform.
-      </p>
+      <div class="landing-buttons" style="margin-top: 16px;">
+        <a class="btn" href="{% url 'about_atls_hottest' %}">Learn More</a>
+      </div>
     </article>
   </section>
 

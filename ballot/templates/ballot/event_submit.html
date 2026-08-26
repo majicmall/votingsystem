@@ -1,0 +1,21 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Submit An Event | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 980px; margin: 0 auto;">
+  <p class="eyebrow">Event Creators</p>
+  <h1>Submit Your Event</h1>
+
+  <p>
+    Event submissions are being prepared. Soon, event creators will be able to
+    submit events for review and receive shareable QR codes that point back to
+    ATL’s Hottest.
+  </p>
+
+  <div class="landing-buttons" style="margin-top: 24px;">
+    <a class="btn primary" href="{% url 'events_whats_happening' %}">What’s Happening In The ATL</a>
+    <a class="btn" href="{% url 'home' %}">Back Home</a>
+  </div>
+</div>
+{% endblock %}

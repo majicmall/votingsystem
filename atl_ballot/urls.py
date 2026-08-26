@@ -11,6 +11,10 @@ from ballot import views as ballot_views
 
 
 urlpatterns = [
+    path("events/whats-happening/", ballot_views.events_whats_happening, name="events_whats_happening"),
+    path("events/submit/", ballot_views.event_submit, name="event_submit"),
+
+    path("about-atls-hottest/", ballot_views.about_atls_hottest, name="about_atls_hottest"),
     path("memberships/", ballot_views.membership_plans, name="membership_plans"),
     path("memberships/<slug:slug>/", ballot_views.membership_plan_detail, name="membership_plan_detail"),
     path("memberships/choose/<slug:slug>/", ballot_views.choose_membership_plan, name="choose_membership_plan"),
