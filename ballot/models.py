@@ -856,3 +856,72 @@ class VotingCampaign(models.Model):
     @property
     def voting_status_label(self):
         return "Voting Open" if self.is_voting_open else "Voting Closed"
+
+
+
+class AtlsHottestEvent(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    CATEGORY_CHOICES = [
+        ("events", "Events"),
+        ("festivals", "Festivals"),
+        ("nightlife", "Nightlife"),
+        ("special_promotions", "Special Promotions"),
+        ("whats_happening_today", "What's Happening Today"),
+    ]
+
+    title = models.CharField(max_length=180)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+
+    category = models.CharField(max_length=40, choices=CATEGORY_CHOICES, default="events")
+
+    organizer_name = models.CharField(max_length=160)
+    organizer_email = models.EmailField()
+    organizer_phone = models.CharField(max_length=40, blank=True)
+
+    venue_name = models.CharField(max_length=180, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=120, default="Atlanta")
+    state = models.CharField(max_length=40, default="GA")
+
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField(null=True, blank=True)
+
+    description = models.TextField()
+    flyer = models.ImageField(upload_to="events/flyers/", blank=True, null=True)
+
+    ticket_link = models.URLField(blank=True)
+    website = models.URLField(blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    is_featured = models.BooleanField(default=False)
+    show_today = models.BooleanField(default=False)
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["starts_at", "title"]
+        verbose_name = "ATL's Hottest Event"
+        verbose_name_plural = "ATL's Hottest Events"
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title) or "atl-event"
+            slug = base_slug
+            counter = 2
+
+            while AtlsHottestEvent.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+
+        super().save(*args, **kwargs)

@@ -1,5 +1,6 @@
-# ballot/forms.py
 from __future__ import annotations
+from .models import AtlsHottestEvent
+# ballot/forms.py
 
 from django import forms
 
@@ -170,4 +171,32 @@ class AdvertisingInquiryForm(forms.ModelForm):
                 "placeholder": "Tell us what you want to promote and when you want your campaign to run.",
                 "rows": 5,
             }),
+        }
+
+
+
+class EventSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = AtlsHottestEvent
+        fields = [
+            "title",
+            "category",
+            "organizer_name",
+            "organizer_email",
+            "organizer_phone",
+            "venue_name",
+            "address",
+            "city",
+            "state",
+            "starts_at",
+            "ends_at",
+            "description",
+            "flyer",
+            "ticket_link",
+            "website",
+        ]
+        widgets = {
+            "starts_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "ends_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "description": forms.Textarea(attrs={"rows": 6}),
         }

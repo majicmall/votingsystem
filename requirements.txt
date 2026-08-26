@@ -5,3 +5,4 @@ whitenoise==6.6.0
 gunicorn>=21.2
 dj-database-url>=2.2.0
 psycopg[binary]>=3.2.1
+qrcode[pil]>=7.4.2

@@ -11,6 +11,12 @@ from ballot import views as ballot_views
 
 
 urlpatterns = [
+    path("events/live/<slug:slug>/qr.png", ballot_views.event_qr_code, name="event_qr_code"),
+
+    path("events/live/<slug:slug>/", ballot_views.event_detail, name="event_detail"),
+
+    path("events/submitted/<slug:slug>/", ballot_views.event_submitted, name="event_submitted"),
+
     path("events/sample/<slug:slug>/", ballot_views.sample_event_detail, name="sample_event_detail"),
 
     path("events/whats-happening/", ballot_views.events_whats_happening, name="events_whats_happening"),

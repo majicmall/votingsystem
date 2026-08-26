@@ -3,19 +3,109 @@
 {% block title %}Submit An Event | ATL’s Hottest{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 980px; margin: 0 auto;">
-  <p class="eyebrow">Event Creators</p>
-  <h1>Submit Your Event</h1>
+<style>
+  .event-submit-shell {
+    max-width: 980px;
+    margin: 0 auto;
+  }
 
-  <p>
-    Event submissions are being prepared. Soon, event creators will be able to
-    submit events for review and receive shareable QR codes that point back to
-    ATL’s Hottest.
-  </p>
+  .event-submit-form {
+    margin-top: 26px;
+  }
 
-  <div class="landing-buttons" style="margin-top: 24px;">
-    <a class="btn primary" href="{% url 'events_whats_happening' %}">What’s Happening In The ATL</a>
-    <a class="btn" href="{% url 'home' %}">Back Home</a>
+  .event-submit-form p {
+    margin-bottom: 18px;
+  }
+
+  .event-submit-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffd76a;
+    font-weight: 1000;
+    letter-spacing: 0.02em;
+  }
+
+  .event-submit-form input,
+  .event-submit-form select,
+  .event-submit-form textarea {
+    width: 100%;
+    padding: 14px 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 106, 0.38);
+    background: rgba(0,0,0,0.64);
+    color: #fff;
+    font: inherit;
+    box-sizing: border-box;
+  }
+
+  .event-submit-form input[type="file"] {
+    padding: 13px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .event-submit-form input:focus,
+  .event-submit-form select:focus,
+  .event-submit-form textarea:focus {
+    outline: none;
+    border-color: rgba(255, 215, 106, 0.82);
+    box-shadow: 0 0 0 3px rgba(255, 215, 106, 0.12);
+  }
+
+  .event-submit-form .helptext {
+    display: block;
+    margin-top: 6px;
+    color: rgba(255,255,255,0.58);
+    font-size: 0.86rem;
+  }
+
+  .event-submit-form ul.errorlist {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    color: #ffd76a;
+    font-weight: 900;
+  }
+
+  .event-form-note {
+    margin-top: 22px;
+    padding: 16px;
+    border: 1px solid rgba(255, 215, 106, 0.25);
+    border-radius: 18px;
+    background: rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.76);
+  }
+</style>
+
+<div class="event-submit-shell">
+  <div class="card">
+    <p class="eyebrow">Event Creators</p>
+    <h1>Submit Your Event</h1>
+
+    <p>
+      Submit your event for review. Approved events can appear in
+      <strong>What’s Happening In The ATL</strong>, <strong>What’s Happening Today</strong>,
+      ATL’s Hottest promotions, and future event discovery areas.
+    </p>
+
+    <p>
+      Event pages can include flyers, links, details, and a shareable QR code that points
+      visitors back to ATLsHottest.com and app.atlshottest.com.
+    </p>
+
+    <div class="event-form-note">
+      <strong>Review Notice:</strong> Event submissions are reviewed before public placement.
+      Sponsored and featured placement opportunities are available through the Advertising Command Center.
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="event-submit-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="landing-buttons" style="margin-top: 26px;">
+        <button type="submit" class="btn primary">Submit Event For Review</button>
+        <a class="btn" href="{% url 'events_whats_happening' %}">Back To What’s Happening</a>
+        <a class="btn" href="{% url 'advertise_command_center' %}">Promote An Event</a>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
