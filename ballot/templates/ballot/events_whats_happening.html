@@ -145,12 +145,32 @@
       min-height: auto;
     }
   }
+
+  .events-date-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 4px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 215, 106, 0.42);
+    border-radius: 999px;
+    color: #ffd76a;
+    background: rgba(0,0,0,0.42);
+    font-weight: 1000;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+  }
+
 </style>
 
 <div class="events-marketplace-shell">
   <div class="card" style="max-width: 1100px; margin: 0 auto;">
     <p class="eyebrow">Events Marketplace</p>
     <h1>What’s Happening In The ATL</h1>
+    <div class="events-date-pill">
+      Today’s Date: {{ today_date|date:"l, F j, Y" }} • {{ timezone_label }}
+    </div>
 
     <p>
       Discover what to do today and where to go around ATL — including events,
@@ -169,6 +189,9 @@
       <div>
         <p class="eyebrow">Daily Spotlight</p>
         <h2>What’s Happening Today</h2>
+        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.72);">
+          Updated daily for Eastern Time: <strong>{{ today_date|date:"F j, Y" }}</strong>
+        </p>
       </div>
       <a class="btn" href="{% url 'event_submit' %}">Submit Today’s Event</a>
     </div>

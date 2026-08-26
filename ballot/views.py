@@ -1677,7 +1677,10 @@ def about_atls_hottest(request):
 
 
 def events_whats_happening(request):
-    return render(request, "ballot/events_whats_happening.html")
+    return render(request, "ballot/events_whats_happening.html", {
+        "today_date": timezone.localdate(),
+        "timezone_label": "Eastern Time",
+    })
 
 
 def event_submit(request):
@@ -1902,4 +1905,6 @@ def sample_event_detail(request, slug):
     return render(request, "ballot/sample_event_detail.html", {
         "event": event,
         "slug": slug,
+        "today_date": timezone.localdate(),
+        "timezone_label": "Eastern Time",
     })
