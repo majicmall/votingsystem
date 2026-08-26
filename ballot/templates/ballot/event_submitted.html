@@ -1,0 +1,52 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Event Submitted | ATL’s Hottest{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 980px; margin: 0 auto;">
+  <p class="eyebrow">Event Submitted</p>
+  <h1>{{ event.title }}</h1>
+
+  <p>
+    Your event has been submitted for review. Once approved, it can appear in
+    What’s Happening In The ATL, What’s Happening Today, and other ATL’s Hottest
+    event discovery areas.
+  </p>
+
+  <section class="landing-section-grid" style="margin-top: 24px;">
+    <article class="landing-info-card">
+      <h3>Status</h3>
+      <p>{{ event.get_status_display }}</p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Category</h3>
+      <p>{{ event.get_category_display }}</p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Event Date</h3>
+      <p>{{ event.starts_at|date:"l, F j, Y g:i A" }} Eastern Time</p>
+    </article>
+  </section>
+
+  <div class="card" style="margin-top: 28px; text-align: center;">
+    <h2>Shareable QR Code Preview</h2>
+    <p>
+      This QR code points to the event page inside ATL’s Hottest.
+    </p>
+
+    <img
+      src="{% url 'event_qr_code' event.slug %}"
+      alt="QR code for {{ event.title }}"
+      style="width:220px; height:220px; background:#fff; padding:12px; border-radius:16px;"
+    >
+  </div>
+
+  <div class="landing-buttons" style="margin-top: 26px;">
+    <a class="btn primary" href="{% url 'event_detail' event.slug %}">View Event Page</a>
+    <a class="btn" href="{% url 'events_whats_happening' %}">Back To Events</a>
+    <a class="btn" href="{% url 'advertise_command_center' %}">Promote This Event</a>
+  </div>
+</div>
+{% endblock %}

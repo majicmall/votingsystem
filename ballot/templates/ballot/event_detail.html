@@ -1,0 +1,68 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}{{ event.title }} | ATL’s Hottest Events{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1000px; margin: 0 auto;">
+  <p class="eyebrow">{{ event.get_category_display }}</p>
+  <h1>{{ event.title }}</h1>
+
+  {% if event.flyer %}
+    <img
+      src="{{ event.flyer.url }}"
+      alt="{{ event.title }}"
+      style="width:100%; max-height:520px; object-fit:cover; border-radius:22px; margin:20px 0;"
+    >
+  {% endif %}
+
+  <section class="landing-section-grid" style="margin-top: 24px;">
+    <article class="landing-info-card">
+      <h3>Date & Time</h3>
+      <p>{{ event.starts_at|date:"l, F j, Y g:i A" }} Eastern Time</p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Location</h3>
+      <p>
+        {% if event.venue_name %}{{ event.venue_name }}<br>{% endif %}
+        {% if event.address %}{{ event.address }}<br>{% endif %}
+        {{ event.city }}, {{ event.state }}
+      </p>
+    </article>
+
+    <article class="landing-info-card">
+      <h3>Status</h3>
+      <p>{{ event.get_status_display }}</p>
+    </article>
+  </section>
+
+  <section class="card" style="margin-top: 28px;">
+    <p class="eyebrow">Event Details</p>
+    <p>{{ event.description|linebreaks }}</p>
+  </section>
+
+  <div class="landing-buttons" style="margin-top: 26px;">
+    {% if event.ticket_link %}
+      <a class="btn primary" href="{{ event.ticket_link }}" target="_blank" rel="noopener">Get Tickets</a>
+    {% endif %}
+
+    {% if event.website %}
+      <a class="btn" href="{{ event.website }}" target="_blank" rel="noopener">Event Website</a>
+    {% endif %}
+
+    <a class="btn" href="{% url 'event_qr_code' event.slug %}" target="_blank">Open QR Code</a>
+    <a class="btn" href="{% url 'events_whats_happening' %}">Back To Events</a>
+  </div>
+
+  <div class="card" style="margin-top: 28px; text-align:center;">
+    <h2>Share This Event</h2>
+    <p>Use this QR code on flyers, social posts, screens, and promotions.</p>
+
+    <img
+      src="{% url 'event_qr_code' event.slug %}"
+      alt="QR code for {{ event.title }}"
+      style="width:220px; height:220px; background:#fff; padding:12px; border-radius:16px;"
+    >
+  </div>
+</div>
+{% endblock %}
