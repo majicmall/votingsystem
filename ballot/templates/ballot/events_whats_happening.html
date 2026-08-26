@@ -3,19 +3,273 @@
 {% block title %}What’s Happening In The ATL | ATL’s Hottest{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 1100px; margin: 0 auto;">
-  <p class="eyebrow">Events Marketplace</p>
-  <h1>What’s Happening In The ATL</h1>
+<style>
+  .events-marketplace-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
 
-  <p>
-    ATL’s Hottest Events Marketplace is coming soon. This will be the destination
-    for events, happenings, attractions, showcases, pop-ups, premieres, networking
-    opportunities, and cultural experiences around Atlanta.
-  </p>
+  .events-category-section {
+    margin-top: 34px;
+  }
 
-  <div class="landing-buttons" style="margin-top: 24px;">
-    <a class="btn primary" href="{% url 'event_submit' %}">Submit An Event</a>
-    <a class="btn" href="{% url 'home' %}">Back Home</a>
+  .events-category-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+
+  .events-category-header h2 {
+    margin: 0;
+  }
+
+  .events-sample-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .event-sample-card {
+    position: relative;
+    display: block;
+    min-height: 245px;
+    padding: 18px;
+    border: 1px solid rgba(255, 215, 106, 0.34);
+    border-radius: 22px;
+    overflow: hidden;
+    text-decoration: none;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 215, 106, 0.18), transparent 34%),
+      linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035)),
+      rgba(0,0,0,0.58);
+    box-shadow:
+      inset 0 0 24px rgba(255,255,255,0.035),
+      0 0 18px rgba(215, 25, 53, 0.10);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .event-sample-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 215, 106, 0.78);
+    box-shadow:
+      inset 0 0 24px rgba(255,255,255,0.045),
+      0 0 28px rgba(255, 215, 106, 0.22),
+      0 0 34px rgba(215, 25, 53, 0.16);
+  }
+
+  .event-sample-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.08) 45%, transparent 56%);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .event-sample-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .event-card-label {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 215, 106, 0.42);
+    border-radius: 999px;
+    color: #ffd76a;
+    font-size: 0.68rem;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .event-sample-card h3 {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 1.08rem;
+    line-height: 1.18;
+  }
+
+  .event-sample-card p {
+    margin: 0 0 10px;
+    color: rgba(255,255,255,0.78);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .event-card-meta {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 215, 106, 0.20);
+    color: #ffd76a !important;
+    font-weight: 900;
+    font-size: 0.82rem !important;
+  }
+
+  .event-card-placeholder {
+    margin-top: 14px;
+    color: rgba(255,255,255,0.62) !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .today-feature-card {
+    border-color: rgba(255, 215, 106, 0.66);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(255, 215, 106, 0.26), transparent 34%),
+      radial-gradient(circle at 90% 8%, rgba(215, 25, 53, 0.26), transparent 34%),
+      linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+      rgba(0,0,0,0.66);
+  }
+
+  @media (max-width: 1100px) {
+    .events-sample-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .events-category-header {
+      display: block;
+    }
+
+    .events-sample-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .event-sample-card {
+      min-height: auto;
+    }
+  }
+</style>
+
+<div class="events-marketplace-shell">
+  <div class="card" style="max-width: 1100px; margin: 0 auto;">
+    <p class="eyebrow">Events Marketplace</p>
+    <h1>What’s Happening In The ATL</h1>
+
+    <p>
+      Discover what to do today and where to go around ATL — including events,
+      festivals, nightlife, special promotions, attractions, showcases, pop-ups,
+      premieres, networking opportunities, and cultural experiences.
+    </p>
+
+    <div class="landing-buttons" style="margin-top: 24px;">
+      <a class="btn primary" href="{% url 'event_submit' %}">Submit An Event</a>
+      <a class="btn" href="{% url 'home' %}">Back Home</a>
+    </div>
   </div>
+
+  <section class="events-category-section">
+    <div class="events-category-header">
+      <div>
+        <p class="eyebrow">Daily Spotlight</p>
+        <h2>What’s Happening Today</h2>
+      </div>
+      <a class="btn" href="{% url 'event_submit' %}">Submit Today’s Event</a>
+    </div>
+
+    <div class="events-sample-grid">
+      <a class="event-sample-card today-feature-card" href="{% url 'sample_event_detail' 'today-downtown-atl-spotlight' %}">
+        <span class="event-card-label">Today</span>
+        <h3>Downtown ATL Spotlight</h3>
+        <p>A daily spotlight for what to do, where to go, and what is happening around Downtown ATL today.</p>
+        <p class="event-card-meta">Downtown Atlanta • Today</p>
+        <p class="event-card-placeholder">View today’s details</p>
+      </a>
+
+      <a class="event-sample-card today-feature-card" href="{% url 'sample_event_detail' 'today-midtown-social' %}">
+        <span class="event-card-label">Today</span>
+        <h3>Midtown Social Picks</h3>
+        <p>Featured restaurants, lounges, networking moments, and entertainment options around Midtown.</p>
+        <p class="event-card-meta">Midtown Atlanta • Today</p>
+        <p class="event-card-placeholder">View today’s details</p>
+      </a>
+
+      <a class="event-sample-card today-feature-card" href="{% url 'sample_event_detail' 'today-buckhead-night-out' %}">
+        <span class="event-card-label">Today</span>
+        <h3>Buckhead Night Out</h3>
+        <p>A daily nightlife and upscale social spotlight for Buckhead events and promotions.</p>
+        <p class="event-card-meta">Buckhead • Tonight</p>
+        <p class="event-card-placeholder">View today’s details</p>
+      </a>
+
+      <a class="event-sample-card today-feature-card" href="{% url 'sample_event_detail' 'today-family-friendly-atl' %}">
+        <span class="event-card-label">Today</span>
+        <h3>Family-Friendly ATL</h3>
+        <p>Family activities, community events, festivals, youth programs, and daytime experiences.</p>
+        <p class="event-card-meta">Metro Atlanta • Today</p>
+        <p class="event-card-placeholder">View today’s details</p>
+      </a>
+
+      <a class="event-sample-card today-feature-card" href="{% url 'sample_event_detail' 'today-special-promotions' %}">
+        <span class="event-card-label">Today</span>
+        <h3>Today’s Special Promotions</h3>
+        <p>Daily deals, restaurant specials, ticket promos, grand openings, and sponsor campaigns.</p>
+        <p class="event-card-meta">ATL Area Businesses • Today</p>
+        <p class="event-card-placeholder">View today’s details</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="events-category-section">
+    <div class="events-category-header">
+      <div><p class="eyebrow">Category</p><h2>Events</h2></div>
+      <a class="btn" href="{% url 'event_submit' %}">Submit Event</a>
+    </div>
+    <div class="events-sample-grid">
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'atl-culture-mixer' %}"><span class="event-card-label">Sample Event</span><h3>ATL Culture Mixer</h3><p>Networking, music, creators, and business connections in one high-energy ATL setting.</p><p class="event-card-meta">Downtown ATL • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'red-carpet-showcase' %}"><span class="event-card-label">Sample Event</span><h3>Red Carpet Showcase</h3><p>A spotlight experience for creators, entertainers, media personalities, and brands.</p><p class="event-card-meta">Midtown • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'business-power-hour' %}"><span class="event-card-label">Sample Event</span><h3>Business Power Hour</h3><p>Professional meet-up for entrepreneurs, founders, service providers, and community leaders.</p><p class="event-card-meta">Buckhead • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'creator-pop-up-night' %}"><span class="event-card-label">Sample Event</span><h3>Creator Pop-Up Night</h3><p>Local creators, vendors, artists, food, music, and live audience engagement.</p><p class="event-card-meta">Westside ATL • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'community-spotlight' %}"><span class="event-card-label">Sample Event</span><h3>Community Spotlight</h3><p>A family-friendly gathering highlighting nonprofits, leaders, resources, and local heroes.</p><p class="event-card-meta">Metro ATL • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+    </div>
+  </section>
+
+  <section class="events-category-section">
+    <div class="events-category-header">
+      <div><p class="eyebrow">Category</p><h2>Festivals</h2></div>
+      <a class="btn" href="{% url 'event_submit' %}">Submit Festival</a>
+    </div>
+    <div class="events-sample-grid">
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'atl-food-fest' %}"><span class="event-card-label">Sample Festival</span><h3>ATL Food Fest</h3><p>Restaurants, chefs, food trucks, tastings, music, and cultural flavor across the city.</p><p class="event-card-meta">Outdoor Venue • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'independent-film-fest' %}"><span class="event-card-label">Sample Festival</span><h3>Independent Film Fest</h3><p>Screenings, panels, filmmakers, actors, directors, and red carpet moments.</p><p class="event-card-meta">Theater District • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'music-in-the-city' %}"><span class="event-card-label">Sample Festival</span><h3>Music In The City</h3><p>Live performances, DJs, bands, artists, stages, and sponsor activations.</p><p class="event-card-meta">ATL Stage • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'arts-culture-fest' %}"><span class="event-card-label">Sample Festival</span><h3>Arts & Culture Fest</h3><p>Visual artists, galleries, creative vendors, fashion, dance, and cultural showcases.</p><p class="event-card-meta">Arts District • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'family-fun-festival' %}"><span class="event-card-label">Sample Festival</span><h3>Family Fun Festival</h3><p>Kid-friendly entertainment, games, food, community resources, and live performances.</p><p class="event-card-meta">Park Venue • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+    </div>
+  </section>
+
+  <section class="events-category-section">
+    <div class="events-category-header">
+      <div><p class="eyebrow">Category</p><h2>Nightlife</h2></div>
+      <a class="btn" href="{% url 'event_submit' %}">Submit Nightlife</a>
+    </div>
+    <div class="events-sample-grid">
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'atl-after-dark' %}"><span class="event-card-label">Sample Nightlife</span><h3>ATL After Dark</h3><p>Music, lounge energy, DJs, VIP sections, and premium nightlife experiences.</p><p class="event-card-meta">Lounge • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'comedy-cocktails' %}"><span class="event-card-label">Sample Nightlife</span><h3>Comedy & Cocktails</h3><p>Stand-up comedy, hosted entertainment, drinks, music, and grown-folks energy.</p><p class="event-card-meta">Comedy Room • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'celebrity-host-night' %}"><span class="event-card-label">Sample Nightlife</span><h3>Celebrity Host Night</h3><p>Featured host, live DJ, red carpet photos, sponsor moments, and VIP promotions.</p><p class="event-card-meta">Club Venue • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'open-mic-live' %}"><span class="event-card-label">Sample Nightlife</span><h3>Open Mic Live</h3><p>Poets, singers, comedians, spoken word artists, and live audience voting energy.</p><p class="event-card-meta">Live Room • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'rooftop-social' %}"><span class="event-card-label">Sample Nightlife</span><h3>Rooftop Social</h3><p>Skyline views, music, cocktails, networking, brand activations, and nightlife culture.</p><p class="event-card-meta">Rooftop • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+    </div>
+  </section>
+
+  <section class="events-category-section">
+    <div class="events-category-header">
+      <div><p class="eyebrow">Category</p><h2>Special Promotions</h2></div>
+      <a class="btn" href="{% url 'event_submit' %}">Submit Promotion</a>
+    </div>
+    <div class="events-sample-grid">
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'grand-opening-promo' %}"><span class="event-card-label">Sample Promo</span><h3>Grand Opening Promo</h3><p>Promote a new restaurant, boutique, studio, lounge, office, or ATL business launch.</p><p class="event-card-meta">Business Launch • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'restaurant-special' %}"><span class="event-card-label">Sample Promo</span><h3>Restaurant Special</h3><p>Featured dining offers, brunch specials, happy hour campaigns, and food promotions.</p><p class="event-card-meta">Food Promo • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'ticket-deal' %}"><span class="event-card-label">Sample Promo</span><h3>Ticket Deal</h3><p>Limited-time event ticket promotions, early bird offers, VIP upgrades, and giveaways.</p><p class="event-card-meta">Ticket Promo • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'product-launch' %}"><span class="event-card-label">Sample Promo</span><h3>Product Launch</h3><p>Launch a brand, product, service, fashion line, album, book, or creative release.</p><p class="event-card-meta">Brand Promo • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+      <a class="event-sample-card" href="{% url 'sample_event_detail' 'sponsor-spotlight' %}"><span class="event-card-label">Sample Promo</span><h3>Sponsor Spotlight</h3><p>Featured sponsor campaign, community partnership, nonprofit drive, or special offer.</p><p class="event-card-meta">Sponsor Promo • Coming Soon</p><p class="event-card-placeholder">View details</p></a>
+    </div>
+  </section>
 </div>
 {% endblock %}

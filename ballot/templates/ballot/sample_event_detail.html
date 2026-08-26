@@ -1,0 +1,99 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}{{ event.title }} | ATL’s Hottest Events{% endblock %}
+
+{% block content %}
+<style>
+  .sample-event-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .sample-event-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 215, 106, 0.52);
+    padding: clamp(26px, 5vw, 56px);
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 215, 106, 0.22), transparent 34%),
+      radial-gradient(circle at 88% 8%, rgba(215, 25, 53, 0.28), transparent 38%),
+      linear-gradient(135deg, #050505, #25040b 52%, #000);
+    box-shadow:
+      0 30px 90px rgba(0,0,0,0.62),
+      0 0 36px rgba(255, 215, 106, 0.16);
+  }
+
+  .sample-event-meta {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .sample-event-meta-card {
+    padding: 18px;
+    border: 1px solid rgba(255, 215, 106, 0.30);
+    border-radius: 18px;
+    background: rgba(0,0,0,0.42);
+  }
+
+  .sample-event-meta-card strong {
+    display: block;
+    color: #ffd76a;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 760px) {
+    .sample-event-meta {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="sample-event-detail">
+  <section class="sample-event-hero">
+    <p class="eyebrow">{{ event.category }}</p>
+    <h1>{{ event.title }}</h1>
+
+    <p>
+      {{ event.description }}
+    </p>
+
+    <div class="sample-event-meta">
+      <div class="sample-event-meta-card">
+        <strong>Location</strong>
+        {{ event.location }}
+      </div>
+
+      <div class="sample-event-meta-card">
+        <strong>Time</strong>
+        {{ event.time }}
+      </div>
+
+      <div class="sample-event-meta-card">
+        <strong>Status</strong>
+        Sample Event Preview
+      </div>
+    </div>
+
+    <div class="landing-buttons" style="margin-top: 26px;">
+      <a class="btn primary" href="{% url 'event_submit' %}">Submit Your Event</a>
+      <a class="btn" href="{% url 'events_whats_happening' %}">Back To What’s Happening</a>
+      <a class="btn" href="{% url 'advertise_command_center' %}">Promote An Event</a>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top: 28px;">
+    <p class="eyebrow">Expanded View</p>
+    <h2>Event Details</h2>
+    <p>{{ event.details }}</p>
+
+    <p>
+      Future live event pages can include flyer artwork, ticket links, event creator profiles,
+      sponsor placements, video promos, QR codes, directions, and share links back to
+      ATLsHottest.com and app.atlshottest.com.
+    </p>
+  </section>
+</div>
+{% endblock %}

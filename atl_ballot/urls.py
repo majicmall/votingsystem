@@ -11,6 +11,8 @@ from ballot import views as ballot_views
 
 
 urlpatterns = [
+    path("events/sample/<slug:slug>/", ballot_views.sample_event_detail, name="sample_event_detail"),
+
     path("events/whats-happening/", ballot_views.events_whats_happening, name="events_whats_happening"),
     path("events/submit/", ballot_views.event_submit, name="event_submit"),
 
