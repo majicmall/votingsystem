@@ -1,3 +1,4 @@
+from django.views.static import serve as django_static_serve
 # atl_ballot/urls.py
 
 from django.conf import settings
@@ -92,3 +93,10 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+# Temporary production media serving for uploaded event flyers.
+# Later, move uploads to Cloudinary, S3, or Render Persistent Disk.
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", django_static_serve, {"document_root": settings.MEDIA_ROOT}),
+]
