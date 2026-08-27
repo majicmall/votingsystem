@@ -201,9 +201,22 @@
         {% for event in approved_events %}
           <a class="event-sample-card" href="{% url 'event_detail' event.slug %}">
             {% if event.flyer %}
-              <div style="height: 140px; border-radius: 18px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,215,106,0.22); background: rgba(255,255,255,0.05);">
+              <div
+                style="
+                  height: 170px;
+                  border-radius: 18px;
+                  overflow: hidden;
+                  margin-bottom: 14px;
+                  border: 1px solid rgba(255,215,106,0.22);
+                  background-color: rgba(255,255,255,0.05);
+                  background-image: url('{{ event.flyer.url }}?v={{ event.updated_at|date:"U" }}');
+                  background-size: cover;
+                  background-position: center;
+                  background-repeat: no-repeat;
+                "
+              >
                 <img
-                  src="/media/{{ event.flyer.name }}"
+                  src="{{ event.flyer.url }}?v={{ event.updated_at|date:'U' }}"
                   alt="{{ event.title }}"
                   style="width:100%; height:100%; object-fit:cover; display:block;"
                   loading="lazy"
