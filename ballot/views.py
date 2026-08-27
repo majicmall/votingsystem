@@ -1682,9 +1682,25 @@ def about_atls_hottest(request):
 
 
 def events_whats_happening(request):
+    approved_events = AtlsHottestEvent.objects.filter(status="approved").order_by("starts_at", "title")
+
+    live_today_events = approved_events.filter(show_today=True)
+    featured_events = approved_events.filter(is_featured=True)
+    regular_events = approved_events.filter(category="events")
+    festival_events = approved_events.filter(category="festivals")
+    nightlife_events = approved_events.filter(category="nightlife")
+    promotion_events = approved_events.filter(category="special_promotions")
+
     return render(request, "ballot/events_whats_happening.html", {
         "today_date": timezone.localdate(),
         "timezone_label": "Eastern Time",
+        "approved_events": approved_events,
+        "live_today_events": live_today_events,
+        "featured_events": featured_events,
+        "regular_events": regular_events,
+        "festival_events": festival_events,
+        "nightlife_events": nightlife_events,
+        "promotion_events": promotion_events,
     })
 
 

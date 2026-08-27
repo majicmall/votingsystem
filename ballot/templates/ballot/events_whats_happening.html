@@ -184,7 +184,46 @@
     </div>
   </div>
 
-  <section class="events-category-section">
+  
+  {% if approved_events %}
+    <section class="events-category-section">
+      <div class="events-category-header">
+        <div>
+          <p class="eyebrow">Live Approved Events</p>
+          <h2>Now Listed On ATL’s Hottest</h2>
+          <p style="margin: 8px 0 0; color: rgba(255,255,255,0.72);">
+            These events have been submitted, reviewed, and approved for public display.
+          </p>
+        </div>
+      </div>
+
+      <div class="events-sample-grid">
+        {% for event in approved_events %}
+          <a class="event-sample-card" href="{% url 'event_detail' event.slug %}">
+            {% if event.flyer %}
+              <div style="height: 140px; border-radius: 18px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,215,106,0.22);">
+                <img src="{{ event.flyer.url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+            {% else %}
+              <div class="event-card-placeholder">LIVE EVENT</div>
+            {% endif %}
+
+            <span class="event-card-label">{{ event.get_category_display }}</span>
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.starts_at|date:"l, F j, Y g:i A" }} Eastern Time</p>
+            <p class="event-card-meta">
+              {% if event.venue_name %}{{ event.venue_name }} • {% endif %}
+              {{ event.city }}, {{ event.state }}
+            </p>
+            <p class="event-card-plus">View event details</p>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+
+<section class="events-category-section">
     <div class="events-category-header">
       <div>
         <p class="eyebrow">Daily Spotlight</p>
