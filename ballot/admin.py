@@ -351,8 +351,8 @@ class VotingCampaignAdmin(admin.ModelAdmin):
 
 @admin.register(AtlsHottestEvent)
 class AtlsHottestEventAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "starts_at", "status", "is_featured", "show_today", "submitted_at")
-    list_filter = ("status", "category", "is_featured", "show_today", "starts_at")
+    list_display = ("title", "category", "starts_at", "status", "is_featured", "show_today", "show_on_homepage", "submitted_at")
+    list_filter = ("status", "category", "is_featured", "show_today", "show_on_homepage", "starts_at")
     search_fields = ("title", "organizer_name", "organizer_email", "venue_name", "city")
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("submitted_at", "updated_at")

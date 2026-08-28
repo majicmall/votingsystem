@@ -900,6 +900,7 @@ class AtlsHottestEvent(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     is_featured = models.BooleanField(default=False)
     show_today = models.BooleanField(default=False)
+    show_on_homepage = models.BooleanField(default=False)
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

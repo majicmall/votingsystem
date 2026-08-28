@@ -1,10 +1,117 @@
 {% extends "ballot/base.html" %}
-{% load static billboard_ads %}
+{% load static billboard_ads event_promos %}
 {% block title %}ATL’s Hottest Awards Association{% endblock %}
 
 {% block content %}
 
+<style>
+  .homepage-event-feature {
+    max-width: 1180px;
+    margin: 34px auto;
+    padding: 0 16px;
+  }
+
+  .homepage-event-feature-card {
+    display: grid;
+    grid-template-columns: 1fr 0.92fr;
+    gap: 24px;
+    align-items: center;
+    padding: 24px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 215, 106, 0.35);
+    background:
+      radial-gradient(circle at top right, rgba(255, 215, 106, 0.16), transparent 36%),
+      linear-gradient(135deg, rgba(0,0,0,0.88), rgba(92,0,0,0.56));
+    box-shadow: 0 24px 80px rgba(0,0,0,0.48);
+    overflow: hidden;
+  }
+
+  .homepage-event-feature-copy h2 {
+    margin: 8px 0 12px;
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: 0.98;
+  }
+
+  .homepage-event-feature-copy p {
+    color: rgba(255,255,255,0.78);
+    font-size: 1.02rem;
+  }
+
+  .homepage-event-feature-meta {
+    color: #ffd76a !important;
+    font-weight: 900;
+  }
+
+  .homepage-event-feature-art {
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 215, 106, 0.42);
+    background: rgba(0,0,0,0.55);
+    min-height: 300px;
+    box-shadow: 0 20px 58px rgba(0,0,0,0.46);
+  }
+
+  .homepage-event-feature-art img {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 820px) {
+    .homepage-event-feature-card {
+      grid-template-columns: 1fr;
+      padding: 18px;
+    }
+
+    .homepage-event-feature-art,
+    .homepage-event-feature-art img {
+      min-height: 260px;
+    }
+  }
+</style>
+
+
 {% render_billboard "homepage_top" %}
+
+{% homepage_featured_event as landing_featured_event %}
+
+{% if landing_featured_event %}
+<section class="homepage-event-feature">
+  <div class="homepage-event-feature-card">
+    <div class="homepage-event-feature-copy">
+      <p class="eyebrow">Featured ATL Event</p>
+      <h2>{{ landing_featured_event.title }}</h2>
+
+      <p>
+        A featured approved event from ATL’s Hottest is now live.
+        Discover the flyer, details, QR code, and promotional information.
+      </p>
+
+      <p class="homepage-event-feature-meta">
+        {{ landing_featured_event.starts_at|date:"l, F j, Y g:i A" }} Eastern Time
+        {% if landing_featured_event.venue_name %}
+          • {{ landing_featured_event.venue_name }}
+        {% endif %}
+      </p>
+
+      <div class="landing-buttons">
+        <a class="btn primary" href="{% url 'event_detail' landing_featured_event.slug %}">View Event</a>
+        <a class="btn" href="{% url 'events_whats_happening' %}">What’s Happening</a>
+      </div>
+    </div>
+
+    <div class="homepage-event-feature-art">
+      <img
+        src="{{ landing_featured_event.flyer.url }}?v={{ landing_featured_event.updated_at|date:'U' }}"
+        alt="{{ landing_featured_event.title }}"
+      >
+    </div>
+  </div>
+</section>
+{% endif %}
+
 
 <style>
   .landing-shell {
@@ -616,3 +723,4 @@
 </script>
 
 {% endblock %}
+
