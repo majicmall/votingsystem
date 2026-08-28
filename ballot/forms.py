@@ -186,11 +186,13 @@ class EventSubmissionForm(forms.ModelForm):
                 "type": "date",
                 "class": "event-date-input",
                 "aria-label": "Event begin date",
+                "onclick": "if (this.showPicker) this.showPicker();",
             },
             time_attrs={
                 "type": "time",
                 "class": "event-time-input",
                 "aria-label": "Event begin time",
+                "onclick": "if (this.showPicker) this.showPicker();",
             },
         ),
     )
@@ -205,11 +207,13 @@ class EventSubmissionForm(forms.ModelForm):
                 "type": "date",
                 "class": "event-date-input",
                 "aria-label": "Event end date",
+                "onclick": "if (this.showPicker) this.showPicker();",
             },
             time_attrs={
                 "type": "time",
                 "class": "event-time-input",
                 "aria-label": "Event end time",
+                "onclick": "if (this.showPicker) this.showPicker();",
             },
         ),
     )
