@@ -176,6 +176,44 @@ class AdvertisingInquiryForm(forms.ModelForm):
 
 
 class EventSubmissionForm(forms.ModelForm):
+    starts_at = forms.SplitDateTimeField(
+        label="Event Begins",
+        required=True,
+        input_date_formats=["%Y-%m-%d"],
+        input_time_formats=["%H:%M"],
+        widget=forms.SplitDateTimeWidget(
+            date_attrs={
+                "type": "date",
+                "class": "event-date-input",
+                "aria-label": "Event begin date",
+            },
+            time_attrs={
+                "type": "time",
+                "class": "event-time-input",
+                "aria-label": "Event begin time",
+            },
+        ),
+    )
+
+    ends_at = forms.SplitDateTimeField(
+        label="Event Ends",
+        required=False,
+        input_date_formats=["%Y-%m-%d"],
+        input_time_formats=["%H:%M"],
+        widget=forms.SplitDateTimeWidget(
+            date_attrs={
+                "type": "date",
+                "class": "event-date-input",
+                "aria-label": "Event end date",
+            },
+            time_attrs={
+                "type": "time",
+                "class": "event-time-input",
+                "aria-label": "Event end time",
+            },
+        ),
+    )
+
     class Meta:
         model = AtlsHottestEvent
         fields = [
@@ -195,8 +233,30 @@ class EventSubmissionForm(forms.ModelForm):
             "ticket_link",
             "website",
         ]
+        labels = {
+            "title": "Event Title",
+            "category": "Event Category",
+            "organizer_name": "Organizer Name",
+            "organizer_email": "Organizer Email",
+            "organizer_phone": "Organizer Phone",
+            "venue_name": "Venue Name",
+            "starts_at": "Event Begins",
+            "ends_at": "Event Ends",
+            "description": "Event Description",
+            "flyer": "Upload Event Flyer / Promotional Image",
+            "ticket_link": "Ticket Link",
+            "website": "Event Website",
+        }
         widgets = {
-            "starts_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "ends_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "description": forms.Textarea(attrs={"rows": 6}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        starts_at = cleaned_data.get("starts_at")
+        ends_at = cleaned_data.get("ends_at")
+
+        if starts_at and ends_at and ends_at < starts_at:
+            self.add_error("ends_at", "The event end date/time cannot be before the begin date/time.")
+
+        return cleaned_data

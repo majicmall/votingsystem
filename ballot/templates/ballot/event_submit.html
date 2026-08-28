@@ -73,6 +73,31 @@
     background: rgba(0,0,0,0.35);
     color: rgba(255,255,255,0.76);
   }
+
+  .event-submit-form .event-date-input,
+  .event-submit-form .event-time-input {
+    margin-top: 8px;
+  }
+
+  .event-submit-form p:has(.event-date-input) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: end;
+  }
+
+  .event-submit-form p:has(.event-date-input) label {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .event-submit-form p:has(.event-date-input) {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+
 </style>
 
 <div class="event-submit-shell">
