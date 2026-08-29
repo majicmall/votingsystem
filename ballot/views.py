@@ -1,7 +1,7 @@
 from __future__ import annotations
 from django.http import HttpResponse
 from .forms import EventSubmissionForm
-from .models import AtlsHottestEvent
+from .models import AtlsHottestEvent, EventPromotionOrder, EventPromotionRate, EventPromotionOrder
 from django.urls import reverse
 from io import BytesIO
 # ballot/views.py
@@ -2059,3 +2059,264 @@ def event_approval_action(request, pk):
         f"{reverse('event_approval_center')}?status="
         f"{request.POST.get('return_status', 'pending')}"
     )
+
+
+@csrf_protect
+def event_promote(request, slug):
+    """
+    Public producer-facing promotion request page.
+
+    Promotion requests do NOT automatically activate homepage placement.
+    Payment/approval remains separate until the checkout layer is wired.
+    """
+    from datetime import timedelta
+    from django.utils.dateparse import parse_datetime
+
+    event = get_object_or_404(
+        AtlsHottestEvent,
+        slug=slug,
+        status="approved",
+    )
+
+    package_choices = EventPromotionOrder.PACKAGE_CHOICES
+
+    if request.method == "POST":
+        producer_name = request.POST.get("producer_name", "").strip()
+        producer_email = request.POST.get("producer_email", "").strip()
+        package = request.POST.get("package", "").strip()
+        requested_start_raw = request.POST.get("requested_start", "").strip()
+        requested_end_raw = request.POST.get("requested_end", "").strip()
+        notes = request.POST.get("notes", "").strip()
+
+        valid_packages = {value for value, label in package_choices}
+
+        errors = []
+
+        if not producer_name:
+            errors.append("Please enter the producer or organizer name.")
+
+        if not producer_email:
+            errors.append("Please enter the organizer email address.")
+        elif producer_email.lower() != event.organizer_email.lower():
+            errors.append(
+                "The email entered does not match the organizer email "
+                "associated with this event."
+            )
+
+        if package not in valid_packages:
+            errors.append("Please select a promotion package.")
+        elif package != "custom":
+            if promotion_rate is None or promotion_rate.amount <= 0:
+                errors.append(
+                    "This promotion package is not currently available for purchase."
+                )
+
+        requested_start = None
+        if requested_start_raw:
+            requested_start = parse_datetime(requested_start_raw)
+
+        if requested_start is None:
+            requested_start = timezone.now()
+        elif timezone.is_naive(requested_start):
+            requested_start = timezone.make_aware(requested_start)
+
+        requested_end = None
+        if requested_end_raw:
+            requested_end = parse_datetime(requested_end_raw)
+            if requested_end and timezone.is_naive(requested_end):
+                requested_end = timezone.make_aware(requested_end)
+
+        if package == "24_hours":
+            requested_end = requested_start + timedelta(hours=24)
+
+        elif package == "3_days":
+            requested_end = requested_start + timedelta(days=3)
+
+        elif package == "7_days":
+            requested_end = requested_start + timedelta(days=7)
+
+        elif package == "custom":
+            if requested_end is None:
+                errors.append(
+                    "Please choose an ending date and time for a custom campaign."
+                )
+
+        if requested_end and requested_end <= requested_start:
+            errors.append(
+                "The promotion ending time must be later than the starting time."
+            )
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+
+        else:
+            EventPromotionOrder.objects.create(
+                event=event,
+                producer_name=producer_name,
+                producer_email=producer_email,
+                package=package,
+                requested_start=requested_start,
+                requested_end=requested_end,
+                quoted_amount=quoted_amount,
+                notes=notes,
+                status="pending",
+            )
+
+            messages.success(
+                request,
+                "Your promotion request has been received. "
+                "ATL's Hottest will confirm availability, pricing, and payment details."
+            )
+
+            return redirect("event_promote", slug=event.slug)
+
+    return render(
+        request,
+        "ballot/event_promote.html",
+        {
+            "event": event,
+            "package_choices": package_choices,
+        },
+    )
+
+
+@staff_member_required
+@require_POST
+def event_promotion_order_action(request, pk):
+    """
+    Staff controls for producer promotion orders.
+
+    Status workflow:
+    Pending Review -> Awaiting Payment -> Paid -> Activated -> Completed
+
+    Homepage activation is deliberately guarded:
+    an order must already be PAID before it can activate an event.
+    """
+    order = get_object_or_404(
+        EventPromotionOrder.objects.select_related("event"),
+        pk=pk,
+    )
+
+    action = request.POST.get("action", "").strip()
+    event = order.event
+
+    if action == "awaiting_payment":
+        order.status = "awaiting_payment"
+        order.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            f"{event.title}: promotion order is now awaiting payment."
+        )
+
+    elif action == "paid":
+        if order.quoted_amount <= 0 and not order.is_complimentary:
+            messages.error(
+                request,
+                "A $0.00 promotion cannot be marked Paid. "
+                "Enter a valid quote or authorize it as complimentary."
+            )
+            return redirect("event_approval_center")
+
+        order.status = "paid"
+        order.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            f"{event.title}: promotion order marked paid."
+        )
+
+    elif action == "activate":
+        if order.status != "paid":
+            messages.error(
+                request,
+                "This promotion must be marked Paid before it can be activated."
+            )
+            return redirect("event_approval_center")
+
+        if order.quoted_amount <= 0 and not order.is_complimentary:
+            messages.error(
+                request,
+                "This $0.00 campaign cannot activate unless staff explicitly "
+                "authorizes it as complimentary."
+            )
+            return redirect("event_approval_center")
+
+        if event.status != "approved":
+            messages.error(
+                request,
+                "The event must be approved before homepage promotion can activate."
+            )
+            return redirect("event_approval_center")
+
+        if not order.requested_start or not order.requested_end:
+            messages.error(
+                request,
+                "This promotion order is missing a valid campaign schedule."
+            )
+            return redirect("event_approval_center")
+
+        if order.requested_end <= order.requested_start:
+            messages.error(
+                request,
+                "The campaign ending time must be later than its starting time."
+            )
+            return redirect("event_approval_center")
+
+        event.homepage_package = order.package
+        event.homepage_amount_paid = order.quoted_amount
+        event.homepage_payment_status = (
+            "comp" if order.is_complimentary else "paid"
+        )
+        event.homepage_promotion_start = order.requested_start
+        event.homepage_promotion_end = order.requested_end
+        event.show_on_homepage = True
+
+        event.save(
+            update_fields=[
+                "homepage_package",
+                "homepage_amount_paid",
+                "homepage_payment_status",
+                "homepage_promotion_start",
+                "homepage_promotion_end",
+                "show_on_homepage",
+                "updated_at",
+            ]
+        )
+
+        order.status = "activated"
+        order.save(update_fields=["status", "updated_at"])
+
+        messages.success(
+            request,
+            f"{event.title}: premium homepage promotion ACTIVATED."
+        )
+
+    elif action == "complete":
+        order.status = "completed"
+        order.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            f"{event.title}: promotion order marked completed."
+        )
+
+    elif action == "cancel":
+        order.status = "cancelled"
+        order.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            f"{event.title}: promotion order cancelled."
+        )
+
+    elif action == "pending":
+        order.status = "pending"
+        order.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            f"{event.title}: promotion order returned to Pending Review."
+        )
+
+    else:
+        messages.error(request, "Unknown promotion order action.")
+
+    return redirect("event_approval_center")
+

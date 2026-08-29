@@ -1,0 +1,487 @@
+{% load static %}
+{% load event_promos %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Promote {{ event.title }} | ATL's Hottest</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #050505;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(155, 0, 0, 0.25), transparent 34rem),
+        linear-gradient(180deg, #090909 0%, #000 100%);
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page-shell {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 34px 0 70px;
+    }
+
+    .eyebrow {
+      color: #d7b56d;
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: .98;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: 18px 0 28px;
+      color: #cfcfcf;
+      line-height: 1.65;
+    }
+
+    .event-card {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 22px;
+      background: rgba(20, 20, 20, .82);
+      border: 1px solid rgba(215, 181, 109, .34);
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 28px;
+      box-shadow: 0 20px 80px rgba(0,0,0,.45);
+    }
+
+    .event-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+
+    .event-info h2 {
+      margin: 4px 0 10px;
+      font-size: 1.65rem;
+    }
+
+    .event-meta {
+      color: #bbb;
+      line-height: 1.7;
+    }
+
+    .packages {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 22px 0 32px;
+    }
+
+    .package {
+      position: relative;
+    }
+
+    .package input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .package label {
+      display: block;
+      height: 100%;
+      min-height: 145px;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid #333;
+      background: linear-gradient(180deg, #181818, #0d0d0d);
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .package input:checked + label {
+      border-color: #d7b56d;
+      box-shadow:
+        0 0 0 2px rgba(215,181,109,.18),
+        0 16px 45px rgba(0,0,0,.45);
+      transform: translateY(-3px);
+    }
+
+    .package-title {
+      display: block;
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .package-copy {
+      color: #aaa;
+      font-size: .9rem;
+      line-height: 1.45;
+    }
+
+    .form-panel {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
+      padding: 24px;
+      background: rgba(10,10,10,.90);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 17px;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label.field-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #ddd;
+      font-size: .87rem;
+      font-weight: 800;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="datetime-local"],
+    textarea {
+      width: 100%;
+      border: 1px solid #333;
+      border-radius: 12px;
+      background: #111;
+      color: #fff;
+      padding: 13px 14px;
+      font-size: 1rem;
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+    }
+
+    .price-note {
+      margin: 5px 0 22px;
+      padding: 15px 17px;
+      border-left: 3px solid #d7b56d;
+      background: rgba(215,181,109,.08);
+      color: #ccc;
+      line-height: 1.55;
+    }
+
+    .submit-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #9e0000, #e21b23);
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 15px 40px rgba(226,27,35,.25);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: #c9c9c9;
+      text-decoration: none;
+    }
+
+    .messages {
+      margin-bottom: 22px;
+    }
+
+    .message {
+      border-radius: 13px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .message.success {
+      background: rgba(46, 170, 85, .15);
+      border: 1px solid rgba(46, 170, 85, .45);
+    }
+
+    .message.error {
+      background: rgba(226, 27, 35, .15);
+      border: 1px solid rgba(226, 27, 35, .45);
+    }
+
+    @media (max-width: 800px) {
+      .packages {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .event-card {
+        grid-template-columns: 110px 1fr;
+      }
+
+      .event-card img {
+        height: 120px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page-shell {
+        width: min(100% - 20px, 1120px);
+        padding-top: 22px;
+      }
+
+      .packages,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event-card {
+        grid-template-columns: 1fr;
+      }
+
+      .event-card img {
+        height: auto;
+        max-height: 390px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page-shell">
+
+    <div class="eyebrow">ATL's Hottest Event Promotion</div>
+    <h1>Put Your Event<br>In The Spotlight.</h1>
+
+    <p class="intro">
+      Promote your approved ATL's Hottest event with premium placement.
+      Select the campaign length that fits your event and submit your request.
+    </p>
+
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <section class="event-card">
+      {% if event.flyer %}
+        <img src="{{ event.flyer.url }}" alt="{{ event.title }}">
+      {% endif %}
+
+      <div class="event-info">
+        <div class="eyebrow">Promoting</div>
+        <h2>{{ event.title }}</h2>
+
+        <div class="event-meta">
+          {{ event.starts_at|date:"F j, Y • g:i A" }}<br>
+
+          {% if event.venue_name %}
+            {{ event.venue_name }}<br>
+          {% endif %}
+
+          {{ event.city }}, {{ event.state }}
+        </div>
+      </div>
+    </section>
+
+    <form method="post" class="form-panel">
+      {% csrf_token %}
+
+      <div class="eyebrow">Choose Your Promotion</div>
+
+      <div class="packages">
+
+        <div class="package">
+          <input
+            type="radio"
+            id="package-24"
+            name="package"
+            value="24_hours"
+            required
+          >
+          <label for="package-24">
+            <span class="package-title">24 Hours</span>
+            <span class="package-copy">
+              A focused one-day premium homepage campaign.
+            </span>
+          </label>
+        </div>
+
+        <div class="package">
+          <input
+            type="radio"
+            id="package-3"
+            name="package"
+            value="3_days"
+          >
+          <label for="package-3">
+            <span class="package-title">3 Days</span>
+            <span class="package-copy">
+              Build momentum across multiple high-traffic days.
+            </span>
+          </label>
+        </div>
+
+        <div class="package">
+          <input
+            type="radio"
+            id="package-7"
+            name="package"
+            value="7_days"
+          >
+          <label for="package-7">
+            <span class="package-title">7 Days</span>
+            <span class="package-copy">
+              A full week of premium promotional opportunity.
+            </span>
+          </label>
+        </div>
+
+        <div class="package">
+          <input
+            type="radio"
+            id="package-custom"
+            name="package"
+            value="custom"
+          >
+          <label for="package-custom">
+            <span class="package-title">Custom</span>
+            <span class="package-copy">
+              Build a campaign around your event's exact schedule.
+            </span>
+          </label>
+        </div>
+
+      </div>
+
+      <div class="price-note">
+        Package pricing and availability will be confirmed before payment.
+        Submitting this request does not activate or charge a campaign.
+      </div>
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label class="field-label" for="producer_name">
+            Producer / Organizer Name
+          </label>
+          <input
+            id="producer_name"
+            name="producer_name"
+            type="text"
+            value="{{ event.organizer_name }}"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="producer_email">
+            Organizer Email
+          </label>
+          <input
+            id="producer_email"
+            name="producer_email"
+            type="email"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="requested_start">
+            Promotion Begins
+          </label>
+          <input
+            id="requested_start"
+            name="requested_start"
+            type="datetime-local"
+          >
+        </div>
+
+        <div class="field" id="custom-end-field">
+          <label class="field-label" for="requested_end">
+            Custom Campaign Ends
+          </label>
+          <input
+            id="requested_end"
+            name="requested_end"
+            type="datetime-local"
+          >
+        </div>
+
+        <div class="field full">
+          <label class="field-label" for="notes">
+            Campaign Notes
+          </label>
+          <textarea
+            id="notes"
+            name="notes"
+            placeholder="Tell us anything important about your promotion."
+          ></textarea>
+        </div>
+
+      </div>
+
+      <button type="submit" class="submit-btn">
+        Request Premium Promotion
+      </button>
+
+      <a
+        href="{% url 'event_detail' slug=event.slug %}"
+        class="back-link"
+      >
+        ← Back to Event
+      </a>
+
+    </form>
+  </main>
+
+  <script>
+    const packageRadios = document.querySelectorAll('input[name="package"]');
+    const customEndField = document.getElementById('custom-end-field');
+    const requestedEnd = document.getElementById('requested_end');
+
+    function updateCustomEnd() {
+      const selected = document.querySelector('input[name="package"]:checked');
+      const isCustom = selected && selected.value === 'custom';
+
+      customEndField.style.display = isCustom ? 'block' : 'none';
+      requestedEnd.required = !!isCustom;
+    }
+
+    packageRadios.forEach(radio => {
+      radio.addEventListener('change', updateCustomEnd);
+    });
+
+    updateCustomEnd();
+  </script>
+</body>
+</html>

@@ -3,6 +3,8 @@ from django.utils.html import format_html
 
 from .models import (
     AtlsHottestEvent,
+    EventPromotionOrder,
+    EventPromotionRate,
     AssociationMembership,
     AssociationProfile,
     BallotSettings,
@@ -442,3 +444,102 @@ class AtlsHottestEventAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+@admin.register(EventPromotionOrder)
+class EventPromotionOrderAdmin(admin.ModelAdmin):
+    list_display = (
+        "event",
+        "producer_name",
+        "producer_email",
+        "package",
+        "status",
+        "quoted_amount",
+        "requested_start",
+        "requested_end",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "package",
+        "created_at",
+    )
+
+    search_fields = (
+        "event__title",
+        "producer_name",
+        "producer_email",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+    ordering = (
+        "-created_at",
+    )
+
+    fieldsets = (
+        (
+            "Event & Producer",
+            {
+                "fields": (
+                    "event",
+                    "producer_name",
+                    "producer_email",
+                )
+            },
+        ),
+        (
+            "Promotion Package",
+            {
+                "fields": (
+                    "package",
+                    "requested_start",
+                    "requested_end",
+                    "quoted_amount",
+                    "is_complimentary",
+                    "status",
+                )
+            },
+        ),
+        (
+            "Producer Notes",
+            {
+                "fields": (
+                    "notes",
+                )
+            },
+        ),
+        (
+            "Order History",
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(EventPromotionRate)
+class EventPromotionRateAdmin(admin.ModelAdmin):
+    list_display = (
+        "package",
+        "amount",
+        "is_active",
+        "display_order",
+        "updated_at",
+    )
+
+    list_editable = (
+        "amount",
+        "is_active",
+        "display_order",
+    )
+
+    ordering = ("display_order",)
+

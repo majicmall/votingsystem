@@ -24,6 +24,13 @@ urlpatterns = [
     path("events/submit/", ballot_views.event_submit, name="event_submit"),
 
     # Staff-only Mobile Event Approval Center
+
+    path(
+        "events/admin/promotions/<int:pk>/action/",
+        ballot_views.event_promotion_order_action,
+        name="event_promotion_order_action",
+    ),
+
     path(
         "events/admin/approvals/",
         ballot_views.event_approval_center,
@@ -111,4 +118,9 @@ if settings.DEBUG:
 # Later, move uploads to Cloudinary, S3, or Render Persistent Disk.
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", django_static_serve, {"document_root": settings.MEDIA_ROOT}),
+    path(
+        "events/live/<slug:slug>/promote/",
+        ballot_views.event_promote,
+        name="event_promote",
+    ),
 ]

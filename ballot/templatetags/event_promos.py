@@ -1,7 +1,7 @@
 from django import template
 from django.utils import timezone
 
-from ballot.models import AtlsHottestEvent
+from ballot.models import AtlsHottestEvent, EventPromotionOrder, EventPromotionRate
 
 
 register = template.Library()
@@ -82,3 +82,30 @@ def homepage_featured_event():
         )
         .first()
     )
+
+
+@register.simple_tag
+def admin_event_promotion_orders(limit=50):
+    """
+    Recent producer promotion orders for the staff approval center.
+    """
+    return (
+        EventPromotionOrder.objects
+        .select_related("event")
+        .order_by("-created_at")[:limit]
+    )
+
+
+@register.simple_tag
+def event_promotion_price(package):
+    rate = (
+        EventPromotionRate.objects
+        .filter(package=package, is_active=True)
+        .first()
+    )
+
+    if not rate or rate.amount <= 0:
+        return None
+
+    return rate.amount
+

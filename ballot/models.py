@@ -977,3 +977,116 @@ class AtlsHottestEvent(models.Model):
             self.slug = slug
 
         super().save(*args, **kwargs)
+
+
+class EventPromotionOrder(models.Model):
+    """
+    Producer-facing request/order for premium event promotion.
+
+    This record is intentionally separate from AtlsHottestEvent so the
+    event itself remains the permanent listing while promotion orders
+    preserve campaign/payment history.
+    """
+
+    PACKAGE_CHOICES = [
+        ("24_hours", "24 Hours"),
+        ("3_days", "3 Days"),
+        ("7_days", "7 Days"),
+        ("custom", "Custom Campaign"),
+    ]
+
+    STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("awaiting_payment", "Awaiting Payment"),
+        ("paid", "Paid"),
+        ("activated", "Activated"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    event = models.ForeignKey(
+        "AtlsHottestEvent",
+        on_delete=models.CASCADE,
+        related_name="promotion_orders",
+    )
+
+    producer_name = models.CharField(max_length=160)
+    producer_email = models.EmailField()
+
+    package = models.CharField(
+        max_length=20,
+        choices=PACKAGE_CHOICES,
+    )
+
+    requested_start = models.DateTimeField()
+    requested_end = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    quoted_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    notes = models.TextField(blank=True)
+
+    is_complimentary = models.BooleanField(
+        default=False,
+        help_text="Staff-authorized complimentary promotion. Allows activation without a paid dollar amount.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.event.title} — {self.get_package_display()} — {self.get_status_display()}"
+
+
+class EventPromotionRate(models.Model):
+    """
+    Admin-controlled pricing for ATL's Hottest premium event promotion.
+    Prices live in the database so they can be changed without editing code.
+    """
+
+    PACKAGE_CHOICES = [
+        ("24_hours", "24 Hours"),
+        ("3_days", "3 Days"),
+        ("7_days", "7 Days"),
+        ("custom", "Custom Campaign"),
+    ]
+
+    package = models.CharField(
+        max_length=20,
+        choices=PACKAGE_CHOICES,
+        unique=True,
+    )
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Only active packages can be purchased by producers.",
+    )
+
+    display_order = models.PositiveIntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("display_order", "amount")
+
+    def __str__(self):
+        return f"{self.get_package_display()} — ${self.amount}"
+
