@@ -900,7 +900,58 @@ class AtlsHottestEvent(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     is_featured = models.BooleanField(default=False)
     show_today = models.BooleanField(default=False)
-    show_on_homepage = models.BooleanField(default=False)
+
+    # Premium homepage event promotion
+    #
+    # Event approval and homepage advertising are intentionally separate.
+    # An approved event may appear in What's Happening In The ATL without
+    # receiving premium homepage placement.
+    show_on_homepage = models.BooleanField(
+        default=False,
+        help_text="Master switch for premium homepage event promotion.",
+    )
+
+    HOMEPAGE_PAYMENT_STATUS_CHOICES = [
+        ("not_required", "Not Required"),
+        ("unpaid", "Unpaid"),
+        ("pending", "Payment Pending"),
+        ("paid", "Paid"),
+        ("comp", "Complimentary / Admin Comp"),
+        ("refunded", "Refunded"),
+    ]
+
+    HOMEPAGE_PACKAGE_CHOICES = [
+        ("", "No Homepage Promotion"),
+        ("24_hours", "24 Hours"),
+        ("3_days", "3 Days"),
+        ("7_days", "7 Days"),
+        ("custom", "Custom Campaign"),
+    ]
+
+    homepage_payment_status = models.CharField(
+        max_length=20,
+        choices=HOMEPAGE_PAYMENT_STATUS_CHOICES,
+        default="not_required",
+    )
+    homepage_package = models.CharField(
+        max_length=20,
+        choices=HOMEPAGE_PACKAGE_CHOICES,
+        blank=True,
+        default="",
+    )
+    homepage_amount_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+    homepage_promotion_start = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    homepage_promotion_end = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

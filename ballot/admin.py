@@ -351,8 +351,94 @@ class VotingCampaignAdmin(admin.ModelAdmin):
 
 @admin.register(AtlsHottestEvent)
 class AtlsHottestEventAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "starts_at", "status", "is_featured", "show_today", "show_on_homepage", "submitted_at")
-    list_filter = ("status", "category", "is_featured", "show_today", "show_on_homepage", "starts_at")
-    search_fields = ("title", "organizer_name", "organizer_email", "venue_name", "city")
+    list_display = (
+        "title",
+        "category",
+        "starts_at",
+        "status",
+        "is_featured",
+        "show_today",
+        "show_on_homepage",
+        "homepage_payment_status",
+        "homepage_package",
+        "homepage_amount_paid",
+        "homepage_promotion_start",
+        "homepage_promotion_end",
+        "submitted_at",
+    )
+
+    list_filter = (
+        "status",
+        "category",
+        "is_featured",
+        "show_today",
+        "show_on_homepage",
+        "homepage_payment_status",
+        "homepage_package",
+        "starts_at",
+    )
+
+    search_fields = (
+        "title",
+        "organizer_name",
+        "organizer_email",
+        "venue_name",
+        "city",
+    )
+
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("submitted_at", "updated_at")
+
+    fieldsets = (
+        ("Event", {
+            "fields": (
+                "title",
+                "slug",
+                "category",
+                "description",
+                "flyer",
+            )
+        }),
+        ("Organizer", {
+            "fields": (
+                "organizer_name",
+                "organizer_email",
+                "organizer_phone",
+            )
+        }),
+        ("Location & Schedule", {
+            "fields": (
+                "venue_name",
+                "address",
+                "city",
+                "state",
+                "starts_at",
+                "ends_at",
+                "ticket_link",
+                "website",
+            )
+        }),
+        ("Approval & Event Placement", {
+            "fields": (
+                "status",
+                "is_featured",
+                "show_today",
+            )
+        }),
+        ("Premium Homepage Promotion", {
+            "fields": (
+                "show_on_homepage",
+                "homepage_payment_status",
+                "homepage_package",
+                "homepage_amount_paid",
+                "homepage_promotion_start",
+                "homepage_promotion_end",
+            )
+        }),
+        ("System", {
+            "fields": (
+                "submitted_at",
+                "updated_at",
+            )
+        }),
+    )

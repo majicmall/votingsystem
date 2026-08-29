@@ -23,6 +23,18 @@ urlpatterns = [
     path("events/whats-happening/", ballot_views.events_whats_happening, name="events_whats_happening"),
     path("events/submit/", ballot_views.event_submit, name="event_submit"),
 
+    # Staff-only Mobile Event Approval Center
+    path(
+        "events/admin/approvals/",
+        ballot_views.event_approval_center,
+        name="event_approval_center",
+    ),
+    path(
+        "events/admin/approvals/<int:pk>/action/",
+        ballot_views.event_approval_action,
+        name="event_approval_action",
+    ),
+
     path("about-atls-hottest/", ballot_views.about_atls_hottest, name="about_atls_hottest"),
     path("memberships/", ballot_views.membership_plans, name="membership_plans"),
     path("memberships/<slug:slug>/", ballot_views.membership_plan_detail, name="membership_plan_detail"),

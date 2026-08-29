@@ -1767,3 +1767,295 @@ def event_qr_code(request, slug):
     buffer.seek(0)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
+
+
+# ============================================================
+# ATL'S HOTTEST - MOBILE EVENT APPROVAL CENTER
+# ============================================================
+
+@staff_member_required
+def event_approval_center(request):
+    selected_status = request.GET.get("status", "pending")
+
+    valid_statuses = {"pending", "approved", "rejected", "all"}
+    if selected_status not in valid_statuses:
+        selected_status = "pending"
+
+    events = AtlsHottestEvent.objects.all()
+
+    if selected_status != "all":
+        events = events.filter(status=selected_status)
+
+    events = events.order_by("-submitted_at", "starts_at")
+
+    counts = {
+        "pending": AtlsHottestEvent.objects.filter(status="pending").count(),
+        "approved": AtlsHottestEvent.objects.filter(status="approved").count(),
+        "rejected": AtlsHottestEvent.objects.filter(status="rejected").count(),
+        "all": AtlsHottestEvent.objects.count(),
+    }
+
+    return render(
+        request,
+        "ballot/event_approval_center.html",
+        {
+            "events": events,
+            "selected_status": selected_status,
+            "counts": counts,
+        },
+    )
+
+
+@staff_member_required
+@require_POST
+def event_approval_action(request, pk):
+    event = get_object_or_404(AtlsHottestEvent, pk=pk)
+    action = request.POST.get("action", "").strip()
+
+    if action == "approve":
+        event.status = "approved"
+        event.save(update_fields=["status", "updated_at"])
+        messages.success(request, f"{event.title} has been approved.")
+
+    elif action == "reject":
+        event.status = "rejected"
+        event.show_today = False
+        event.is_featured = False
+        event.show_on_homepage = False
+        event.save(
+            update_fields=[
+                "status",
+                "show_today",
+                "is_featured",
+                "show_on_homepage",
+                "updated_at",
+            ]
+        )
+        messages.success(request, f"{event.title} has been rejected.")
+
+    elif action == "toggle_featured":
+        event.is_featured = not event.is_featured
+        event.save(update_fields=["is_featured", "updated_at"])
+
+        state = "ON" if event.is_featured else "OFF"
+        messages.success(
+            request,
+            f"Featured placement for {event.title}: {state}.",
+        )
+
+    elif action == "toggle_today":
+        event.show_today = not event.show_today
+        event.save(update_fields=["show_today", "updated_at"])
+
+        state = "ON" if event.show_today else "OFF"
+        messages.success(
+            request,
+            f"Show Today for {event.title}: {state}.",
+        )
+
+    elif action == "save_homepage_promo":
+        from datetime import timedelta
+        from decimal import Decimal, InvalidOperation
+        from django.utils.dateparse import parse_datetime
+
+        payment_status = request.POST.get(
+            "homepage_payment_status",
+            "not_required",
+        ).strip()
+
+        package = request.POST.get(
+            "homepage_package",
+            "",
+        ).strip()
+
+        amount_raw = request.POST.get(
+            "homepage_amount_paid",
+            "0",
+        ).strip() or "0"
+
+        start_raw = request.POST.get(
+            "homepage_promotion_start",
+            "",
+        ).strip()
+
+        end_raw = request.POST.get(
+            "homepage_promotion_end",
+            "",
+        ).strip()
+
+        requested_homepage = (
+            request.POST.get("show_on_homepage") == "on"
+        )
+
+        valid_payment_statuses = {
+            choice[0]
+            for choice in AtlsHottestEvent.HOMEPAGE_PAYMENT_STATUS_CHOICES
+        }
+
+        valid_packages = {
+            choice[0]
+            for choice in AtlsHottestEvent.HOMEPAGE_PACKAGE_CHOICES
+        }
+
+        if payment_status not in valid_payment_statuses:
+            messages.error(request, "Invalid payment status.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        if package not in valid_packages:
+            messages.error(request, "Invalid homepage promotion package.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        try:
+            amount = Decimal(amount_raw)
+        except InvalidOperation:
+            messages.error(request, "Amount paid must be a valid dollar amount.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        if amount < 0:
+            messages.error(request, "Amount paid cannot be negative.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        def parse_local_datetime(value):
+            if not value:
+                return None
+
+            parsed = parse_datetime(value)
+
+            if parsed and timezone.is_naive(parsed):
+                parsed = timezone.make_aware(
+                    parsed,
+                    timezone.get_current_timezone(),
+                )
+
+            return parsed
+
+        start_at = parse_local_datetime(start_raw)
+        end_at = parse_local_datetime(end_raw)
+
+        if start_raw and start_at is None:
+            messages.error(request, "Promotion start date/time is invalid.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        if end_raw and end_at is None:
+            messages.error(request, "Promotion end date/time is invalid.")
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        package_durations = {
+            "24_hours": timedelta(hours=24),
+            "3_days": timedelta(days=3),
+            "7_days": timedelta(days=7),
+        }
+
+        if package in package_durations and start_at:
+            end_at = start_at + package_durations[package]
+
+        if package == "custom":
+            if start_at and not end_at:
+                messages.error(
+                    request,
+                    "Custom promotions require an end date/time.",
+                )
+                return redirect(
+                    f"{reverse('event_approval_center')}?status="
+                    f"{request.POST.get('return_status', 'pending')}"
+                )
+
+        if start_at and end_at and end_at <= start_at:
+            messages.error(
+                request,
+                "Promotion end must be later than promotion start.",
+            )
+            return redirect(
+                f"{reverse('event_approval_center')}?status="
+                f"{request.POST.get('return_status', 'pending')}"
+            )
+
+        allow_homepage = requested_homepage
+
+        if requested_homepage and event.status != "approved":
+            allow_homepage = False
+            messages.warning(
+                request,
+                "Homepage promotion was saved but NOT activated because "
+                "the event is not approved.",
+            )
+
+        elif requested_homepage and payment_status not in {"paid", "comp"}:
+            allow_homepage = False
+            messages.warning(
+                request,
+                "Homepage promotion was saved but NOT activated because "
+                "payment must be Paid or Complimentary.",
+            )
+
+        elif requested_homepage and not package:
+            allow_homepage = False
+            messages.warning(
+                request,
+                "Homepage promotion was saved but NOT activated because "
+                "a promotion package is required.",
+            )
+
+        elif requested_homepage and (not start_at or not end_at):
+            allow_homepage = False
+            messages.warning(
+                request,
+                "Homepage promotion was saved but NOT activated because "
+                "a start and end time are required.",
+            )
+
+        event.homepage_payment_status = payment_status
+        event.homepage_package = package
+        event.homepage_amount_paid = amount
+        event.homepage_promotion_start = start_at
+        event.homepage_promotion_end = end_at
+        event.show_on_homepage = allow_homepage
+
+        event.save(
+            update_fields=[
+                "homepage_payment_status",
+                "homepage_package",
+                "homepage_amount_paid",
+                "homepage_promotion_start",
+                "homepage_promotion_end",
+                "show_on_homepage",
+                "updated_at",
+            ]
+        )
+
+        if allow_homepage:
+            messages.success(
+                request,
+                f"Homepage promotion activated for {event.title}.",
+            )
+        elif not requested_homepage:
+            messages.success(
+                request,
+                f"Homepage promotion settings saved for {event.title}.",
+            )
+
+    else:
+        messages.error(request, "Unknown event action.")
+
+    return redirect(
+        f"{reverse('event_approval_center')}?status="
+        f"{request.POST.get('return_status', 'pending')}"
+    )

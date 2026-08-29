@@ -1,0 +1,870 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Event Approval Center | ATL's Hottest</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at top, #301010 0%, #100606 35%, #050505 75%);
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        .approval-shell {
+            width: min(100%, 1100px);
+            margin: 0 auto;
+            padding: 22px 14px 60px;
+        }
+
+        .approval-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .approval-kicker {
+            color: #d8b35a;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .approval-header h1 {
+            margin: 0;
+            font-size: clamp(28px, 7vw, 46px);
+            line-height: 1;
+        }
+
+        .approval-header p {
+            color: #cfcfcf;
+            margin: 10px auto 0;
+            max-width: 640px;
+            line-height: 1.5;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 9px;
+            margin: 22px 0;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            text-decoration: none;
+            padding: 12px 13px;
+            border-radius: 12px;
+            border: 1px solid rgba(216, 179, 90, .45);
+            background: rgba(255,255,255,.05);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #a71919, #6f0808);
+            border-color: #f0c86a;
+            box-shadow: 0 0 18px rgba(216,179,90,.18);
+        }
+
+        .filter-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 27px;
+            height: 27px;
+            border-radius: 999px;
+            background: rgba(0,0,0,.4);
+            color: #f4d47d;
+        }
+
+        .messages {
+            margin-bottom: 18px;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.15);
+            margin-bottom: 8px;
+        }
+
+        .event-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .event-card {
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(216,179,90,.35);
+            background:
+                linear-gradient(150deg, rgba(36,10,10,.98), rgba(10,10,10,.98));
+            box-shadow: 0 16px 35px rgba(0,0,0,.4);
+        }
+
+        .flyer {
+            width: 100%;
+            display: block;
+            max-height: 510px;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .no-flyer {
+            min-height: 180px;
+            display: grid;
+            place-items: center;
+            color: #777;
+            background: #080808;
+        }
+
+        .event-body {
+            padding: 17px;
+        }
+
+        .status-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 27px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
+        .pending {
+            background: #5d4300;
+            color: #ffdc78;
+        }
+
+        .approved {
+            background: #0d542c;
+            color: #9af2bd;
+        }
+
+        .rejected {
+            background: #641717;
+            color: #ffb2b2;
+        }
+
+        .gold {
+            background: rgba(216,179,90,.16);
+            color: #f2ce75;
+            border: 1px solid rgba(216,179,90,.35);
+        }
+
+        .event-title {
+            margin: 0 0 13px;
+            font-size: 24px;
+            line-height: 1.15;
+        }
+
+        .event-meta {
+            display: grid;
+            gap: 8px;
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .event-meta strong {
+            color: #fff;
+        }
+
+        .description {
+            color: #bebebe;
+            line-height: 1.55;
+            margin: 15px 0;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+            margin-top: 16px;
+        }
+
+        .action-form {
+            margin: 0;
+        }
+
+        button,
+        .detail-link {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 11px;
+            border: 1px solid rgba(255,255,255,.15);
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        button {
+            padding: 10px;
+        }
+
+        .approve-btn {
+            background: #167743;
+        }
+
+        .reject-btn {
+            background: #9b2020;
+        }
+
+        .toggle-btn {
+            background: #282828;
+        }
+
+        .toggle-btn.on {
+            color: #f1cb68;
+            border-color: rgba(216,179,90,.55);
+        }
+
+        .detail-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            background: linear-gradient(135deg, #7f1010, #a71919);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 45px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(216,179,90,.25);
+            color: #bbb;
+            background: rgba(255,255,255,.035);
+        }
+
+        .promo-panel {
+            grid-column: 1 / -1;
+            margin-top: 9px;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(216,179,90,.35);
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(216,179,90,.08),
+                    rgba(0,0,0,.28)
+                );
+        }
+
+        .promo-heading {
+            margin: 0 0 5px;
+            color: #f1cf76;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .promo-subheading {
+            margin: 0 0 14px;
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .promo-fields {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 11px;
+        }
+
+        .promo-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ddd;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .promo-field input,
+        .promo-field select {
+            width: 100%;
+            min-height: 45px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: #111;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .homepage-switch {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 45px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            background: rgba(0,0,0,.28);
+            border: 1px solid rgba(216,179,90,.3);
+        }
+
+        .homepage-switch input {
+            width: 21px;
+            height: 21px;
+            accent-color: #b8892e;
+        }
+
+        .promo-save-btn {
+            margin-top: 12px;
+            background:
+                linear-gradient(135deg, #b68729, #e0bd66);
+            color: #120d02;
+            border-color: #f4db91;
+        }
+
+        .promo-status {
+            margin-top: 10px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            background: rgba(0,0,0,.28);
+            color: #bbb;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        @media (min-width: 700px) {
+            .filter-row {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .event-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="approval-shell">
+
+    <header class="approval-header">
+        <div class="approval-kicker">Staff Command Center</div>
+        <h1>Event Approval Center</h1>
+        <p>
+            Review ATL events, approve submissions, reject submissions,
+            and control event-directory placement directly from mobile.
+        </p>
+    </header>
+
+    <nav class="filter-row">
+
+        <a
+            class="filter-btn {% if selected_status == 'pending' %}active{% endif %}"
+            href="{% url 'event_approval_center' %}?status=pending"
+        >
+            Pending
+            <span class="filter-count">{{ counts.pending }}</span>
+        </a>
+
+        <a
+            class="filter-btn {% if selected_status == 'approved' %}active{% endif %}"
+            href="{% url 'event_approval_center' %}?status=approved"
+        >
+            Approved
+            <span class="filter-count">{{ counts.approved }}</span>
+        </a>
+
+        <a
+            class="filter-btn {% if selected_status == 'rejected' %}active{% endif %}"
+            href="{% url 'event_approval_center' %}?status=rejected"
+        >
+            Rejected
+            <span class="filter-count">{{ counts.rejected }}</span>
+        </a>
+
+        <a
+            class="filter-btn {% if selected_status == 'all' %}active{% endif %}"
+            href="{% url 'event_approval_center' %}?status=all"
+        >
+            All
+            <span class="filter-count">{{ counts.all }}</span>
+        </a>
+
+    </nav>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="event-grid">
+
+        {% for event in events %}
+
+            <article class="event-card">
+
+                {% if event.flyer %}
+                    <img
+                        class="flyer"
+                        src="{{ event.flyer.url }}"
+                        alt="{{ event.title }}"
+                    >
+                {% else %}
+                    <div class="no-flyer">
+                        No flyer uploaded
+                    </div>
+                {% endif %}
+
+                <div class="event-body">
+
+                    <div class="status-line">
+
+                        <span class="badge {{ event.status }}">
+                            {{ event.get_status_display }}
+                        </span>
+
+                        {% if event.is_featured %}
+                            <span class="badge gold">
+                                Featured
+                            </span>
+                        {% endif %}
+
+                        {% if event.show_today %}
+                            <span class="badge gold">
+                                Show Today
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <h2 class="event-title">
+                        {{ event.title }}
+                    </h2>
+
+                    <div class="event-meta">
+
+                        <div>
+                            <strong>Date:</strong>
+                            {{ event.starts_at|date:"M j, Y g:i A" }}
+                        </div>
+
+                        {% if event.ends_at %}
+                            <div>
+                                <strong>Ends:</strong>
+                                {{ event.ends_at|date:"M j, Y g:i A" }}
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <strong>Venue:</strong>
+                            {{ event.venue_name|default:"Not provided" }}
+                        </div>
+
+                        <div>
+                            <strong>Location:</strong>
+                            {{ event.city }}, {{ event.state }}
+                        </div>
+
+                        <div>
+                            <strong>Organizer:</strong>
+                            {{ event.organizer_name }}
+                        </div>
+
+                        <div>
+                            <strong>Email:</strong>
+                            {{ event.organizer_email }}
+                        </div>
+
+                        {% if event.organizer_phone %}
+                            <div>
+                                <strong>Phone:</strong>
+                                {{ event.organizer_phone }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    <p class="description">
+                        {{ event.description|truncatewords:45 }}
+                    </p>
+
+                    <div class="action-grid">
+
+                        {% if event.status != "approved" %}
+                            <form
+                                class="action-form"
+                                method="post"
+                                action="{% url 'event_approval_action' event.pk %}"
+                            >
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve">
+                                <input
+                                    type="hidden"
+                                    name="return_status"
+                                    value="{{ selected_status }}"
+                                >
+
+                                <button class="approve-btn" type="submit">
+                                    ✓ Approve
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if event.status != "rejected" %}
+                            <form
+                                class="action-form"
+                                method="post"
+                                action="{% url 'event_approval_action' event.pk %}"
+                            >
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject">
+                                <input
+                                    type="hidden"
+                                    name="return_status"
+                                    value="{{ selected_status }}"
+                                >
+
+                                <button class="reject-btn" type="submit">
+                                    ✕ Reject
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <form
+                            class="action-form"
+                            method="post"
+                            action="{% url 'event_approval_action' event.pk %}"
+                        >
+                            {% csrf_token %}
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="toggle_featured"
+                            >
+                            <input
+                                type="hidden"
+                                name="return_status"
+                                value="{{ selected_status }}"
+                            >
+
+                            <button
+                                class="toggle-btn {% if event.is_featured %}on{% endif %}"
+                                type="submit"
+                            >
+                                ★ Featured:
+                                {% if event.is_featured %}ON{% else %}OFF{% endif %}
+                            </button>
+                        </form>
+
+                        <form
+                            class="action-form"
+                            method="post"
+                            action="{% url 'event_approval_action' event.pk %}"
+                        >
+                            {% csrf_token %}
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="toggle_today"
+                            >
+                            <input
+                                type="hidden"
+                                name="return_status"
+                                value="{{ selected_status }}"
+                            >
+
+                            <button
+                                class="toggle-btn {% if event.show_today %}on{% endif %}"
+                                type="submit"
+                            >
+                                Today:
+                                {% if event.show_today %}ON{% else %}OFF{% endif %}
+                            </button>
+                        </form>
+
+                        <div class="promo-panel">
+
+                            <h3 class="promo-heading">
+                                💰 Paid Homepage Promotion
+                            </h3>
+
+                            <p class="promo-subheading">
+                                Event approval and premium homepage advertising
+                                are separate. Configure the paid campaign here.
+                            </p>
+
+                            <form
+                                method="post"
+                                action="{% url 'event_approval_action' event.pk %}"
+                            >
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="save_homepage_promo"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="return_status"
+                                    value="{{ selected_status }}"
+                                >
+
+                                <div class="promo-fields">
+
+                                    <div class="promo-field">
+                                        <label>Payment Status</label>
+
+                                        <select name="homepage_payment_status">
+
+                                            <option
+                                                value="not_required"
+                                                {% if event.homepage_payment_status == "not_required" %}selected{% endif %}
+                                            >
+                                                Not Required / Legacy
+                                            </option>
+
+                                            <option
+                                                value="unpaid"
+                                                {% if event.homepage_payment_status == "unpaid" %}selected{% endif %}
+                                            >
+                                                Unpaid
+                                            </option>
+
+                                            <option
+                                                value="pending"
+                                                {% if event.homepage_payment_status == "pending" %}selected{% endif %}
+                                            >
+                                                Payment Pending
+                                            </option>
+
+                                            <option
+                                                value="paid"
+                                                {% if event.homepage_payment_status == "paid" %}selected{% endif %}
+                                            >
+                                                Paid
+                                            </option>
+
+                                            <option
+                                                value="comp"
+                                                {% if event.homepage_payment_status == "comp" %}selected{% endif %}
+                                            >
+                                                Complimentary / Admin Comp
+                                            </option>
+
+                                            <option
+                                                value="refunded"
+                                                {% if event.homepage_payment_status == "refunded" %}selected{% endif %}
+                                            >
+                                                Refunded
+                                            </option>
+
+                                        </select>
+                                    </div>
+
+
+                                    <div class="promo-field">
+                                        <label>Promotion Package</label>
+
+                                        <select name="homepage_package">
+
+                                            <option
+                                                value=""
+                                                {% if not event.homepage_package %}selected{% endif %}
+                                            >
+                                                No Homepage Promotion
+                                            </option>
+
+                                            <option
+                                                value="24_hours"
+                                                {% if event.homepage_package == "24_hours" %}selected{% endif %}
+                                            >
+                                                24 Hours
+                                            </option>
+
+                                            <option
+                                                value="3_days"
+                                                {% if event.homepage_package == "3_days" %}selected{% endif %}
+                                            >
+                                                3 Days
+                                            </option>
+
+                                            <option
+                                                value="7_days"
+                                                {% if event.homepage_package == "7_days" %}selected{% endif %}
+                                            >
+                                                7 Days
+                                            </option>
+
+                                            <option
+                                                value="custom"
+                                                {% if event.homepage_package == "custom" %}selected{% endif %}
+                                            >
+                                                Custom Campaign
+                                            </option>
+
+                                        </select>
+                                    </div>
+
+
+                                    <div class="promo-field">
+                                        <label>Amount Paid</label>
+
+                                        <input
+                                            type="number"
+                                            name="homepage_amount_paid"
+                                            min="0"
+                                            step="0.01"
+                                            value="{{ event.homepage_amount_paid }}"
+                                            inputmode="decimal"
+                                        >
+                                    </div>
+
+
+                                    <div class="promo-field">
+                                        <label>Promotion Begins</label>
+
+                                        <input
+                                            type="datetime-local"
+                                            name="homepage_promotion_start"
+                                            value="{{ event.homepage_promotion_start|date:'Y-m-d\\TH:i' }}"
+                                        >
+                                    </div>
+
+
+                                    <div class="promo-field">
+                                        <label>
+                                            Promotion Ends
+                                            {% if event.homepage_package != "custom" %}
+                                                — Auto Calculated
+                                            {% endif %}
+                                        </label>
+
+                                        <input
+                                            type="datetime-local"
+                                            name="homepage_promotion_end"
+                                            value="{{ event.homepage_promotion_end|date:'Y-m-d\\TH:i' }}"
+                                        >
+                                    </div>
+
+
+                                    <label class="homepage-switch">
+
+                                        <input
+                                            type="checkbox"
+                                            name="show_on_homepage"
+                                            {% if event.show_on_homepage %}checked{% endif %}
+                                        >
+
+                                        <span>
+                                            Activate Premium Homepage Placement
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+                                <button
+                                    class="promo-save-btn"
+                                    type="submit"
+                                >
+                                    Save Homepage Promotion
+                                </button>
+
+                            </form>
+
+
+                            <div class="promo-status">
+
+                                <strong>Payment:</strong>
+                                {{ event.get_homepage_payment_status_display }}
+
+                                <br>
+
+                                <strong>Package:</strong>
+                                {{ event.get_homepage_package_display|default:"None" }}
+
+                                <br>
+
+                                <strong>Homepage Switch:</strong>
+                                {% if event.show_on_homepage %}
+                                    ON
+                                {% else %}
+                                    OFF
+                                {% endif %}
+
+                                {% if event.homepage_promotion_start %}
+                                    <br>
+                                    <strong>Starts:</strong>
+                                    {{ event.homepage_promotion_start|date:"M j, Y g:i A" }}
+                                {% endif %}
+
+                                {% if event.homepage_promotion_end %}
+                                    <br>
+                                    <strong>Ends:</strong>
+                                    {{ event.homepage_promotion_end|date:"M j, Y g:i A" }}
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <a
+                            class="detail-link"
+                            href="{% url 'event_detail' event.slug %}"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            View Full Event
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        {% empty %}
+
+            <div class="empty-state">
+                No events found in this section.
+            </div>
+
+        {% endfor %}
+
+    </section>
+
+</div>
+
+</body>
+</html>
