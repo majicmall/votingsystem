@@ -2091,6 +2091,7 @@ def event_promote(request, slug):
         valid_packages = {value for value, label in package_choices}
 
         errors = []
+        quoted_amount = 0
 
         if not producer_name:
             errors.append("Please enter the producer or organizer name.")
@@ -2106,10 +2107,18 @@ def event_promote(request, slug):
         if package not in valid_packages:
             errors.append("Please select a promotion package.")
         elif package != "custom":
+            promotion_rate = (
+                EventPromotionRate.objects
+                .filter(package=package, is_active=True)
+                .first()
+            )
+
             if promotion_rate is None or promotion_rate.amount <= 0:
                 errors.append(
                     "This promotion package is not currently available for purchase."
                 )
+            else:
+                quoted_amount = promotion_rate.amount
 
         requested_start = None
         if requested_start_raw:

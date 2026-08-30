@@ -15,6 +15,11 @@ urlpatterns = [
     path("events/live/<slug:slug>/qr.png", ballot_views.event_qr_code, name="event_qr_code"),
 
     path("events/live/<slug:slug>/", ballot_views.event_detail, name="event_detail"),
+    path(
+        "events/live/<slug:slug>/promote/",
+        ballot_views.event_promote,
+        name="event_promote",
+    ),
 
     path("events/submitted/<slug:slug>/", ballot_views.event_submitted, name="event_submitted"),
 
@@ -118,9 +123,4 @@ if settings.DEBUG:
 # Later, move uploads to Cloudinary, S3, or Render Persistent Disk.
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", django_static_serve, {"document_root": settings.MEDIA_ROOT}),
-    path(
-        "events/live/<slug:slug>/promote/",
-        ballot_views.event_promote,
-        name="event_promote",
-    ),
 ]

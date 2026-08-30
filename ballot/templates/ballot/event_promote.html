@@ -133,6 +133,16 @@
       margin-bottom: 8px;
     }
 
+    
+    .package-price {
+      display: block;
+      margin-top: 6px;
+      color: #f4c75b;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+
     .package-copy {
       color: #aaa;
       font-size: .9rem;
@@ -318,6 +328,10 @@
 
       <div class="eyebrow">Choose Your Promotion</div>
 
+      {% event_promotion_price "24_hours" as price_24 %}
+      {% event_promotion_price "3_days" as price_3 %}
+      {% event_promotion_price "7_days" as price_7 %}
+
       <div class="packages">
 
         <div class="package">
@@ -330,6 +344,9 @@
           >
           <label for="package-24">
             <span class="package-title">24 Hours</span>
+            <span class="package-price">
+              {% if price_24 %}${{ price_24 }}{% else %}Currently Unavailable{% endif %}
+            </span>
             <span class="package-copy">
               A focused one-day premium homepage campaign.
             </span>
@@ -345,6 +362,9 @@
           >
           <label for="package-3">
             <span class="package-title">3 Days</span>
+            <span class="package-price">
+              {% if price_3 %}${{ price_3 }}{% else %}Currently Unavailable{% endif %}
+            </span>
             <span class="package-copy">
               Build momentum across multiple high-traffic days.
             </span>
@@ -360,6 +380,9 @@
           >
           <label for="package-7">
             <span class="package-title">7 Days</span>
+            <span class="package-price">
+              {% if price_7 %}${{ price_7 }}{% else %}Currently Unavailable{% endif %}
+            </span>
             <span class="package-copy">
               A full week of premium promotional opportunity.
             </span>
@@ -375,6 +398,7 @@
           >
           <label for="package-custom">
             <span class="package-title">Custom</span>
+            <span class="package-price">Request a Quote</span>
             <span class="package-copy">
               Build a campaign around your event's exact schedule.
             </span>
@@ -384,7 +408,8 @@
       </div>
 
       <div class="price-note">
-        Package pricing and availability will be confirmed before payment.
+        Choose the promotion package that fits your event.
+        Custom campaigns receive a manual quote before payment.
         Submitting this request does not activate or charge a campaign.
       </div>
 
