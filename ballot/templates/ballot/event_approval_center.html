@@ -1060,6 +1060,88 @@
                             {% endif %}
 
                             {% if order.status == "awaiting_payment" %}
+                                <div class="promotion-payment-tools" style="
+                                    grid-column:1 / -1;
+                                    padding:14px;
+                                    margin-bottom:2px;
+                                    background:rgba(213,154,34,.08);
+                                    border:1px solid rgba(244,199,91,.32);
+                                    border-radius:12px;
+                                ">
+                                    <div style="
+                                        color:#f4c75b;
+                                        font-size:.72rem;
+                                        font-weight:900;
+                                        letter-spacing:.09em;
+                                        text-transform:uppercase;
+                                        margin-bottom:8px;
+                                    ">
+                                        Secure Producer Payment Link
+                                    </div>
+
+                                    <div style="
+                                        color:#aaa;
+                                        font-size:.78rem;
+                                        line-height:1.45;
+                                        margin-bottom:10px;
+                                        overflow-wrap:anywhere;
+                                    ">
+                                        {% url 'event_promotion_payment' token=order.public_token as payment_path %}
+                                        {{ request.scheme }}://{{ request.get_host }}{{ payment_path }}
+                                    </div>
+
+                                    <div style="
+                                        display:grid;
+                                        grid-template-columns:1fr 1fr;
+                                        gap:8px;
+                                    ">
+                                        <a
+                                            href="{{ payment_path }}"
+                                            target="_blank"
+                                            rel="noopener"
+                                            style="
+                                                min-height:44px;
+                                                display:flex;
+                                                align-items:center;
+                                                justify-content:center;
+                                                padding:9px;
+                                                border-radius:11px;
+                                                background:#d59a22;
+                                                color:#111;
+                                                text-decoration:none;
+                                                text-align:center;
+                                                font-size:.82rem;
+                                                font-weight:900;
+                                            "
+                                        >
+                                            Open Payment Page
+                                        </a>
+
+                                        <button
+                                            type="button"
+                                            onclick="copyPromotionPaymentLink(
+                                                '{{ request.scheme }}://{{ request.get_host }}{{ payment_path }}',
+                                                this
+                                            )"
+                                            style="
+                                                width:100%;
+                                                min-height:44px;
+                                                border:1px solid rgba(244,199,91,.5);
+                                                border-radius:11px;
+                                                background:#111;
+                                                color:#f4c75b;
+                                                font-size:.82rem;
+                                                font-weight:900;
+                                                cursor:pointer;
+                                            "
+                                        >
+                                            Copy Payment Link
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if order.status == "awaiting_payment" %}
                                 <form method="post"
                                       action="{% url 'event_promotion_order_action' order.pk %}">
                                     {% csrf_token %}
@@ -1164,6 +1246,33 @@
 
     </div>
 </section>
+
+
+<script>
+async function copyPromotionPaymentLink(url, button) {
+    const originalText = button.textContent.trim();
+
+    try {
+        await navigator.clipboard.writeText(url);
+        button.textContent = "Copied!";
+    } catch (error) {
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = url;
+        temporaryInput.style.position = "fixed";
+        temporaryInput.style.opacity = "0";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.focus();
+        temporaryInput.select();
+        document.execCommand("copy");
+        temporaryInput.remove();
+        button.textContent = "Copied!";
+    }
+
+    window.setTimeout(function () {
+        button.textContent = originalText;
+    }, 1800);
+}
+</script>
 
 </body>
 </html>

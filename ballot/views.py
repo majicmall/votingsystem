@@ -10,6 +10,7 @@ import logging
 import csv
 import json
 import uuid
+import stripe
 
 from django.conf import settings as django_settings
 from django.contrib import messages
@@ -18,14 +19,16 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import EmailMultiAlternatives
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 from django.core.files.base import ContentFile
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import Http404, HttpResponse,  JsonResponse, HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_protect
+from django.utils.html import escape
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_http_methods, require_POST
 
 from .forms import AssociationProfileForm, CategoryRequestForm, NomineePhotoForm, NomineeProfileForm, NomineeSignupForm
@@ -2190,6 +2193,724 @@ def event_promote(request, slug):
     )
 
 
+
+def _activate_event_promotion_order(order):
+    """
+    Activate a promotion order using the same rules for both
+    staff activation and verified Stripe payments.
+
+    Returns:
+        (success: bool, message: str)
+    """
+    event = order.event
+
+    if order.status != "paid":
+        return (
+            False,
+            "This promotion must be marked Paid before it can be activated.",
+        )
+
+    if order.quoted_amount <= 0 and not order.is_complimentary:
+        return (
+            False,
+            "This $0.00 campaign cannot activate unless staff explicitly "
+            "authorizes it as complimentary.",
+        )
+
+    if event.status != "approved":
+        return (
+            False,
+            "The event must be approved before homepage promotion can activate.",
+        )
+
+    if not order.requested_start or not order.requested_end:
+        return (
+            False,
+            "This promotion order is missing a valid campaign schedule.",
+        )
+
+    if order.requested_end <= order.requested_start:
+        return (
+            False,
+            "The campaign ending time must be later than its starting time.",
+        )
+
+    event.homepage_package = order.package
+    event.homepage_amount_paid = order.quoted_amount
+    event.homepage_payment_status = (
+        "comp" if order.is_complimentary else "paid"
+    )
+    event.homepage_promotion_start = order.requested_start
+    event.homepage_promotion_end = order.requested_end
+    event.show_on_homepage = True
+
+    event.save(
+        update_fields=[
+            "homepage_package",
+            "homepage_amount_paid",
+            "homepage_payment_status",
+            "homepage_promotion_start",
+            "homepage_promotion_end",
+            "show_on_homepage",
+            "updated_at",
+        ]
+    )
+
+    order.status = "activated"
+    order.save(update_fields=["status", "updated_at"])
+
+    return True, f"{event.title}: premium homepage promotion ACTIVATED."
+
+
+def event_promotion_payment(request, token):
+    """
+    Secure producer-facing payment/status page.
+
+    The UUID token prevents sequential promotion order IDs
+    from being exposed publicly.
+    """
+    order = get_object_or_404(
+        EventPromotionOrder.objects.select_related("event"),
+        public_token=token,
+    )
+
+    return render(
+        request,
+        "ballot/event_promotion_payment.html",
+        {
+            "order": order,
+            "checkout_success": request.GET.get("success") == "1",
+            "checkout_cancelled": request.GET.get("cancelled") == "1",
+        },
+    )
+
+
+@require_POST
+def event_promotion_checkout(request, token):
+    """
+    Create or reuse a Stripe-hosted Checkout Session.
+
+    Only Awaiting Payment orders with a positive server-side
+    quote may enter Checkout.
+    """
+    order = get_object_or_404(
+        EventPromotionOrder.objects.select_related("event"),
+        public_token=token,
+    )
+
+    if not django_settings.STRIPE_SECRET_KEY:
+        logger.error(
+            "Stripe checkout requested but STRIPE_SECRET_KEY is not configured."
+        )
+        messages.error(
+            request,
+            "Online payment is temporarily unavailable. Please contact ATL's Hottest."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    if order.status != "awaiting_payment":
+        messages.error(
+            request,
+            "This promotion order is not currently awaiting payment."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    if order.is_complimentary:
+        messages.error(
+            request,
+            "This promotion has been authorized as complimentary and does not require Stripe payment."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    if order.quoted_amount <= 0:
+        messages.error(
+            request,
+            "This promotion does not yet have a valid payment amount."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    if order.event.status != "approved":
+        messages.error(
+            request,
+            "This event must be approved before payment can be collected."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    if (
+        not order.requested_start
+        or not order.requested_end
+        or order.requested_end <= order.requested_start
+    ):
+        messages.error(
+            request,
+            "This promotion does not have a valid campaign schedule."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    stripe.api_key = django_settings.STRIPE_SECRET_KEY
+
+    # Reuse an existing open Checkout Session instead of creating
+    # multiple simultaneously payable sessions for the same order.
+    if order.stripe_checkout_session_id:
+        try:
+            existing_session = stripe.checkout.Session.retrieve(
+                order.stripe_checkout_session_id
+            )
+
+            if (
+                existing_session.get("status") == "open"
+                and existing_session.get("url")
+            ):
+                return redirect(existing_session.url)
+
+        except Exception:
+            logger.exception(
+                "Unable to retrieve existing Stripe Checkout Session %s",
+                order.stripe_checkout_session_id,
+            )
+
+    amount_cents = int(
+        order.quoted_amount * Decimal("100")
+    )
+
+    success_url = request.build_absolute_uri(
+        reverse(
+            "event_promotion_payment_success",
+            kwargs={"token": order.public_token},
+        )
+    )
+
+    cancel_url = request.build_absolute_uri(
+        reverse(
+            "event_promotion_payment_cancel",
+            kwargs={"token": order.public_token},
+        )
+    )
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            mode="payment",
+            payment_method_types=["card"],
+            customer_email=order.producer_email,
+            client_reference_id=str(order.pk),
+            metadata={
+                "event_promotion_order_id": str(order.pk),
+                "event_promotion_public_token": str(order.public_token),
+            },
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": (
+                                "ATL's Hottest Homepage Promotion — "
+                                f"{order.get_package_display()}"
+                            ),
+                            "description": order.event.title,
+                        },
+                        "unit_amount": amount_cents,
+                    },
+                    "quantity": 1,
+                }
+            ],
+            success_url=(
+                success_url
+                + "?success=1&session_id={CHECKOUT_SESSION_ID}"
+            ),
+            cancel_url=cancel_url + "?cancelled=1",
+        )
+
+    except Exception:
+        logger.exception(
+            "Stripe Checkout Session creation failed for promotion order #%s",
+            order.pk,
+        )
+        messages.error(
+            request,
+            "We could not open the secure payment page. Please try again."
+        )
+        return redirect(
+            "event_promotion_payment",
+            token=order.public_token,
+        )
+
+    order.stripe_checkout_session_id = checkout_session.id
+    order.stripe_payment_status = (
+        checkout_session.payment_status or "unpaid"
+    )
+    order.save(
+        update_fields=[
+            "stripe_checkout_session_id",
+            "stripe_payment_status",
+            "updated_at",
+        ]
+    )
+
+    return redirect(checkout_session.url)
+
+
+def event_promotion_payment_success(request, token):
+    """
+    Informational return page only.
+
+    IMPORTANT:
+    Reaching this URL does NOT mark an order paid.
+    Only the verified Stripe webhook can do that.
+    """
+    order = get_object_or_404(
+        EventPromotionOrder.objects.select_related("event"),
+        public_token=token,
+    )
+
+    return render(
+        request,
+        "ballot/event_promotion_payment.html",
+        {
+            "order": order,
+            "checkout_success": True,
+            "checkout_cancelled": False,
+        },
+    )
+
+
+def event_promotion_payment_cancel(request, token):
+    order = get_object_or_404(
+        EventPromotionOrder.objects.select_related("event"),
+        public_token=token,
+    )
+
+    return render(
+        request,
+        "ballot/event_promotion_payment.html",
+        {
+            "order": order,
+            "checkout_success": False,
+            "checkout_cancelled": True,
+        },
+    )
+
+
+@csrf_exempt
+@require_POST
+def stripe_event_promotion_webhook(request):
+    """
+    Verified Stripe webhook for paid homepage event promotions.
+
+    Stripe is the source of truth for payment confirmation.
+    Success-page redirects never fulfill an order.
+    """
+    webhook_secret = django_settings.STRIPE_WEBHOOK_SECRET
+
+    if not webhook_secret:
+        logger.error(
+            "Stripe webhook received but STRIPE_WEBHOOK_SECRET is not configured."
+        )
+        return HttpResponse(status=503)
+
+    stripe.api_key = django_settings.STRIPE_SECRET_KEY
+
+    payload = request.body
+    signature = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+
+    try:
+        stripe_event = stripe.Webhook.construct_event(
+            payload,
+            signature,
+            webhook_secret,
+        )
+    except (ValueError, stripe.SignatureVerificationError):
+        logger.warning("Rejected Stripe webhook with invalid signature.")
+        return HttpResponse(status=400)
+
+    # stripe-python 15.x returns StripeObject instances.
+    # Convert the verified event and nested objects to plain dictionaries
+    # before using dict-style .get() access below.
+    if hasattr(stripe_event, "to_dict"):
+        stripe_event = stripe_event.to_dict()
+
+    if stripe_event.get("type") != "checkout.session.completed":
+        return HttpResponse(status=200)
+
+    session = stripe_event["data"]["object"]
+
+    if session.get("payment_status") != "paid":
+        logger.info(
+            "Checkout session %s completed without paid payment_status.",
+            session.get("id"),
+        )
+        return HttpResponse(status=200)
+
+    metadata = session.get("metadata") or {}
+    order_id = metadata.get("event_promotion_order_id")
+
+    if not order_id:
+        logger.warning(
+            "Stripe Checkout Session %s missing promotion order metadata.",
+            session.get("id"),
+        )
+        return HttpResponse(status=400)
+
+    try:
+        order_id = int(order_id)
+    except (TypeError, ValueError):
+        return HttpResponse(status=400)
+
+    try:
+        with transaction.atomic():
+            order = (
+                EventPromotionOrder.objects
+                .select_for_update()
+                .select_related("event")
+                .get(pk=order_id)
+            )
+
+            session_id = session.get("id", "")
+
+            # A Checkout Session must belong to the same order that
+            # originally generated it.
+            if (
+                not order.stripe_checkout_session_id
+                or order.stripe_checkout_session_id != session_id
+            ):
+                logger.warning(
+                    "Stripe session mismatch for promotion order #%s.",
+                    order.pk,
+                )
+                return HttpResponse(status=400)
+
+            session_token = metadata.get(
+                "event_promotion_public_token",
+                ""
+            )
+
+            if session_token != str(order.public_token):
+                logger.warning(
+                    "Stripe public-token mismatch for promotion order #%s.",
+                    order.pk,
+                )
+                return HttpResponse(status=400)
+
+            expected_amount = int(
+                order.quoted_amount * Decimal("100")
+            )
+
+            if session.get("currency") != "usd":
+                logger.warning(
+                    "Stripe currency mismatch for promotion order #%s.",
+                    order.pk,
+                )
+                return HttpResponse(status=400)
+
+            if session.get("amount_total") != expected_amount:
+                logger.warning(
+                    "Stripe amount mismatch for promotion order #%s. "
+                    "Expected %s cents, received %s cents.",
+                    order.pk,
+                    expected_amount,
+                    session.get("amount_total"),
+                )
+                return HttpResponse(status=400)
+
+            # Webhook idempotency: Stripe can retry the same event.
+            if order.status in {"activated", "completed"}:
+                return HttpResponse(status=200)
+
+            if order.status not in {"awaiting_payment", "paid"}:
+                logger.warning(
+                    "Paid Stripe session received for promotion order #%s "
+                    "with unexpected status %s.",
+                    order.pk,
+                    order.status,
+                )
+                return HttpResponse(status=200)
+
+            order.stripe_payment_intent_id = (
+                session.get("payment_intent") or ""
+            )
+            order.stripe_payment_status = "paid"
+            order.paid_at = order.paid_at or timezone.now()
+            order.status = "paid"
+
+            order.save(
+                update_fields=[
+                    "stripe_payment_intent_id",
+                    "stripe_payment_status",
+                    "paid_at",
+                    "status",
+                    "updated_at",
+                ]
+            )
+
+            activated, activation_message = (
+                _activate_event_promotion_order(order)
+            )
+
+            if not activated:
+                # Payment is still safely recorded as Paid.
+                # Staff can resolve the schedule/event issue and
+                # activate manually afterward.
+                logger.warning(
+                    "Promotion order #%s was paid but not automatically "
+                    "activated: %s",
+                    order.pk,
+                    activation_message,
+                )
+
+    except EventPromotionOrder.DoesNotExist:
+        logger.warning(
+            "Stripe webhook referenced unknown promotion order #%s.",
+            order_id,
+        )
+        return HttpResponse(status=400)
+
+    return HttpResponse(status=200)
+
+
+
+def _send_event_promotion_payment_email(order, payment_url):
+    """
+    Email the producer their secure event-promotion payment link.
+
+    Email delivery failure must never destroy or roll back the
+    promotion order. Staff still retains the payment link inside
+    Revenue Command as a manual fallback.
+    """
+    subject = (
+        "Complete Your ATL's Hottest Homepage Promotion Payment"
+    )
+
+    producer_name = order.producer_name or "Event Producer"
+    event_title = order.event.title
+    package_name = order.get_package_display()
+    amount = f"${order.quoted_amount:.2f}"
+
+    plain_message = f"""Hello {producer_name},
+
+Your ATL's Hottest homepage promotion request for:
+
+{event_title}
+
+has been approved for payment.
+
+Promotion Package: {package_name}
+Amount Due: {amount}
+
+Complete your secure payment here:
+{payment_url}
+
+Your promotion will not be activated from the return page alone.
+Payment must first be securely confirmed through Stripe.
+
+Thank you,
+ATL's Hottest Awards
+"""
+
+    html_message = f"""
+    <!doctype html>
+    <html>
+      <body style="
+          margin:0;
+          padding:0;
+          background:#050505;
+          color:#ffffff;
+          font-family:Arial,Helvetica,sans-serif;
+      ">
+        <div style="
+            max-width:640px;
+            margin:0 auto;
+            padding:32px 18px;
+        ">
+          <div style="
+              background:#0d0d0d;
+              border:1px solid rgba(212,175,55,.55);
+              border-radius:20px;
+              overflow:hidden;
+          ">
+            <div style="
+                padding:28px 24px;
+                text-align:center;
+                background:linear-gradient(
+                    135deg,
+                    #220000,
+                    #090909
+                );
+                border-bottom:1px solid #292929;
+            ">
+              <div style="
+                  color:#d8b64c;
+                  font-size:12px;
+                  font-weight:800;
+                  letter-spacing:2px;
+                  text-transform:uppercase;
+                  margin-bottom:8px;
+              ">
+                ATL'S HOTTEST AWARDS
+              </div>
+
+              <h1 style="
+                  margin:0;
+                  color:#ffffff;
+                  font-size:28px;
+              ">
+                Your Promotion Is Ready For Payment
+              </h1>
+            </div>
+
+            <div style="padding:28px 24px;">
+              <p style="
+                  margin-top:0;
+                  color:#dddddd;
+                  font-size:16px;
+                  line-height:1.6;
+              ">
+                Hello {escape(producer_name)},
+              </p>
+
+              <p style="
+                  color:#dddddd;
+                  font-size:16px;
+                  line-height:1.6;
+              ">
+                Your homepage promotion request for
+                <strong style="color:#ffffff;">
+                  {escape(event_title)}
+                </strong>
+                has been approved for payment.
+              </p>
+
+              <div style="
+                  margin:24px 0;
+                  padding:18px;
+                  background:#151515;
+                  border:1px solid #292929;
+                  border-radius:14px;
+              ">
+                <div style="
+                    margin-bottom:12px;
+                    color:#aaaaaa;
+                    font-size:14px;
+                ">
+                  Promotion Package
+                  <div style="
+                      margin-top:4px;
+                      color:#ffffff;
+                      font-size:17px;
+                      font-weight:700;
+                  ">
+                    {escape(package_name)}
+                  </div>
+                </div>
+
+                <div style="
+                    color:#aaaaaa;
+                    font-size:14px;
+                ">
+                  Amount Due
+                  <div style="
+                      margin-top:4px;
+                      color:#e1c35a;
+                      font-size:24px;
+                      font-weight:800;
+                  ">
+                    {escape(amount)}
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align:center;margin:28px 0;">
+                <a
+                  href="{escape(payment_url)}"
+                  style="
+                      display:inline-block;
+                      padding:16px 28px;
+                      border-radius:10px;
+                      background:#b9151d;
+                      color:#ffffff;
+                      text-decoration:none;
+                      font-size:16px;
+                      font-weight:800;
+                  "
+                >
+                  Pay Securely
+                </a>
+              </div>
+
+              <p style="
+                  color:#999999;
+                  font-size:13px;
+                  line-height:1.6;
+                  text-align:center;
+              ">
+                Secure payment processing is provided through Stripe.
+                Your promotion activates only after verified payment
+                confirmation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+    """
+
+    from_email = getattr(
+        django_settings,
+        "DEFAULT_FROM_EMAIL",
+        "ATL's Hottest <noreply@localhost>",
+    )
+
+    try:
+        email_msg = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=[order.producer_email],
+        )
+
+        email_msg.attach_alternative(
+            html_message,
+            "text/html",
+        )
+
+        sent_count = email_msg.send(
+            fail_silently=False
+        )
+
+        logger.info(
+            "Promotion payment email sent for order #%s to %s. Result=%s",
+            order.pk,
+            order.producer_email,
+            sent_count,
+        )
+
+        return bool(sent_count)
+
+    except Exception:
+        logger.exception(
+            "Promotion payment email failed for order #%s to %s",
+            order.pk,
+            order.producer_email,
+        )
+        return False
+
+
 @staff_member_required
 @require_POST
 def event_promotion_order_action(request, pk):
@@ -2213,10 +2934,32 @@ def event_promotion_order_action(request, pk):
     if action == "awaiting_payment":
         order.status = "awaiting_payment"
         order.save(update_fields=["status", "updated_at"])
-        messages.success(
-            request,
-            f"{event.title}: promotion order is now awaiting payment."
+
+        payment_url = request.build_absolute_uri(
+            reverse(
+                "event_promotion_payment",
+                kwargs={"token": order.public_token},
+            )
         )
+
+        email_sent = _send_event_promotion_payment_email(
+            order,
+            payment_url,
+        )
+
+        if email_sent:
+            messages.success(
+                request,
+                f"{event.title}: awaiting payment. "
+                "Secure payment link emailed to the producer."
+            )
+        else:
+            messages.warning(
+                request,
+                f"{event.title}: awaiting payment, but the payment "
+                "email could not be delivered. Use Copy Payment Link "
+                "in Revenue Command."
+            )
 
     elif action == "paid":
         if order.quoted_amount <= 0 and not order.is_complimentary:
@@ -2235,70 +2978,12 @@ def event_promotion_order_action(request, pk):
         )
 
     elif action == "activate":
-        if order.status != "paid":
-            messages.error(
-                request,
-                "This promotion must be marked Paid before it can be activated."
-            )
-            return redirect("event_approval_center")
+        activated, activation_message = _activate_event_promotion_order(order)
 
-        if order.quoted_amount <= 0 and not order.is_complimentary:
-            messages.error(
-                request,
-                "This $0.00 campaign cannot activate unless staff explicitly "
-                "authorizes it as complimentary."
-            )
-            return redirect("event_approval_center")
-
-        if event.status != "approved":
-            messages.error(
-                request,
-                "The event must be approved before homepage promotion can activate."
-            )
-            return redirect("event_approval_center")
-
-        if not order.requested_start or not order.requested_end:
-            messages.error(
-                request,
-                "This promotion order is missing a valid campaign schedule."
-            )
-            return redirect("event_approval_center")
-
-        if order.requested_end <= order.requested_start:
-            messages.error(
-                request,
-                "The campaign ending time must be later than its starting time."
-            )
-            return redirect("event_approval_center")
-
-        event.homepage_package = order.package
-        event.homepage_amount_paid = order.quoted_amount
-        event.homepage_payment_status = (
-            "comp" if order.is_complimentary else "paid"
-        )
-        event.homepage_promotion_start = order.requested_start
-        event.homepage_promotion_end = order.requested_end
-        event.show_on_homepage = True
-
-        event.save(
-            update_fields=[
-                "homepage_package",
-                "homepage_amount_paid",
-                "homepage_payment_status",
-                "homepage_promotion_start",
-                "homepage_promotion_end",
-                "show_on_homepage",
-                "updated_at",
-            ]
-        )
-
-        order.status = "activated"
-        order.save(update_fields=["status", "updated_at"])
-
-        messages.success(
-            request,
-            f"{event.title}: premium homepage promotion ACTIVATED."
-        )
+        if activated:
+            messages.success(request, activation_message)
+        else:
+            messages.error(request, activation_message)
 
     elif action == "complete":
         order.status = "completed"

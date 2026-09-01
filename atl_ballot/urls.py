@@ -21,6 +21,33 @@ urlpatterns = [
         name="event_promote",
     ),
 
+    # Secure producer event-promotion payment flow
+    path(
+        "events/promotions/<uuid:token>/payment/",
+        ballot_views.event_promotion_payment,
+        name="event_promotion_payment",
+    ),
+    path(
+        "events/promotions/<uuid:token>/checkout/",
+        ballot_views.event_promotion_checkout,
+        name="event_promotion_checkout",
+    ),
+    path(
+        "events/promotions/<uuid:token>/success/",
+        ballot_views.event_promotion_payment_success,
+        name="event_promotion_payment_success",
+    ),
+    path(
+        "events/promotions/<uuid:token>/cancel/",
+        ballot_views.event_promotion_payment_cancel,
+        name="event_promotion_payment_cancel",
+    ),
+    path(
+        "payments/stripe/event-promotions/webhook/",
+        ballot_views.stripe_event_promotion_webhook,
+        name="stripe_event_promotion_webhook",
+    ),
+
     path("events/submitted/<slug:slug>/", ballot_views.event_submitted, name="event_submitted"),
 
     path("events/sample/<slug:slug>/", ballot_views.sample_event_detail, name="sample_event_detail"),

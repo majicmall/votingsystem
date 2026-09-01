@@ -1,12 +1,20 @@
 {% extends "ballot/base.html" %}
-{% block title %}Staff Dashboard | ATL’s Hottest{% endblock %}
+{% block title %}Patrol Center | ATL’s Hottest{% endblock %}
 
 {% block content %}
 <section class="hero small">
-  <p class="eyebrow">Staff Control Room</p>
+  <p class="eyebrow">Patrol Center</p>
   <h1>ATL’s Hottest Vote Dashboard</h1>
   <p>Review pending requests, monitor vote totals, and export results.</p>
-  <a class="btn primary" href="{% url 'export_votes_csv' %}">Export Vote CSV</a>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
+    <a class="btn primary" href="{% url 'export_votes_csv' %}">
+      Export Vote CSV
+    </a>
+
+    <a class="btn" href="{% url 'event_approval_center' %}">
+      📅 Event Approval Center
+    </a>
+  </div>
 </section>
 
 <section class="staff-summary-grid">

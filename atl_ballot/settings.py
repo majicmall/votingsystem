@@ -287,3 +287,13 @@ else:
 
 
 SITE_URL = os.environ.get("SITE_URL", "https://atlshottestawards.onrender.com")
+
+# -------------------------------------------------------------------
+# Stripe payments
+# -------------------------------------------------------------------
+# Secrets come from .env locally and Render environment variables
+# in production. Never hard-code Stripe credentials in the repository.
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")

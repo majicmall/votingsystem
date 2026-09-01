@@ -1043,6 +1043,33 @@ class EventPromotionOrder(models.Model):
         help_text="Staff-authorized complimentary promotion. Allows activation without a paid dollar amount.",
     )
 
+
+    # Secure producer-facing payment identifier
+    public_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+    )
+
+    # Stripe payment tracking
+    stripe_checkout_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True,
+    )
+    stripe_payment_intent_id = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+    stripe_payment_status = models.CharField(
+        max_length=50,
+        blank=True,
+    )
+    paid_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
