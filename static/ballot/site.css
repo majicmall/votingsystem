@@ -6131,3 +6131,89 @@ header nav a:hover::before,
     padding: 12px 13px;
   }
 }
+
+/* =========================================================
+   BALLOT NOMINEE MOBILE VISIBILITY + FULL PORTRAIT FIX
+   Keep approved nominee cards visible on phones and show
+   the complete uploaded nominee portrait without cropping.
+   ========================================================= */
+
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 215, 106, 0.18), transparent 45%),
+    #070707 !important;
+}
+
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+@media screen and (max-width: 820px) {
+  .ballot-category-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  .ballot-category-only-grid {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .ballot-category-only-grid .ballot-nominee-card {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+  }
+
+  .ballot-category-only-grid .nominee-card-link {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 320px !important;
+    min-height: 320px !important;
+  }
+
+  .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  .ballot-category-only-grid .nominee-card-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

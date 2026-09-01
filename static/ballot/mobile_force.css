@@ -156,9 +156,12 @@
   .nominee-card .nominee-photo-frame img,
   .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
+    object-position: center center !important;
   }
 
   .nominee-card-body {
