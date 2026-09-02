@@ -1265,8 +1265,8 @@
         <a href="{% url 'advertise_command_center' %}">Advertise With ATL’s Hottest</a>
       <a href="{% url 'nominee_signup' %}">Submit Nominee</a>
       <a href="{% url 'assoc_dashboard' %}">Nominee Dashboard</a>
+      <a href="{% url 'staff_dashboard' %}">Patrol Center</a>
       {% if request.user.is_staff %}
-        <a href="{% url 'staff_dashboard' %}">Patrol Center</a>
         <a href="{% url 'admin:index' %}">Admin</a>
       {% endif %}
       {% if request.user.is_authenticated %}
