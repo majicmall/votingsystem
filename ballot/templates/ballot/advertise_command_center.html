@@ -182,10 +182,32 @@
     <label class="field-label" for="{{ form.website.id_for_label }}">Website</label>
     {{ form.website }}
 
-    <label class="field-label" for="{{ form.placement_interest.id_for_label }}">Placement Interest</label>
-    {{ form.placement_interest }}
+    <label class="field-label">Advertising Properties</label>
+    <div class="advertise-property-grid">
+      {{ form.requested_placements }}
+    </div>
+    {% if form.requested_placements.help_text %}
+      <p class="muted advertise-upload-note">
+        {{ form.requested_placements.help_text }}
+      </p>
+    {% endif %}
 
-    <label class="field-label" for="{{ form.budget_range.id_for_label }}">Budget Range</label>
+    <label class="field-label" for="{{ form.purchase_type.id_for_label }}">Billboard Purchase</label>
+    {{ form.purchase_type }}
+    <p class="muted advertise-upload-note">
+      Rotating Billboard Slot shares the property with other advertisers.
+      Exclusive Whole Billboard requests the entire property for your campaign.
+    </p>
+
+    <label class="field-label" for="{{ form.total_budget.id_for_label }}">Total Campaign Budget</label>
+    {{ form.total_budget }}
+    <p class="muted advertise-upload-note">
+      One campaign budget covers all selected properties.
+      Multiple properties require a minimum $50 campaign budget.
+      Premium homepage inventory also begins at a $50 minimum.
+    </p>
+
+    <label class="field-label" for="{{ form.budget_range.id_for_label }}">Budget / Package Notes</label>
     {{ form.budget_range }}
 
     <label class="field-label" for="{{ form.requested_start_date.id_for_label }}">Requested Start Date</label>

@@ -1268,6 +1268,31 @@ def _send_real_nominee_approval_email(request_obj, nominee_obj=None, temporary_p
 # Powered By The MajesticMall Megaverse Advertising Platform
 # =========================================================
 
+def billboard_click(request, ad_id):
+    from django.shortcuts import get_object_or_404, redirect
+
+    from .models import BillboardAd, BillboardAdEvent
+
+    ad = get_object_or_404(
+        BillboardAd,
+        pk=ad_id,
+        is_active=True,
+    )
+
+    BillboardAdEvent.objects.create(
+        ad=ad,
+        event_type=BillboardAdEvent.EVENT_CLICK,
+        placement=ad.placement,
+    )
+
+    if ad.destination_url:
+        return redirect(ad.destination_url)
+
+    return redirect(
+        f"/advertise/?placement={ad.placement}"
+    )
+
+
 def advertise_command_center(request):
     from django.contrib import messages
     from django.shortcuts import render, redirect
@@ -1293,8 +1318,15 @@ def advertise_command_center(request):
         }
 
         initial = {}
-        if requested_placement in valid_placements:
-            initial["placement_interest"] = requested_placement
+
+        if (
+            requested_placement in valid_placements
+            and requested_placement
+            != AdvertisingInquiry.PLACEMENT_FULL_CAMPAIGN
+        ):
+            initial["requested_placements"] = [
+                requested_placement
+            ]
 
         form = AdvertisingInquiryForm(initial=initial)
 

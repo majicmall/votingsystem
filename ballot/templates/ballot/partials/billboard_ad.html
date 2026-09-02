@@ -4,7 +4,7 @@
 <section class="mm-billboard mm-billboard-live">
   <a
     class="mm-billboard-link"
-    href="{% if ad.destination_url %}{{ ad.destination_url }}{% else %}{% url 'advertise_command_center' %}?placement={{ placement|urlencode }}{% endif %}"
+    href="{% url 'billboard_click' ad.id %}"
     {% if ad.destination_url %}target="_blank" rel="noopener noreferrer"{% endif %}
     aria-label="{{ ad.title }}"
   >

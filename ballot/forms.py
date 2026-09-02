@@ -150,6 +150,27 @@ class AssociationProfileForm(forms.ModelForm):
 
 
 class AdvertisingInquiryForm(forms.ModelForm):
+    requested_placements = forms.MultipleChoiceField(
+        choices=AdvertisingInquiry.PLACEMENT_CHOICES[:-1],
+        required=True,
+        widget=forms.CheckboxSelectMultiple,
+        label="Advertising Properties",
+        help_text="Choose one or more ATL’s Hottest advertising properties.",
+    )
+
+    total_budget = forms.DecimalField(
+        required=True,
+        min_value=0,
+        decimal_places=2,
+        max_digits=10,
+        label="Total Campaign Budget",
+        widget=forms.NumberInput(attrs={
+            "min": "0",
+            "step": "0.01",
+            "placeholder": "100.00",
+        }),
+    )
+
     class Meta:
         model = AdvertisingInquiry
         fields = [
@@ -158,7 +179,9 @@ class AdvertisingInquiryForm(forms.ModelForm):
             "email",
             "phone",
             "website",
-            "placement_interest",
+            "requested_placements",
+            "purchase_type",
+            "total_budget",
             "budget_range",
             "requested_start_date",
             "requested_end_date",
@@ -172,7 +195,10 @@ class AdvertisingInquiryForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"placeholder": "best@email.com"}),
             "phone": forms.TextInput(attrs={"placeholder": "Phone number"}),
             "website": forms.URLInput(attrs={"placeholder": "https://yourbrand.com"}),
-            "budget_range": forms.TextInput(attrs={"placeholder": "Example: $50-$250, $500+, monthly package"}),
+            "purchase_type": forms.Select(),
+            "budget_range": forms.TextInput(attrs={
+                "placeholder": "Optional notes about budget, duration, or package"
+            }),
             "requested_start_date": forms.DateInput(attrs={"type": "date"}),
             "requested_end_date": forms.DateInput(attrs={"type": "date"}),
             "creative_notes": forms.Textarea(attrs={
@@ -184,6 +210,76 @@ class AdvertisingInquiryForm(forms.ModelForm):
                 "rows": 5,
             }),
         }
+
+    def clean(self):
+        from decimal import Decimal
+
+        cleaned = super().clean()
+
+        placements = cleaned.get("requested_placements") or []
+        total_budget = cleaned.get("total_budget")
+        start_date = cleaned.get("requested_start_date")
+        end_date = cleaned.get("requested_end_date")
+
+        if start_date and end_date and end_date < start_date:
+            self.add_error(
+                "requested_end_date",
+                "Requested end date must be on or after the start date.",
+            )
+
+        required_minimum = Decimal("0.00")
+
+        # More than one property requires at least $50 total spend.
+        if len(placements) > 1:
+            required_minimum = max(
+                required_minimum,
+                Decimal("50.00"),
+            )
+
+        # Homepage Red Carpet is premium inventory.
+        if AdvertisingInquiry.PLACEMENT_HOMEPAGE in placements:
+            required_minimum = max(
+                required_minimum,
+                Decimal("50.00"),
+            )
+
+        if (
+            total_budget is not None
+            and total_budget < required_minimum
+        ):
+            self.add_error(
+                "total_budget",
+                (
+                    f"The selected advertising properties require "
+                    f"a minimum total campaign budget of "
+                    f"${required_minimum:.2f}."
+                ),
+            )
+
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        placements = self.cleaned_data.get(
+            "requested_placements"
+        ) or []
+
+        instance.requested_placements = list(placements)
+
+        # Preserve the original single-placement field for
+        # compatibility with existing Admin/reporting code.
+        if len(placements) == 1:
+            instance.placement_interest = placements[0]
+        elif len(placements) > 1:
+            instance.placement_interest = (
+                AdvertisingInquiry.PLACEMENT_FULL_CAMPAIGN
+            )
+
+        if commit:
+            instance.save()
+
+        return instance
 
 
 

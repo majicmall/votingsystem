@@ -155,8 +155,233 @@ class NominationCategoryRequestAdmin(admin.ModelAdmin):
 # Powered By The MajesticMall Megaverse Advertising Platform
 # =========================================================
 
-from .models import BillboardAd, AdvertisingInquiry
+from .models import BillboardAd, AdvertisingInquiry, AdvertisingCampaign, BillboardAdEvent
 from .models import MembershipPlan, MembershipBenefit, MembershipReward, UserMembership
+
+@admin.action(
+    description="Activate selected advertising campaign(s)"
+)
+def activate_advertising_campaigns(modeladmin, request, queryset):
+    from django.contrib import messages
+    from django.core.exceptions import ValidationError
+    from django.db import transaction
+
+    activated = 0
+    skipped = 0
+
+    for campaign in queryset:
+        campaign.status = AdvertisingCampaign.STATUS_ACTIVE
+
+        try:
+            # Validate campaign budget/minimum rules first.
+            campaign.full_clean()
+
+            # Validate every billboard before activating any.
+            ads = list(campaign.billboard_ads.all())
+
+            if not ads:
+                skipped += 1
+                continue
+
+            for ad in ads:
+                ad.is_active = True
+                ad.full_clean()
+
+            with transaction.atomic():
+                campaign.save(
+                    update_fields=[
+                        "status",
+                        "updated_at",
+                    ]
+                )
+
+                for ad in ads:
+                    ad.save(
+                        update_fields=[
+                            "is_active",
+                            "updated_at",
+                        ]
+                    )
+
+            activated += 1
+
+        except ValidationError:
+            skipped += 1
+
+    if activated:
+        messages.success(
+            request,
+            (
+                f"{activated} advertising campaign(s) "
+                f"activated successfully."
+            ),
+        )
+
+    if skipped:
+        messages.warning(
+            request,
+            (
+                f"{skipped} campaign(s) were not activated. "
+                f"Review budget, minimum spend, schedule, "
+                f"exclusive inventory, and billboard bookings."
+            ),
+        )
+
+
+@admin.action(
+    description="Pause selected advertising campaign(s)"
+)
+def pause_advertising_campaigns(modeladmin, request, queryset):
+    from django.contrib import messages
+    from django.db import transaction
+
+    paused = 0
+
+    for campaign in queryset:
+        with transaction.atomic():
+            campaign.status = AdvertisingCampaign.STATUS_PAUSED
+            campaign.save(
+                update_fields=[
+                    "status",
+                    "updated_at",
+                ]
+            )
+
+            campaign.billboard_ads.update(
+                is_active=False
+            )
+
+        paused += 1
+
+    if paused:
+        messages.success(
+            request,
+            f"{paused} advertising campaign(s) paused.",
+        )
+
+
+@admin.register(AdvertisingCampaign)
+class AdvertisingCampaignAdmin(admin.ModelAdmin):
+    list_display = (
+        "campaign_name",
+        "advertiser_name",
+        "total_budget",
+        "allocated_total_display",
+        "remaining_budget_display",
+        "status",
+        "starts_at",
+        "ends_at",
+    )
+    list_filter = ("status", "starts_at", "ends_at")
+    search_fields = (
+        "campaign_name",
+        "advertiser_name",
+        "contact_name",
+        "email",
+        "phone",
+    )
+    ordering = ("-created_at",)
+    actions = (
+        activate_advertising_campaigns,
+        pause_advertising_campaigns,
+    )
+    readonly_fields = (
+        "allocated_total_display",
+        "remaining_budget_display",
+        "required_minimum_spend_display",
+        "budget_status_display",
+        "created_at",
+        "updated_at",
+    )
+
+    fieldsets = (
+        ("Campaign", {
+            "fields": (
+                "campaign_name",
+                "advertiser_name",
+                "status",
+            )
+        }),
+        ("Contact", {
+            "fields": (
+                "contact_name",
+                "email",
+                "phone",
+            )
+        }),
+        ("Budget", {
+            "fields": (
+                "total_budget",
+                "minimum_campaign_spend",
+                "allocated_total_display",
+                "remaining_budget_display",
+                "required_minimum_spend_display",
+                "budget_status_display",
+            )
+        }),
+        ("Schedule", {
+            "fields": (
+                "starts_at",
+                "ends_at",
+            )
+        }),
+        ("Internal", {
+            "fields": (
+                "internal_notes",
+                "created_at",
+                "updated_at",
+            )
+        }),
+    )
+
+    @admin.display(description="Allocated")
+    def allocated_total_display(self, obj):
+        return obj.allocated_total
+
+    @admin.display(description="Remaining")
+    def remaining_budget_display(self, obj):
+        return obj.remaining_budget
+
+    @admin.display(description="Required Minimum")
+    def required_minimum_spend_display(self, obj):
+        return obj.required_minimum_spend
+
+    @admin.display(description="Budget Status")
+    def budget_status_display(self, obj):
+        return "VALID" if obj.budget_is_valid else "REVIEW REQUIRED"
+
+
+@admin.register(BillboardAdEvent)
+class BillboardAdEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "ad",
+        "event_type",
+        "placement",
+        "created_at",
+    )
+    list_filter = (
+        "event_type",
+        "placement",
+        "created_at",
+    )
+    search_fields = (
+        "ad__title",
+        "ad__advertiser_name",
+    )
+    readonly_fields = (
+        "ad",
+        "event_type",
+        "placement",
+        "created_at",
+    )
+    ordering = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(BillboardAd)
 class BillboardAdAdmin(admin.ModelAdmin):
@@ -164,20 +389,47 @@ class BillboardAdAdmin(admin.ModelAdmin):
         "title",
         "advertiser_name",
         "placement",
+        "campaign",
+        "purchase_type",
+        "allocated_budget",
+        "minimum_spend",
+        "is_premium_property",
+        "rotation_weight",
         "is_active",
         "starts_at",
         "ends_at",
         "priority",
     )
-    list_filter = ("placement", "is_active", "starts_at", "ends_at")
+    list_filter = (
+        "placement",
+        "purchase_type",
+        "is_premium_property",
+        "is_active",
+        "starts_at",
+        "ends_at",
+    )
     search_fields = ("title", "advertiser_name", "subtitle", "destination_url")
     ordering = ("priority", "-created_at")
     fieldsets = (
         ("Advertiser", {
-            "fields": ("advertiser_name", "title", "subtitle")
+            "fields": ("campaign", "advertiser_name", "title", "subtitle")
         }),
-        ("Placement", {
-            "fields": ("placement", "priority", "is_active")
+        ("Placement & Inventory", {
+            "fields": (
+                "placement",
+                "purchase_type",
+                "priority",
+                "rotation_weight",
+                "is_premium_property",
+                "minimum_spend",
+                "is_active",
+            )
+        }),
+        ("Campaign Budget", {
+            "fields": (
+                "campaign_budget",
+                "allocated_budget",
+            )
         }),
         ("Creative", {
             "fields": ("image", "destination_url", "call_to_action")
@@ -191,6 +443,235 @@ class BillboardAdAdmin(admin.ModelAdmin):
     )
 
 
+@admin.action(
+    description="Create advertising campaign from selected inquiry/inquiries"
+)
+def create_campaign_from_inquiry(modeladmin, request, queryset):
+    from datetime import datetime, time
+    from decimal import Decimal, ROUND_DOWN
+
+    from django.contrib import messages
+    from django.db import transaction
+    from django.utils import timezone
+
+    created_count = 0
+    skipped_count = 0
+
+    placement_labels = dict(BillboardAd.PLACEMENT_CHOICES)
+
+    for inquiry in queryset:
+        # -------------------------------------------------
+        # Do not duplicate already-converted inquiries.
+        # -------------------------------------------------
+        if inquiry.converted_campaign_id:
+            skipped_count += 1
+            continue
+
+        placements = list(
+            dict.fromkeys(
+                inquiry.requested_placements or []
+            )
+        )
+
+        # Legacy inquiry fallback.
+        if (
+            not placements
+            and inquiry.placement_interest
+            and inquiry.placement_interest
+            != AdvertisingInquiry.PLACEMENT_FULL_CAMPAIGN
+        ):
+            placements = [
+                inquiry.placement_interest
+            ]
+
+        placements = [
+            placement
+            for placement in placements
+            if placement in placement_labels
+        ]
+
+        if not placements or inquiry.total_budget is None:
+            skipped_count += 1
+            continue
+
+        total_budget = Decimal(inquiry.total_budget)
+
+        # -------------------------------------------------
+        # Campaign minimum
+        # -------------------------------------------------
+        required_minimum = Decimal("0.00")
+
+        if len(placements) > 1:
+            required_minimum = Decimal("50.00")
+
+        if (
+            AdvertisingInquiry.PLACEMENT_HOMEPAGE
+            in placements
+        ):
+            required_minimum = max(
+                required_minimum,
+                Decimal("50.00"),
+            )
+
+        if total_budget < required_minimum:
+            skipped_count += 1
+            continue
+
+        # -------------------------------------------------
+        # Convert requested dates into campaign datetimes.
+        # -------------------------------------------------
+        starts_at = None
+        ends_at = None
+
+        if inquiry.requested_start_date:
+            starts_at = timezone.make_aware(
+                datetime.combine(
+                    inquiry.requested_start_date,
+                    time.min,
+                ),
+                timezone.get_current_timezone(),
+            )
+
+        if inquiry.requested_end_date:
+            ends_at = timezone.make_aware(
+                datetime.combine(
+                    inquiry.requested_end_date,
+                    time.max,
+                ),
+                timezone.get_current_timezone(),
+            )
+
+        # -------------------------------------------------
+        # Equal initial budget allocation.
+        #
+        # Staff can modify allocations in Admin before
+        # activating the campaign.
+        # -------------------------------------------------
+        property_count = len(placements)
+
+        equal_share = (
+            total_budget / Decimal(property_count)
+        ).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_DOWN,
+        )
+
+        remaining = total_budget
+
+        try:
+            with transaction.atomic():
+                campaign = AdvertisingCampaign.objects.create(
+                    advertiser_name=inquiry.business_name,
+                    campaign_name=(
+                        f"{inquiry.business_name} "
+                        f"Campaign #{inquiry.pk}"
+                    ),
+                    contact_name=inquiry.contact_name,
+                    email=inquiry.email,
+                    phone=inquiry.phone,
+                    total_budget=total_budget,
+                    minimum_campaign_spend=required_minimum,
+                    status=AdvertisingCampaign.STATUS_PENDING,
+                    starts_at=starts_at,
+                    ends_at=ends_at,
+                    internal_notes=(
+                        f"Created from Advertising Inquiry "
+                        f"#{inquiry.pk}. "
+                        f"{inquiry.internal_notes}".strip()
+                    ),
+                )
+
+                for index, placement in enumerate(
+                    placements,
+                    start=1,
+                ):
+                    # Give the final property any leftover
+                    # pennies so allocations total exactly.
+                    if index == property_count:
+                        allocated = remaining
+                    else:
+                        allocated = equal_share
+                        remaining -= allocated
+
+                    BillboardAd.objects.create(
+                        campaign=campaign,
+                        advertiser_name=inquiry.business_name,
+                        title=(
+                            f"{inquiry.business_name} — "
+                            f"{placement_labels[placement]}"
+                        ),
+                        subtitle="",
+                        placement=placement,
+                        purchase_type=inquiry.purchase_type,
+                        destination_url=inquiry.website or "",
+                        call_to_action="Learn More",
+
+                        # Staff approval is still required.
+                        is_active=False,
+
+                        starts_at=starts_at,
+                        ends_at=ends_at,
+
+                        priority=100,
+                        rotation_weight=1,
+
+                        campaign_budget=total_budget,
+                        allocated_budget=allocated,
+
+                        minimum_spend=Decimal("0.00"),
+
+                        is_premium_property=(
+                            placement
+                            == BillboardAd.PLACEMENT_HOMEPAGE_TOP
+                        ),
+
+                        impressions_note=(
+                            f"Created from Advertising Inquiry "
+                            f"#{inquiry.pk}. "
+                            f"Review creative, allocation, schedule, "
+                            f"and destination before activation."
+                        ),
+                    )
+
+                inquiry.converted_campaign = campaign
+                inquiry.converted_at = timezone.now()
+                inquiry.is_contacted = True
+
+                inquiry.save(
+                    update_fields=[
+                        "converted_campaign",
+                        "converted_at",
+                        "is_contacted",
+                    ]
+                )
+
+                created_count += 1
+
+        except Exception:
+            skipped_count += 1
+
+    if created_count:
+        messages.success(
+            request,
+            (
+                f"{created_count} advertising campaign"
+                f"{'' if created_count == 1 else 's'} "
+                f"created successfully. Billboard bookings "
+                f"were created INACTIVE for final staff review."
+            ),
+        )
+
+    if skipped_count:
+        messages.warning(
+            request,
+            (
+                f"{skipped_count} inquiry/inquiries were skipped. "
+                f"They may already be converted or may not contain "
+                f"a valid campaign budget/property selection."
+            ),
+        )
+
+
 @admin.register(AdvertisingInquiry)
 class AdvertisingInquiryAdmin(admin.ModelAdmin):
     list_display = (
@@ -202,11 +683,20 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
         "requested_start_date",
         "requested_end_date",
         "is_contacted",
+        "converted_campaign",
+        "converted_at",
         "created_at",
     )
     list_filter = ("placement_interest", "is_contacted", "created_at")
     search_fields = ("business_name", "contact_name", "email", "phone", "website", "campaign_message")
-    readonly_fields = ("created_at",)
+    readonly_fields = (
+        "converted_campaign",
+        "converted_at",
+        "created_at",
+    )
+    actions = (
+        create_campaign_from_inquiry,
+    )
     ordering = ("-created_at",)
     fieldsets = (
         ("Advertiser", {
@@ -224,8 +714,18 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
         ("Creative", {
             "fields": ("creative_upload", "creative_notes")
         }),
+        ("Campaign Conversion", {
+            "fields": (
+                "converted_campaign",
+                "converted_at",
+            )
+        }),
         ("Follow Up", {
-            "fields": ("is_contacted", "internal_notes", "created_at")
+            "fields": (
+                "is_contacted",
+                "internal_notes",
+                "created_at",
+            )
         }),
     )
 

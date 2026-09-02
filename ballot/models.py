@@ -655,6 +655,156 @@ class NominationCategoryRequest(models.Model):
 
 
 # =========================================================
+# ATL's Hottest Advertising Campaign Engine
+# Powered By The MajesticMall Megaverse Advertising Platform
+# =========================================================
+
+class AdvertisingCampaign(models.Model):
+    STATUS_DRAFT = "draft"
+    STATUS_PENDING = "pending"
+    STATUS_ACTIVE = "active"
+    STATUS_PAUSED = "paused"
+    STATUS_COMPLETED = "completed"
+    STATUS_CANCELLED = "cancelled"
+
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_PENDING, "Pending Approval"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_PAUSED, "Paused"),
+        (STATUS_COMPLETED, "Completed"),
+        (STATUS_CANCELLED, "Cancelled"),
+    ]
+
+    advertiser_name = models.CharField(max_length=180)
+    campaign_name = models.CharField(max_length=180)
+    contact_name = models.CharField(max_length=140, blank=True)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+
+    total_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Total budget shared across all billboard properties in this campaign.",
+    )
+
+    minimum_campaign_spend = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Minimum total spend required for this campaign.",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
+    )
+
+    starts_at = models.DateTimeField(blank=True, null=True)
+    ends_at = models.DateTimeField(blank=True, null=True)
+
+    internal_notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Advertising Campaign"
+        verbose_name_plural = "Advertising Campaigns"
+
+    def __str__(self):
+        return f"{self.campaign_name} — {self.advertiser_name}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        errors = {}
+
+        if (
+            self.starts_at
+            and self.ends_at
+            and self.ends_at <= self.starts_at
+        ):
+            errors["ends_at"] = (
+                "Campaign end time must be after the start time."
+            )
+
+        if self.total_budget is not None and self.total_budget < 0:
+            errors["total_budget"] = (
+                "Campaign budget cannot be negative."
+            )
+
+        if (
+            self.minimum_campaign_spend is not None
+            and self.minimum_campaign_spend < 0
+        ):
+            errors["minimum_campaign_spend"] = (
+                "Minimum campaign spend cannot be negative."
+            )
+
+        # Do not allow a campaign to become active if its
+        # booked inventory exceeds its budget or minimum rules.
+        if self.pk and self.status == self.STATUS_ACTIVE:
+            if not self.budget_is_valid:
+                errors["status"] = (
+                    "This campaign cannot be activated until its "
+                    "budget and minimum-spend requirements are valid."
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    @property
+    def allocated_total(self):
+        from django.db.models import Sum
+        total = self.billboard_ads.aggregate(
+            total=Sum("allocated_budget")
+        )["total"]
+        return total or 0
+
+    @property
+    def remaining_budget(self):
+        return self.total_budget - self.allocated_total
+
+    @property
+    def selected_property_count(self):
+        return self.billboard_ads.count()
+
+    @property
+    def required_minimum_spend(self):
+        from decimal import Decimal
+
+        minimums = [
+            ad.minimum_spend or Decimal("0")
+            for ad in self.billboard_ads.all()
+        ]
+
+        property_minimum = max(minimums, default=Decimal("0"))
+
+        # Multi-property campaigns require at least $50 total spend.
+        multi_property_minimum = (
+            Decimal("50.00")
+            if self.selected_property_count > 1
+            else Decimal("0")
+        )
+
+        return max(
+            self.minimum_campaign_spend or Decimal("0"),
+            property_minimum,
+            multi_property_minimum,
+        )
+
+    @property
+    def budget_is_valid(self):
+        return (
+            self.total_budget >= self.required_minimum_spend
+            and self.allocated_total <= self.total_budget
+        )
+
+
+# =========================================================
 # ATL's Hottest Billboard System
 # Powered By The MajesticMall Megaverse Advertising Platform
 # =========================================================
@@ -688,10 +838,67 @@ class BillboardAd(models.Model):
         (PLACEMENT_ATL_TV, "ATL TV Sponsor Billboard"),
     ]
 
+    PURCHASE_ROTATION = "rotation"
+    PURCHASE_EXCLUSIVE = "exclusive"
+
+    PURCHASE_TYPE_CHOICES = [
+        (PURCHASE_ROTATION, "Rotating Billboard Slot"),
+        (PURCHASE_EXCLUSIVE, "Exclusive Whole Billboard"),
+    ]
+
+    campaign = models.ForeignKey(
+        "AdvertisingCampaign",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="billboard_ads",
+        help_text="Optional campaign that owns the shared budget for this billboard booking.",
+    )
+
     advertiser_name = models.CharField(max_length=160)
     title = models.CharField(max_length=180)
     subtitle = models.CharField(max_length=240, blank=True)
-    placement = models.CharField(max_length=40, choices=PLACEMENT_CHOICES, default=PLACEMENT_HOMEPAGE_TOP)
+    placement = models.CharField(
+        max_length=40,
+        choices=PLACEMENT_CHOICES,
+        default=PLACEMENT_HOMEPAGE_TOP,
+    )
+
+    purchase_type = models.CharField(
+        max_length=20,
+        choices=PURCHASE_TYPE_CHOICES,
+        default=PURCHASE_ROTATION,
+        help_text="Rotating slots share this property. Exclusive purchases take over the whole billboard while active.",
+    )
+    campaign_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Advertiser's total campaign budget across all selected properties.",
+    )
+    allocated_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Amount of the campaign budget allocated to this billboard property.",
+    )
+    minimum_spend = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Minimum spend required for this billboard property.",
+    )
+    is_premium_property = models.BooleanField(
+        default=False,
+        help_text="Marks premium inventory such as major homepage billboard properties.",
+    )
+    rotation_weight = models.PositiveIntegerField(
+        default=1,
+        help_text="Relative rotation frequency. 1 = standard; higher values receive proportionally more appearances.",
+    )
+
     image = models.ImageField(
         upload_to="billboards/",
         blank=True,
@@ -720,6 +927,117 @@ class BillboardAd(models.Model):
     def __str__(self):
         return f"{self.title} — {self.get_placement_display()}"
 
+    def clean(self):
+        from decimal import Decimal
+
+        from django.core.exceptions import ValidationError
+        from django.db.models import Q, Sum
+
+        errors = {}
+
+        allocated = self.allocated_budget or Decimal("0")
+        minimum = self.minimum_spend or Decimal("0")
+
+        if allocated < 0:
+            errors["allocated_budget"] = (
+                "Allocated budget cannot be negative."
+            )
+
+        if minimum < 0:
+            errors["minimum_spend"] = (
+                "Minimum spend cannot be negative."
+            )
+
+        if self.rotation_weight < 1:
+            errors["rotation_weight"] = (
+                "Rotation weight must be at least 1."
+            )
+
+        if (
+            self.starts_at
+            and self.ends_at
+            and self.ends_at <= self.starts_at
+        ):
+            errors["ends_at"] = (
+                "Billboard end time must be after the start time."
+            )
+
+        if self.is_active and allocated < minimum:
+            errors["allocated_budget"] = (
+                f"This billboard requires a minimum allocation "
+                f"of ${minimum:.2f} before it can be active."
+            )
+
+        if self.campaign_id:
+            campaign = self.campaign
+
+            if (
+                campaign.starts_at
+                and self.starts_at
+                and self.starts_at < campaign.starts_at
+            ):
+                errors["starts_at"] = (
+                    "Billboard cannot start before its campaign."
+                )
+
+            if (
+                campaign.ends_at
+                and self.ends_at
+                and self.ends_at > campaign.ends_at
+            ):
+                errors["ends_at"] = (
+                    "Billboard cannot end after its campaign."
+                )
+
+            other_allocated = (
+                campaign.billboard_ads
+                .exclude(pk=self.pk)
+                .aggregate(total=Sum("allocated_budget"))["total"]
+                or Decimal("0")
+            )
+
+            if other_allocated + allocated > campaign.total_budget:
+                available = campaign.total_budget - other_allocated
+
+                errors["allocated_budget"] = (
+                    f"This allocation exceeds the campaign budget. "
+                    f"Maximum available for this property is "
+                    f"${available:.2f}."
+                )
+
+        # Exclusive inventory cannot overlap another active
+        # exclusive booking for the same billboard property.
+        if (
+            self.is_active
+            and self.purchase_type == self.PURCHASE_EXCLUSIVE
+        ):
+            overlapping = BillboardAd.objects.filter(
+                placement=self.placement,
+                purchase_type=self.PURCHASE_EXCLUSIVE,
+                is_active=True,
+            ).exclude(pk=self.pk)
+
+            if self.starts_at:
+                overlapping = overlapping.filter(
+                    Q(ends_at__isnull=True)
+                    | Q(ends_at__gt=self.starts_at)
+                )
+
+            if self.ends_at:
+                overlapping = overlapping.filter(
+                    Q(starts_at__isnull=True)
+                    | Q(starts_at__lt=self.ends_at)
+                )
+
+            if overlapping.exists():
+                errors["purchase_type"] = (
+                    "Another exclusive booking overlaps this "
+                    "billboard property during the selected schedule."
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
     @property
     def is_current(self):
         from django.utils import timezone
@@ -737,6 +1055,49 @@ class BillboardAd(models.Model):
 # ATL's Hottest Advertise Command Center
 # Powered By The MajesticMall Megaverse Advertising Platform
 # =========================================================
+
+class BillboardAdEvent(models.Model):
+    EVENT_IMPRESSION = "impression"
+    EVENT_CLICK = "click"
+
+    EVENT_CHOICES = [
+        (EVENT_IMPRESSION, "Impression"),
+        (EVENT_CLICK, "Click"),
+    ]
+
+    ad = models.ForeignKey(
+        "BillboardAd",
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=20,
+        choices=EVENT_CHOICES,
+    )
+    placement = models.CharField(
+        max_length=40,
+        blank=True,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["ad", "event_type", "created_at"],
+            ),
+        ]
+        verbose_name = "Billboard Ad Event"
+        verbose_name_plural = "Billboard Ad Events"
+
+    def __str__(self):
+        return (
+            f"{self.ad.title} — "
+            f"{self.get_event_type_display()}"
+        )
+
 
 class AdvertisingInquiry(models.Model):
     PLACEMENT_SITEWIDE = "sitewide"
@@ -769,6 +1130,14 @@ class AdvertisingInquiry(models.Model):
         (PLACEMENT_FULL_CAMPAIGN, "Full ATL’s Hottest Campaign"),
     ]
 
+    PURCHASE_ROTATION = "rotation"
+    PURCHASE_EXCLUSIVE = "exclusive"
+
+    PURCHASE_TYPE_CHOICES = [
+        (PURCHASE_ROTATION, "Rotating Billboard Slot"),
+        (PURCHASE_EXCLUSIVE, "Exclusive Whole Billboard"),
+    ]
+
     business_name = models.CharField(max_length=180)
     contact_name = models.CharField(max_length=140)
     email = models.EmailField()
@@ -782,7 +1151,25 @@ class AdvertisingInquiry(models.Model):
     budget_range = models.CharField(
         max_length=120,
         blank=True,
-        help_text="Optional budget range or campaign spend."
+        help_text="Optional budget notes or campaign spend details."
+    )
+    total_budget = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text="Total campaign budget shared across selected advertising properties.",
+    )
+    purchase_type = models.CharField(
+        max_length=20,
+        choices=PURCHASE_TYPE_CHOICES,
+        default=PURCHASE_ROTATION,
+        help_text="Choose shared rotating inventory or request the entire billboard exclusively.",
+    )
+    requested_placements = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Advertising property keys requested for this campaign.",
     )
     requested_start_date = models.DateField(blank=True, null=True)
     requested_end_date = models.DateField(blank=True, null=True)
@@ -803,6 +1190,20 @@ class AdvertisingInquiry(models.Model):
     )
     is_contacted = models.BooleanField(default=False)
     internal_notes = models.TextField(blank=True)
+
+    converted_campaign = models.ForeignKey(
+        "AdvertisingCampaign",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="source_inquiries",
+        help_text="Campaign created from this advertising inquiry.",
+    )
+    converted_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

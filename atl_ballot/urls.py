@@ -90,6 +90,7 @@ urlpatterns = [
     path("membership/dashboard/", ballot_views.membership_dashboard, name="membership_dashboard"),
     path("marketplace/", ballot_views.atls_hottest_marketplace, name="atls_hottest_marketplace"),
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
+    path("advertise/click/<int:ad_id>/", ballot_views.billboard_click, name="billboard_click"),
     path("advertise/thank-you/", ballot_views.advertise_thank_you, name="advertise_thank_you"),
 
     path("tv/", ballot_views.atl_tv, name="atl_tv"),
