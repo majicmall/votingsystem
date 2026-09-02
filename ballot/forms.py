@@ -4,7 +4,12 @@ from .models import AtlsHottestEvent
 
 from django import forms
 
-from .models import Category, Nominee, AdvertisingInquiry
+from .models import (
+    Category,
+    Nominee,
+    AdvertisingInquiry,
+    validate_safe_image_upload,
+)
 
 
 class NomineePhotoForm(forms.Form):
@@ -27,7 +32,10 @@ class NomineePhotoForm(forms.Form):
     )
 
 
-    photo = forms.ImageField()
+    photo = forms.ImageField(
+        validators=[validate_safe_image_upload],
+        help_text="JPG, PNG, or WEBP only. Maximum 10 MB.",
+    )
 
 
 class NomineeProfileForm(forms.ModelForm):
@@ -108,7 +116,11 @@ class NomineeSignupForm(forms.Form):
     website = forms.URLField(required=False)
     social_link = forms.URLField(required=False)
     contact_email = forms.EmailField(required=False)
-    photo = forms.ImageField(required=False)
+    photo = forms.ImageField(
+        required=False,
+        validators=[validate_safe_image_upload],
+        help_text="JPG, PNG, or WEBP only. Maximum 10 MB.",
+    )
 
     def clean_categories(self):
         cats = self.cleaned_data["categories"]

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "axes",
     "ballot.apps.BallotConfig",
 ]
 
@@ -73,15 +74,16 @@ INSTALLED_APPS = [
 # ---------------------------------------------------------------------
 
 MIDDLEWARE = [
-    'ballot.middleware.VotingCampaignGateMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    'ballot.middleware.VotingCampaignGateMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 
@@ -176,6 +178,50 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/association/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
+# ---------------------------------------------------------------------
+# Session and authentication security
+# ---------------------------------------------------------------------
+
+# Sessions expire after 12 hours maximum.
+SESSION_COOKIE_AGE = 60 * 60 * 12
+
+# Also discard the authentication cookie when the browser is closed.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Protect session cookies from JavaScript access.
+SESSION_COOKIE_HTTPONLY = True
+
+# Prevent normal cross-site requests from carrying authentication cookies.
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# Preserve Django's efficient session behavior.
+SESSION_SAVE_EVERY_REQUEST = False
+
+# CSRF cookie policy.
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# Password reset links expire after 1 hour.
+PASSWORD_RESET_TIMEOUT = 60 * 60
+
+# ---------------------------------------------------------------------
+# Authentication protection
+# ---------------------------------------------------------------------
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Lock an account after 5 failed login attempts.
+AXES_FAILURE_LIMIT = 5
+AXES_LOCK_OUT_AT_FAILURE = True
+
+# Automatically allow another attempt after 30 minutes.
+AXES_COOLOFF_TIME = 0.5
+
+# Reset the recorded failures after a successful login.
+AXES_RESET_ON_SUCCESS = True
+
 
 # ---------------------------------------------------------------------
 # Email
@@ -259,6 +305,11 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+
+    # HSTS rollout — begin conservatively and increase after production verification.
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 # -------------------------------------------------------------------
 # Email settings

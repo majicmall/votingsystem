@@ -4,6 +4,11 @@ import secrets
 # ballot/models.py
 
 import uuid
+import warnings
+from io import BytesIO
+from pathlib import Path
+
+from PIL import Image, UnidentifiedImageError
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -16,6 +21,107 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from ballot.email_utils import absolute_url, send_nominee_approved_email
+
+
+# ---------------------------------------------------------------------
+# Secure image upload validation
+# ---------------------------------------------------------------------
+
+MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+MAX_IMAGE_PIXELS = 40_000_000
+
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+ALLOWED_IMAGE_FORMATS = {"JPEG", "PNG", "WEBP"}
+ALLOWED_IMAGE_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+}
+
+
+def validate_safe_image_upload(uploaded_file):
+    """
+    Validate all user-supplied artwork as a genuine, reasonably sized image.
+
+    Security rules:
+    - JPG/JPEG, PNG, and WEBP only
+    - 10 MB maximum
+    - actual image bytes must decode successfully
+    - file extension, MIME type (when supplied), and decoded format must agree
+    - reject images with excessive pixel counts
+    """
+
+    if not uploaded_file:
+        return
+
+    filename = getattr(uploaded_file, "name", "") or ""
+    extension = Path(filename).suffix.lower()
+
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValidationError(
+            "Unsupported image type. Please upload a JPG, JPEG, PNG, or WEBP image."
+        )
+
+    content_type = getattr(uploaded_file, "content_type", None)
+    if content_type:
+        content_type = content_type.lower()
+        if content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
+            raise ValidationError(
+                "Unsupported image type. Please upload a JPG, JPEG, PNG, or WEBP image."
+            )
+
+    try:
+        # FieldFile values may need to be opened explicitly.
+        if getattr(uploaded_file, "closed", False) and hasattr(uploaded_file, "open"):
+            uploaded_file.open("rb")
+
+        uploaded_file.seek(0)
+        raw = uploaded_file.read(MAX_IMAGE_UPLOAD_BYTES + 1)
+        uploaded_file.seek(0)
+
+        if len(raw) > MAX_IMAGE_UPLOAD_BYTES:
+            raise ValidationError("Image files may not exceed 10 MB.")
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+
+            with Image.open(BytesIO(raw)) as image:
+                detected_format = (image.format or "").upper()
+                width, height = image.size
+
+                if detected_format not in ALLOWED_IMAGE_FORMATS:
+                    raise ValidationError(
+                        "Unsupported image type. Please upload a JPG, JPEG, PNG, or WEBP image."
+                    )
+
+                if width <= 0 or height <= 0:
+                    raise ValidationError("The uploaded image is invalid.")
+
+                if width * height > MAX_IMAGE_PIXELS:
+                    raise ValidationError(
+                        "This image is too large in dimensions. Please use a smaller image."
+                    )
+
+                image.verify()
+
+    except ValidationError:
+        raise
+    except (
+        UnidentifiedImageError,
+        OSError,
+        ValueError,
+        Image.DecompressionBombError,
+        Image.DecompressionBombWarning,
+    ):
+        raise ValidationError(
+            "The uploaded file could not be verified as a safe image."
+        )
+
+    # Make the upload available to Django again after validation.
+    try:
+        uploaded_file.seek(0)
+    except (AttributeError, OSError):
+        pass
 
 
 # ---------------------------------------------------------------------
@@ -203,7 +309,12 @@ class Nominee(models.Model):
         related_name="nominees",
     )
 
-    photo = models.ImageField(upload_to="nominees/", blank=True, null=True)
+    photo = models.ImageField(
+        upload_to="nominees/",
+        blank=True,
+        null=True,
+        validators=[validate_safe_image_upload],
+    )
     photo_submitted_at = models.DateTimeField(blank=True, null=True)
 
     website = models.URLField(blank=True, default="")
@@ -443,7 +554,12 @@ class AssociationProfile(models.Model):
     social_media = models.URLField(blank=True, null=True)
     website = models.URLField(blank=True)
     notification_email = models.EmailField(blank=True)
-    profile_pic = models.ImageField(upload_to="association_profiles/", blank=True, null=True)
+    profile_pic = models.ImageField(
+        upload_to="association_profiles/",
+        blank=True,
+        null=True,
+        validators=[validate_safe_image_upload],
+    )
     special_interest = models.TextField(
         blank=True,
         help_text="Tell us what you are most interested in: entertainment, events, media, business, venues, creative work, sponsorship, community, etc.",
@@ -566,7 +682,12 @@ class BillboardAd(models.Model):
     title = models.CharField(max_length=180)
     subtitle = models.CharField(max_length=240, blank=True)
     placement = models.CharField(max_length=40, choices=PLACEMENT_CHOICES, default=PLACEMENT_HOMEPAGE_TOP)
-    image = models.ImageField(upload_to="billboards/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to="billboards/",
+        blank=True,
+        null=True,
+        validators=[validate_safe_image_upload],
+    )
     destination_url = models.URLField(blank=True)
     call_to_action = models.CharField(max_length=80, default="Learn More")
     is_active = models.BooleanField(default=True)
@@ -645,7 +766,8 @@ class AdvertisingInquiry(models.Model):
         upload_to="advertising_inquiries/",
         blank=True,
         null=True,
-        help_text="Optional ad creative, flyer, logo, or campaign artwork."
+        validators=[validate_safe_image_upload],
+        help_text="Optional JPG, PNG, or WEBP ad creative, flyer, logo, or campaign artwork. Maximum 10 MB."
     )
     creative_notes = models.TextField(
         blank=True,
@@ -892,7 +1014,12 @@ class AtlsHottestEvent(models.Model):
     ends_at = models.DateTimeField(null=True, blank=True)
 
     description = models.TextField()
-    flyer = models.ImageField(upload_to="events/flyers/", blank=True, null=True)
+    flyer = models.ImageField(
+        upload_to="events/flyers/",
+        blank=True,
+        null=True,
+        validators=[validate_safe_image_upload],
+    )
 
     ticket_link = models.URLField(blank=True)
     website = models.URLField(blank=True)

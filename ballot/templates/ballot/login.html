@@ -8,6 +8,7 @@
     {{ form.as_p }}
     <button class="btn primary" type="submit">Login</button>
   </form>
+  <p><a href="{% url 'password_reset' %}">Forgot password?</a></p>
   <p><a href="{% url 'signup' %}">Create an account</a></p>
 </section>
 {% endblock %}

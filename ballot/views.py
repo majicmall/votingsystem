@@ -606,11 +606,6 @@ def association_nominee_delete(request, nominee_id):
     return redirect("assoc_dashboard")
 
 
-@require_http_methods(["GET", "POST"])
-@csrf_protect
-
-
-
 def send_nomination_confirmation_email(nominator_name, nominator_email, nominee_name, category_names, request=None):
     """
     Sends a confirmation email to the person who submitted a nomination.
@@ -667,8 +662,8 @@ ATL's Hottest Awards Association
     """
 
     from_email = (
-        getattr(settings, "DEFAULT_FROM_EMAIL", None)
-        or getattr(settings, "EMAIL_HOST_USER", None)
+        getattr(django_settings, "DEFAULT_FROM_EMAIL", None)
+        or getattr(django_settings, "EMAIL_HOST_USER", None)
         or "noreply@atlshottestawards.com"
     )
 
@@ -756,9 +751,15 @@ def nominee_signup(request):
 
         confirmation_category_names = list(dict.fromkeys([name for name in confirmation_category_names if name]))
 
-        # Confirmation email temporarily disabled for launch stability.
-        # Nomination submit, save, photo upload, and thank-you redirect must never be blocked by email.
-        pass
+        # Send the nominator a confirmation receipt.
+        # Delivery failures are handled inside the helper and never block submission.
+        send_nomination_confirmation_email(
+            nominator_name=form.cleaned_data.get("nominator_name", ""),
+            nominator_email=form.cleaned_data.get("nominator_email", ""),
+            nominee_name=nominee_name,
+            category_names=confirmation_category_names,
+            request=request,
+        )
 
 
         return redirect("nomination_thank_you")
@@ -867,7 +868,8 @@ def upload_test(request):
     return render(request, "ballot/upload_test.html")
 
 
-@require_http_methods(["GET", "POST"])
+@require_POST
+@csrf_protect
 def logout_then_home(request):
     logout(request)
     return redirect("/")
@@ -1463,17 +1465,24 @@ def membership_dashboard(request):
 # =========================================================
 
 def get_active_voting_campaign():
-    try:
-        return VotingCampaign.objects.filter(is_active_campaign=True).order_by("-created_at").first()
-    except Exception:
-        return None
+    return (
+        VotingCampaign.objects
+        .filter(is_active_campaign=True)
+        .order_by("-created_at")
+        .first()
+    )
 
 
 def is_voting_currently_open():
-    campaign = get_active_voting_campaign()
+    try:
+        campaign = get_active_voting_campaign()
+    except Exception:
+        # SECURITY: fail closed if campaign state cannot be verified.
+        # A database/configuration failure must never enable vote-changing actions.
+        return False, None
 
-    # If no campaign has been configured yet, keep legacy voting behavior open.
-    # Once admin creates a VotingCampaign, the campaign controls take over.
+    # Preserve legacy behavior only when the database query succeeds
+    # and confirms that no VotingCampaign has been configured.
     if campaign is None:
         return True, None
 

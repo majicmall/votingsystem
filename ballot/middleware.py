@@ -48,7 +48,10 @@ class VotingCampaignGateMiddleware:
                     })
 
             except Exception:
-                # Do not break the whole site if something unusual happens.
-                pass
+                # SECURITY: fail closed for vote-changing actions.
+                # If campaign state cannot be verified, do not allow voting through.
+                return render(request, "ballot/voting_closed.html", {
+                    "campaign": None,
+                })
 
         return self.get_response(request)
