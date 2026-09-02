@@ -2,6 +2,10 @@
 {% load static billboard_ads event_promos %}
 {% block title %}ATL’s Hottest Awards Association{% endblock %}
 
+{% block billboard %}
+  {% render_billboard "homepage_top" %}
+{% endblock %}
+
 {% block content %}
 
 <style>
@@ -72,8 +76,6 @@
   }
 </style>
 
-
-{% render_billboard "homepage_top" %}
 
 {% homepage_featured_event as landing_featured_event %}
 

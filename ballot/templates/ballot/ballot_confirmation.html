@@ -1,5 +1,10 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 {% block title %}Ballot Confirmed | ATL’s Hottest{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "confirmation" %}
+{% endblock %}
 
 {% block content %}
 <section class="confirmation-hero">

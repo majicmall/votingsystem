@@ -3,6 +3,10 @@
 
 {% block title %}Official Ballot | ATL’s Hottest{% endblock %}
 
+{% block billboard %}
+  {% render_billboard "voting_top" %}
+{% endblock %}
+
 {% block content %}
 
 {% if active_campaign and not voting_open %}
@@ -11,8 +15,6 @@
     <span>You may view the current ballot and nominees, but votes cannot be cast until the official voting period begins.</span>
   </div>
 {% endif %}
-
-{% render_billboard "voting_top" %}
 
 <section class="hero small ballot-hero">
   <p class="eyebrow">Official Ballot</p>

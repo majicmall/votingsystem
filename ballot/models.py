@@ -660,20 +660,30 @@ class NominationCategoryRequest(models.Model):
 # =========================================================
 
 class BillboardAd(models.Model):
+    PLACEMENT_SITEWIDE = "sitewide"
     PLACEMENT_HOMEPAGE_TOP = "homepage_top"
     PLACEMENT_HOMEPAGE_VIDEO = "homepage_video"
     PLACEMENT_VOTING_TOP = "voting_top"
     PLACEMENT_CATEGORY_TOP = "category_top"
     PLACEMENT_NOMINEE_PROFILE = "nominee_profile"
+    PLACEMENT_EVENTS_TOP = "events_top"
+    PLACEMENT_MARKETPLACE_TOP = "marketplace_top"
+    PLACEMENT_MEMBERSHIP_TOP = "membership_top"
+    PLACEMENT_ADVERTISING_TOP = "advertising_top"
     PLACEMENT_CONFIRMATION = "confirmation"
     PLACEMENT_ATL_TV = "atl_tv"
 
     PLACEMENT_CHOICES = [
+        (PLACEMENT_SITEWIDE, "ATL's Hottest Sitewide Billboard"),
         (PLACEMENT_HOMEPAGE_TOP, "Homepage Red Carpet Billboard"),
         (PLACEMENT_HOMEPAGE_VIDEO, "Homepage TV Sponsor Billboard"),
         (PLACEMENT_VOTING_TOP, "Voting Page Billboard"),
         (PLACEMENT_CATEGORY_TOP, "Category Sponsor Billboard"),
         (PLACEMENT_NOMINEE_PROFILE, "Nominee Profile Sponsor"),
+        (PLACEMENT_EVENTS_TOP, "What's Happening In The ATL Billboard"),
+        (PLACEMENT_MARKETPLACE_TOP, "ATL's Hottest Marketplace Billboard"),
+        (PLACEMENT_MEMBERSHIP_TOP, "Membership Billboard"),
+        (PLACEMENT_ADVERTISING_TOP, "Advertising Command Center Billboard"),
         (PLACEMENT_CONFIRMATION, "Confirmation Page Billboard"),
         (PLACEMENT_ATL_TV, "ATL TV Sponsor Billboard"),
     ]
@@ -729,19 +739,33 @@ class BillboardAd(models.Model):
 # =========================================================
 
 class AdvertisingInquiry(models.Model):
-    PLACEMENT_HOMEPAGE = "homepage"
-    PLACEMENT_VOTING = "voting"
-    PLACEMENT_CATEGORY = "category"
-    PLACEMENT_NOMINEE = "nominee"
+    PLACEMENT_SITEWIDE = "sitewide"
+    PLACEMENT_HOMEPAGE = "homepage_top"
+    PLACEMENT_HOMEPAGE_VIDEO = "homepage_video"
+    PLACEMENT_VOTING = "voting_top"
+    PLACEMENT_CATEGORY = "category_top"
+    PLACEMENT_NOMINEE = "nominee_profile"
+    PLACEMENT_EVENTS = "events_top"
+    PLACEMENT_MARKETPLACE = "marketplace_top"
+    PLACEMENT_MEMBERSHIP = "membership_top"
+    PLACEMENT_ADVERTISING = "advertising_top"
     PLACEMENT_ATL_TV = "atl_tv"
+    PLACEMENT_CONFIRMATION = "confirmation"
     PLACEMENT_FULL_CAMPAIGN = "full_campaign"
 
     PLACEMENT_CHOICES = [
-        (PLACEMENT_HOMEPAGE, "Homepage Billboard"),
+        (PLACEMENT_SITEWIDE, "ATL's Hottest Sitewide Billboard"),
+        (PLACEMENT_HOMEPAGE, "Homepage Red Carpet Billboard"),
+        (PLACEMENT_HOMEPAGE_VIDEO, "Homepage TV Sponsor Billboard"),
         (PLACEMENT_VOTING, "Voting Page Billboard"),
-        (PLACEMENT_CATEGORY, "Category Sponsor"),
+        (PLACEMENT_CATEGORY, "Category Sponsor Billboard"),
         (PLACEMENT_NOMINEE, "Nominee Profile Sponsor"),
-        (PLACEMENT_ATL_TV, "ATL TV Sponsor"),
+        (PLACEMENT_EVENTS, "What's Happening In The ATL Billboard"),
+        (PLACEMENT_MARKETPLACE, "ATL's Hottest Marketplace Billboard"),
+        (PLACEMENT_MEMBERSHIP, "Membership Billboard"),
+        (PLACEMENT_ADVERTISING, "Advertising Command Center Billboard"),
+        (PLACEMENT_ATL_TV, "ATL TV Sponsor Billboard"),
+        (PLACEMENT_CONFIRMATION, "Confirmation Page Billboard"),
         (PLACEMENT_FULL_CAMPAIGN, "Full ATL’s Hottest Campaign"),
     ]
 

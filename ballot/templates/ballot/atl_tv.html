@@ -1,5 +1,10 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 {% block title %}ATL’s Hottest TV{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "atl_tv" %}
+{% endblock %}
 
 {% block content %}
 <section class="atl-tv-hero">

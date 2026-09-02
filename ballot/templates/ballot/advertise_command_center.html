@@ -1,7 +1,11 @@
 {% extends "ballot/base.html" %}
-{% load static %}
+{% load static billboard_ads %}
 
 {% block title %}Advertise Command Center | ATL’s Hottest Awards{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "advertising_top" %}
+{% endblock %}
 
 {% block content %}
 

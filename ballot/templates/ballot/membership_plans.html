@@ -1,5 +1,9 @@
 {% extends "ballot/base.html" %}
-{% load static %}
+{% load static billboard_ads %}
+
+{% block billboard %}
+  {% render_billboard "membership_top" %}
+{% endblock %}
 
 {% block content %}
 <section class="membership-hero">

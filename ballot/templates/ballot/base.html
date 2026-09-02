@@ -1,4 +1,4 @@
-{% load static %}
+{% load static billboard_ads %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1290,6 +1290,10 @@
         {% endfor %}
       </div>
     {% endif %}
+
+    {% block billboard %}
+      {% render_billboard "sitewide" %}
+    {% endblock %}
 
     {% block content %}{% endblock %}
   </main>

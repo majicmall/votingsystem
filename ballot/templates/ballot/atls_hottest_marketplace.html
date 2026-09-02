@@ -1,6 +1,11 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 
 {% block title %}ATL’s Hottest Marketplace{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "marketplace_top" %}
+{% endblock %}
 
 {% block content %}
 <section class="membership-payment-hero">

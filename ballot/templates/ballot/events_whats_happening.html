@@ -1,6 +1,11 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 
 {% block title %}What’s Happening In The ATL | ATL’s Hottest{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "events_top" %}
+{% endblock %}
 
 {% block content %}
 <style>

@@ -1272,6 +1272,7 @@ def advertise_command_center(request):
     from django.contrib import messages
     from django.shortcuts import render, redirect
     from .forms import AdvertisingInquiryForm
+    from .models import AdvertisingInquiry
 
     if request.method == "POST":
         form = AdvertisingInquiryForm(request.POST, request.FILES)
@@ -1284,7 +1285,18 @@ def advertise_command_center(request):
         else:
             messages.error(request, "Please review the form and try again.")
     else:
-        form = AdvertisingInquiryForm()
+        requested_placement = request.GET.get("placement", "").strip()
+
+        valid_placements = {
+            value
+            for value, _label in AdvertisingInquiry.PLACEMENT_CHOICES
+        }
+
+        initial = {}
+        if requested_placement in valid_placements:
+            initial["placement_interest"] = requested_placement
+
+        form = AdvertisingInquiryForm(initial=initial)
 
     return render(request, "ballot/advertise_command_center.html", {"form": form})
 

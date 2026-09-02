@@ -1,5 +1,10 @@
 {% extends "ballot/base.html" %}
+{% load billboard_ads %}
 {% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "nominee_profile" %}
+{% endblock %}
 
 {% block content %}
 

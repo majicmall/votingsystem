@@ -4,7 +4,7 @@
 <section class="mm-billboard mm-billboard-live">
   <a
     class="mm-billboard-link"
-    href="{% if ad.destination_url %}{{ ad.destination_url }}{% else %}#{% endif %}"
+    href="{% if ad.destination_url %}{{ ad.destination_url }}{% else %}{% url 'advertise_command_center' %}?placement={{ placement|urlencode }}{% endif %}"
     {% if ad.destination_url %}target="_blank" rel="noopener noreferrer"{% endif %}
     aria-label="{{ ad.title }}"
   >
@@ -20,7 +20,9 @@
     <div class="mm-billboard-copy">
       <span class="mm-billboard-label">Sponsored Billboard</span>
 
-      <h2 class="mm-billboard-title"><span class="top-billboard-title-nowrap">{{ ad.title }}</span></h2>
+      <h2 class="mm-billboard-title">
+        <span class="top-billboard-title-nowrap">{{ ad.title }}</span>
+      </h2>
 
       {% if ad.subtitle %}
         <p>{{ ad.subtitle }}</p>
@@ -33,6 +35,44 @@
       {% if ad.call_to_action %}
         <span class="mm-billboard-cta">{{ ad.call_to_action }}</span>
       {% endif %}
+    </div>
+
+  </a>
+</section>
+
+{% else %}
+<section class="mm-billboard mm-billboard-house">
+  <a
+    class="mm-billboard-link"
+    href="{% url 'advertise_command_center' %}?placement={{ placement|urlencode }}"
+    aria-label="Advertise on this ATL’s Hottest billboard"
+  >
+
+    <div class="mm-billboard-image-wrap">
+      <img
+        class="mm-billboard-creative-img"
+        src="{% static 'ballot/img/atls_hottest_billboard_1.png' %}"
+        alt="Advertise With ATL’s Hottest"
+      >
+    </div>
+
+    <div class="mm-billboard-copy">
+      <span class="mm-billboard-label">Billboard Available</span>
+
+      <h2 class="mm-billboard-title">
+        <span class="top-billboard-title-nowrap">Advertise With ATL’s Hottest</span>
+      </h2>
+
+      <p>
+        Put your brand in front of the ATL’s Hottest audience.
+        This advertising property is available now.
+      </p>
+
+      <div class="mm-billboard-powered">
+        Powered By The MajesticMall Megaverse Advertising Platform
+      </div>
+
+      <span class="mm-billboard-cta">Reserve This Billboard</span>
     </div>
 
   </a>
