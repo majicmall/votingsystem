@@ -6,12 +6,20 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, re_path
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 from ballot import views as ballot_views
 
 
 urlpatterns = [
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt",
+            content_type="text/plain",
+        ),
+    ),
+
     path("events/live/<slug:slug>/qr.png", ballot_views.event_qr_code, name="event_qr_code"),
 
     path("events/live/<slug:slug>/", ballot_views.event_detail, name="event_detail"),
