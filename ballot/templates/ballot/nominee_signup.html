@@ -83,6 +83,16 @@
       </div>
     {% endif %}
 
+    <div
+      id="category-limit-message"
+      class="alert"
+      role="alert"
+      aria-live="polite"
+      style="display:none;"
+    >
+      You’ve reached the maximum of 5 categories.
+    </div>
+
     <div class="category-choice-grid">
       {% for checkbox in form.categories %}
         <label class="category-choice-card" for="{{ checkbox.id_for_label }}">
@@ -103,4 +113,36 @@
     </button>
   </form>
 </section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const checkboxes = Array.from(
+    document.querySelectorAll('.category-choice-grid input[type="checkbox"]')
+  );
+  const message = document.getElementById("category-limit-message");
+  const maxCategories = 5;
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      const checkedCount = checkboxes.filter((item) => item.checked).length;
+
+      if (checkedCount > maxCategories) {
+        this.checked = false;
+
+        if (message) {
+          message.style.display = "block";
+          message.textContent =
+            "You’ve reached the maximum of 5 categories.";
+        }
+        return;
+      }
+
+      if (message) {
+        message.style.display = "none";
+      }
+    });
+  });
+});
+</script>
+
 {% endblock %}
