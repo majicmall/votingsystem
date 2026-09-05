@@ -486,6 +486,80 @@ class Nominee(models.Model):
 
 
 # ---------------------------------------------------------------------
+# Nomination Ledger
+# ---------------------------------------------------------------------
+
+class NominationLedger(models.Model):
+    """
+    Permanent record of each valid ATL's Hottest nomination recognition.
+
+    The public Nominee record remains the canonical nominee/category record.
+    This ledger preserves who submitted each nomination so multiple fans can
+    nominate the same person while preventing one email address from counting
+    more than once for the same nominee/category.
+    """
+
+    nominee = models.ForeignKey(
+        Nominee,
+        on_delete=models.PROTECT,
+        related_name="nomination_records",
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        related_name="nomination_records",
+    )
+
+    nominator_name = models.CharField(max_length=160)
+    nominator_email = models.EmailField()
+
+    submitted_nominee_name = models.CharField(
+        max_length=160,
+        blank=True,
+        default="",
+        help_text="Preserves the nominee name exactly as submitted by the fan.",
+    )
+
+    communications_consent = models.BooleanField(
+        default=True,
+        help_text=(
+            "By nominating and/or voting, the participant consented to receiving "
+            "ATL's Hottest Awards information, updates, announcements, and invitations."
+        ),
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["nominator_email", "nominee", "category"],
+                name="one_nomination_per_email_nominee_category",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["nominee", "category"]),
+            models.Index(fields=["nominator_email"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.nominator_email:
+            self.nominator_email = self.nominator_email.strip().lower()
+        if not self.submitted_nominee_name and self.nominee_id:
+            self.submitted_nominee_name = self.nominee.name
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return (
+            f"{self.nominator_name} nominated "
+            f"{self.submitted_nominee_name or self.nominee.name} "
+            f"for {self.category.name}"
+        )
+
+
+# ---------------------------------------------------------------------
 # Votes
 # ---------------------------------------------------------------------
 

@@ -38,6 +38,7 @@ from .models import (
     BallotSettings,
     Category,
     NominationCategoryRequest,
+    NominationLedger,
     Nominee,
     Vote,
 )
@@ -725,6 +726,25 @@ def nominee_signup(request):
             nominee.approval_status = Nominee.APPROVAL_PENDING
             nominee.is_active = True
             nominee.save()
+
+            # Preserve each fan's nomination as a separate recognition.
+            # The same normalized email can count only once for the same
+            # nominee/category. Duplicate submissions do not interrupt the
+            # existing public nomination flow.
+            nominator_email = (
+                form.cleaned_data.get("nominator_email", "") or ""
+            ).strip().lower()
+
+            NominationLedger.objects.get_or_create(
+                nominator_email=nominator_email,
+                nominee=nominee,
+                category=category,
+                defaults={
+                    "nominator_name": form.cleaned_data.get("nominator_name", ""),
+                    "submitted_nominee_name": nominee_name,
+                    "communications_consent": True,
+                },
+            )
 
             created_nominees.append(nominee)
 
