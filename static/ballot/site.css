@@ -6439,3 +6439,23 @@ header nav a:hover::before,
     0 0 6px rgba(255, 255, 255, 0.48),
     0 0 12px rgba(255, 255, 255, 0.18) !important;
 }
+
+/* =========================================================
+   FEATURED ATL EVENT — MOBILE COMPLETE FLYER
+   Desktop remains unchanged; mobile never crops artwork
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .landing-featured-event-image {
+    background: #000000 !important;
+  }
+
+  .landing-featured-event-image img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    display: block !important;
+  }
+}
