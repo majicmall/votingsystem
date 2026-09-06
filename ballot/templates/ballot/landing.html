@@ -356,8 +356,11 @@
     }
 
     .landing-featured-event-image img {
-      height: clamp(220px, 72vw, 320px);
-      object-fit: cover;
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      object-position: center center;
     }
   }
 
@@ -1077,8 +1080,10 @@
     .landing-featured-event-image img {
       display: block !important;
       width: 100% !important;
-      height: clamp(210px, 68vw, 300px) !important;
-      object-fit: cover !important;
+      height: auto !important;
+      max-height: none !important;
+      object-fit: contain !important;
+      object-position: center center !important;
     }
 
     .landing-featured-event-copy {
@@ -1537,9 +1542,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     .landing-featured-event-image img {
+      display: block;
       width: 100%;
-      height: clamp(210px, 68vw, 300px);
-      object-fit: cover;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      object-position: center center;
     }
   }
 </style>
