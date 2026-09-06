@@ -6223,3 +6223,51 @@ header nav a:hover::before,
 .mm-billboard-cta {
   margin-top: 18px !important;
 }
+
+/* =========================================================
+   ATL'S HOTTEST APP — LUMINOUS WELCOME HEADLINE
+   ========================================================= */
+
+.atl-whats-inside h2 {
+  color: #ffffff !important;
+
+  /* Fine illuminated gold edge around the white lettering */
+  -webkit-text-stroke: 0.7px rgba(255, 210, 92, 0.95);
+
+  /* White illumination + layered gold aura */
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 1),
+    0 0 7px rgba(255, 255, 255, 0.80),
+    0 0 13px rgba(255, 215, 110, 0.70),
+    0 0 24px rgba(212, 160, 23, 0.48),
+    0 0 40px rgba(212, 160, 23, 0.24);
+
+  animation: atlWelcomeGoldShimmer 3.8s ease-in-out infinite;
+}
+
+@keyframes atlWelcomeGoldShimmer {
+  0%, 100% {
+    text-shadow:
+      0 0 2px rgba(255, 255, 255, 1),
+      0 0 7px rgba(255, 255, 255, 0.80),
+      0 0 13px rgba(255, 215, 110, 0.65),
+      0 0 24px rgba(212, 160, 23, 0.42),
+      0 0 40px rgba(212, 160, 23, 0.20);
+  }
+
+  50% {
+    text-shadow:
+      0 0 3px rgba(255, 255, 255, 1),
+      0 0 10px rgba(255, 255, 255, 0.95),
+      0 0 18px rgba(255, 225, 135, 0.90),
+      0 0 32px rgba(235, 184, 45, 0.68),
+      0 0 52px rgba(212, 160, 23, 0.34);
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .atl-whats-inside h2 {
+    animation: none !important;
+  }
+}
