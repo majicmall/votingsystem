@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import path, reverse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 
 from .models import (
@@ -286,6 +288,7 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
         pause_advertising_campaigns,
     )
     readonly_fields = (
+        "workflow_controls",
         "allocated_total_display",
         "remaining_budget_display",
         "required_minimum_spend_display",
@@ -295,12 +298,17 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("Campaign", {
+        ("Campaign Workflow", {
             "fields": (
+                "workflow_controls",
                 "campaign_name",
                 "advertiser_name",
                 "status",
-            )
+            ),
+            "description": (
+                "Use the primary control below to move the campaign "
+                "directly toward LIVE status."
+            ),
         }),
         ("Contact", {
             "fields": (
@@ -333,6 +341,137 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<path:object_id>/activate/",
+                self.admin_site.admin_view(self.activate_campaign_view),
+                name="ballot_advertisingcampaign_activate",
+            ),
+            path(
+                "<path:object_id>/pause/",
+                self.admin_site.admin_view(self.pause_campaign_view),
+                name="ballot_advertisingcampaign_pause",
+            ),
+        ]
+        return custom_urls + urls
+
+    @admin.display(description="Campaign Control")
+    def workflow_controls(self, obj):
+        if not obj or not obj.pk:
+            return "Save this campaign first."
+
+        ads_url = (
+            reverse("admin:ballot_billboardad_changelist")
+            + f"?campaign__id__exact={obj.pk}"
+        )
+
+        if obj.status == AdvertisingCampaign.STATUS_ACTIVE:
+            pause_url = reverse(
+                "admin:ballot_advertisingcampaign_pause",
+                args=[obj.pk],
+            )
+            return format_html(
+                '<strong style="color:#198754;font-size:16px;">● LIVE</strong>'
+                '&nbsp;&nbsp;'
+                '<a class="button" href="{}">VIEW BILLBOARD ADS</a>'
+                '&nbsp;'
+                '<a class="button" style="background:#8b0000;color:#fff;" href="{}">'
+                'PAUSE CAMPAIGN</a>',
+                ads_url,
+                pause_url,
+            )
+
+        activate_url = reverse(
+            "admin:ballot_advertisingcampaign_activate",
+            args=[obj.pk],
+        )
+
+        return format_html(
+            '<strong style="color:#b8860b;">READY FOR REVIEW</strong>'
+            '&nbsp;&nbsp;'
+            '<a class="button" href="{}">VIEW BILLBOARD ADS</a>'
+            '&nbsp;'
+            '<a class="button" style="background:#198754;color:#fff;'
+            'padding:10px 18px;font-weight:700;" href="{}">'
+            'ACTIVATE CAMPAIGN →</a>',
+            ads_url,
+            activate_url,
+        )
+
+    def activate_campaign_view(self, request, object_id):
+        campaign = get_object_or_404(AdvertisingCampaign, pk=object_id)
+
+        change_url = reverse(
+            "admin:ballot_advertisingcampaign_change",
+            args=[campaign.pk],
+        )
+
+        if request.method != "POST":
+            return render(
+                request,
+                "admin/ballot/workflow_confirm.html",
+                {
+                    "title": "Activate Advertising Campaign",
+                    "message": (
+                        f'Activate "{campaign.campaign_name}" and begin serving '
+                        "its approved billboard ads?"
+                    ),
+                    "action_label": "ACTIVATE CAMPAIGN",
+                    "cancel_url": change_url,
+                },
+            )
+
+        activate_advertising_campaigns(
+            self,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        campaign.refresh_from_db()
+
+        if campaign.status == AdvertisingCampaign.STATUS_ACTIVE:
+            self.message_user(
+                request,
+                "Campaign is LIVE. Its approved billboard ads are now active.",
+            )
+
+        return redirect(change_url)
+
+
+    def pause_campaign_view(self, request, object_id):
+        campaign = get_object_or_404(AdvertisingCampaign, pk=object_id)
+
+        change_url = reverse(
+            "admin:ballot_advertisingcampaign_change",
+            args=[campaign.pk],
+        )
+
+        if request.method != "POST":
+            return render(
+                request,
+                "admin/ballot/workflow_confirm.html",
+                {
+                    "title": "Pause Advertising Campaign",
+                    "message": (
+                        f'Pause "{campaign.campaign_name}" and stop its '
+                        "billboard ads from serving?"
+                    ),
+                    "action_label": "PAUSE CAMPAIGN",
+                    "cancel_url": change_url,
+                },
+            )
+
+        pause_advertising_campaigns(
+            self,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        return redirect(change_url)
+
 
     @admin.display(description="Allocated")
     def allocated_total_display(self, obj):
@@ -483,6 +622,22 @@ def create_campaign_from_inquiry(modeladmin, request, queryset):
             placements = [
                 inquiry.placement_interest
             ]
+
+        # -------------------------------------------------
+        # Legacy advertising-property compatibility.
+        #
+        # Older inquiries may contain historic placement
+        # values created before the current property network.
+        # Normalize them before validation/conversion.
+        # -------------------------------------------------
+        legacy_placement_map = {
+            "homepage": AdvertisingInquiry.PLACEMENT_HOMEPAGE,
+        }
+
+        placements = [
+            legacy_placement_map.get(placement, placement)
+            for placement in placements
+        ]
 
         placements = [
             placement
@@ -690,6 +845,7 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
     list_filter = ("placement_interest", "is_contacted", "created_at")
     search_fields = ("business_name", "contact_name", "email", "phone", "website", "campaign_message")
     readonly_fields = (
+        "workflow_controls",
         "converted_campaign",
         "converted_at",
         "created_at",
@@ -714,11 +870,16 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
         ("Creative", {
             "fields": ("creative_upload", "creative_notes")
         }),
-        ("Campaign Conversion", {
+        ("Campaign Workflow", {
             "fields": (
+                "workflow_controls",
                 "converted_campaign",
                 "converted_at",
-            )
+            ),
+            "description": (
+                "Review the inquiry, then use the primary workflow control "
+                "below to move directly to the next objective."
+            ),
         }),
         ("Follow Up", {
             "fields": (
@@ -728,6 +889,146 @@ class AdvertisingInquiryAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<path:object_id>/approve-create-campaign/",
+                self.admin_site.admin_view(self.approve_create_campaign_view),
+                name="ballot_advertisinginquiry_approve_create_campaign",
+            ),
+        ]
+        return custom_urls + urls
+
+    @admin.display(description="Next Step")
+    def workflow_controls(self, obj):
+        if not obj or not obj.pk:
+            return "Save this inquiry first."
+
+        if obj.converted_campaign_id:
+            campaign_url = reverse(
+                "admin:ballot_advertisingcampaign_change",
+                args=[obj.converted_campaign_id],
+            )
+            return format_html(
+                '<a class="button" style="background:#198754;color:#fff;'
+                'padding:10px 18px;font-weight:700;" href="{}">'
+                'OPEN CAMPAIGN →</a>',
+                campaign_url,
+            )
+
+        missing = []
+
+        placements = list(obj.requested_placements or [])
+
+        if not placements and obj.placement_interest:
+            legacy_placement_map = {
+                "homepage": AdvertisingInquiry.PLACEMENT_HOMEPAGE,
+            }
+            placement = legacy_placement_map.get(
+                obj.placement_interest,
+                obj.placement_interest,
+            )
+
+            valid_placements = {
+                value for value, label in BillboardAd.PLACEMENT_CHOICES
+            }
+
+            if placement in valid_placements:
+                placements = [placement]
+
+        if obj.total_budget is None:
+            missing.append("Total Budget")
+
+        if not placements:
+            missing.append("Advertising Property")
+
+        if missing:
+            return format_html(
+                '<strong style="color:#b42318;">NOT READY</strong>'
+                '<br><span>Missing: {}</span>',
+                ", ".join(missing),
+            )
+
+        approve_url = reverse(
+            "admin:ballot_advertisinginquiry_approve_create_campaign",
+            args=[obj.pk],
+        )
+
+        return format_html(
+            '<strong style="color:#198754;">READY</strong>'
+            '&nbsp;&nbsp;'
+            '<a class="button" style="background:#b8860b;color:#fff;'
+            'padding:10px 18px;font-weight:700;" href="{}">'
+            'CREATE CAMPAIGN →</a>',
+            approve_url,
+        )
+
+    def approve_create_campaign_view(self, request, object_id):
+        inquiry = get_object_or_404(AdvertisingInquiry, pk=object_id)
+
+        if inquiry.converted_campaign_id:
+            self.message_user(
+                request,
+                "This inquiry already has a campaign. Opening it now.",
+            )
+            return redirect(
+                reverse(
+                    "admin:ballot_advertisingcampaign_change",
+                    args=[inquiry.converted_campaign_id],
+                )
+            )
+
+        inquiry_url = reverse(
+            "admin:ballot_advertisinginquiry_change",
+            args=[inquiry.pk],
+        )
+
+        if request.method != "POST":
+            return render(
+                request,
+                "admin/ballot/workflow_confirm.html",
+                {
+                    "title": "Confirm Campaign Creation",
+                    "message": (
+                        f'Approve "{inquiry.business_name}" and create its '
+                        "advertising campaign now?"
+                    ),
+                    "action_label": "YES — CREATE CAMPAIGN",
+                    "cancel_url": inquiry_url,
+                },
+            )
+
+        create_campaign_from_inquiry(
+            self,
+            request,
+            AdvertisingInquiry.objects.filter(pk=inquiry.pk),
+        )
+
+        inquiry.refresh_from_db()
+
+        if inquiry.converted_campaign_id:
+            self.message_user(
+                request,
+                "Campaign created successfully. Review it, then activate it when ready.",
+            )
+            return redirect(
+                reverse(
+                    "admin:ballot_advertisingcampaign_change",
+                    args=[inquiry.converted_campaign_id],
+                )
+            )
+
+        self.message_user(
+            request,
+            "Campaign could not be created. Review the inquiry budget, properties, and schedule.",
+            level="error",
+        )
+
+        return redirect(inquiry_url)
+
 
 
 

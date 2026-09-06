@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+
+  <div class="module aligned" style="max-width:760px;">
+    <h2>{{ title }}</h2>
+
+    <div style="
+      padding:20px;
+      margin:18px 0;
+      border:1px solid #d4af37;
+      border-radius:8px;
+    ">
+      <p style="font-size:16px; margin:0;">
+        {{ message }}
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="submit-row">
+        <input
+          type="submit"
+          value="{{ action_label }}"
+          class="default"
+        >
+
+        <a
+          href="{{ cancel_url }}"
+          class="button"
+          style="margin-left:10px;"
+        >
+          CANCEL
+        </a>
+      </div>
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}

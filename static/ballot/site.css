@@ -6217,3 +6217,9 @@ header nav a:hover::before,
     opacity: 1 !important;
   }
 }
+
+
+/* ATL'S HOTTEST BILLBOARD CTA SPACING */
+.mm-billboard-cta {
+  margin-top: 18px !important;
+}
