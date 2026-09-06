@@ -6271,3 +6271,171 @@ header nav a:hover::before,
     animation: none !important;
   }
 }
+
+/* =========================================================
+   HOMEPAGE TOP BILLBOARD — SOLID BLACK SURROUND
+   ========================================================= */
+
+.mm-billboard,
+.mm-billboard-live,
+.mm-billboard-house,
+.mm-billboard-link,
+.mm-billboard-live .mm-billboard-link {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* =========================================================
+   HOMEPAGE BOTTOM INFO CARDS — SOLID BLACK
+   EVENTS + ABOUT ATL'S HOTTEST
+   ========================================================= */
+
+.landing-info-grid > .landing-info-card {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* =========================================================
+   HOMEPAGE FEATURE HEADINGS — WHITE + GOLD SHIMMER
+   WATCH THE MOVEMENT + WHAT'S HAPPENING IN THE ATL
+   ========================================================= */
+
+.front-video-copy h2,
+.landing-info-grid > .landing-info-card:first-child > h3 {
+  color: #ffffff !important;
+  -webkit-text-stroke: 0.8px rgba(255, 211, 92, 0.98);
+
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 1),
+    0 0 8px rgba(255, 255, 255, 0.82),
+    0 0 15px rgba(255, 219, 105, 0.72),
+    0 0 28px rgba(218, 164, 28, 0.52);
+
+  animation: atlFeatureHeadingShimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes atlFeatureHeadingShimmer {
+  0%, 100% {
+    -webkit-text-stroke-color: rgba(220, 164, 32, 0.88);
+    text-shadow:
+      0 0 3px rgba(255, 255, 255, 0.90),
+      0 0 8px rgba(255, 255, 255, 0.68),
+      0 0 14px rgba(220, 168, 42, 0.55),
+      0 0 25px rgba(190, 132, 12, 0.34);
+  }
+
+  50% {
+    -webkit-text-stroke-color: rgba(255, 235, 155, 1);
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 1),
+      0 0 12px rgba(255, 255, 255, 0.95),
+      0 0 21px rgba(255, 225, 120, 0.94),
+      0 0 36px rgba(235, 181, 38, 0.72),
+      0 0 54px rgba(205, 145, 15, 0.40);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .front-video-copy h2,
+  .landing-info-grid > .landing-info-card:first-child > h3 {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   HOMEPAGE FEATURE HEADINGS — WHITE + GOLD SHIMMER
+   WATCH THE MOVEMENT + WHAT'S HAPPENING IN THE ATL
+   ========================================================= */
+
+.front-video-copy h2,
+.landing-info-grid > .landing-info-card:first-child > h3 {
+  color: #ffffff !important;
+  -webkit-text-stroke: 0.8px rgba(255, 211, 92, 0.98);
+
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 1),
+    0 0 8px rgba(255, 255, 255, 0.82),
+    0 0 15px rgba(255, 219, 105, 0.72),
+    0 0 28px rgba(218, 164, 28, 0.52);
+
+  animation: atlFeatureHeadingShimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes atlFeatureHeadingShimmer {
+  0%, 100% {
+    -webkit-text-stroke-color: rgba(220, 164, 32, 0.88);
+    text-shadow:
+      0 0 3px rgba(255, 255, 255, 0.90),
+      0 0 8px rgba(255, 255, 255, 0.68),
+      0 0 14px rgba(220, 168, 42, 0.55),
+      0 0 25px rgba(190, 132, 12, 0.34);
+  }
+
+  50% {
+    -webkit-text-stroke-color: rgba(255, 235, 155, 1);
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 1),
+      0 0 12px rgba(255, 255, 255, 0.95),
+      0 0 21px rgba(255, 225, 120, 0.94),
+      0 0 36px rgba(235, 181, 38, 0.72),
+      0 0 54px rgba(205, 145, 15, 0.40);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .front-video-copy h2,
+  .landing-info-grid > .landing-info-card:first-child > h3 {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   WHAT'S HAPPENING — REFINED GOLD ILLUMINATION
+   ========================================================= */
+
+.landing-info-grid > .landing-info-card:first-child > h3 {
+  -webkit-text-stroke: 0.7px rgba(255, 211, 92, 0.92) !important;
+
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.88),
+    0 0 5px rgba(255, 255, 255, 0.48),
+    0 0 10px rgba(255, 218, 105, 0.42),
+    0 0 18px rgba(218, 164, 28, 0.24) !important;
+
+  animation: atlWhatsHappeningShimmer 3.4s ease-in-out infinite !important;
+}
+
+@keyframes atlWhatsHappeningShimmer {
+  0%, 100% {
+    -webkit-text-stroke-color: rgba(220, 164, 32, 0.82);
+    text-shadow:
+      0 0 2px rgba(255, 255, 255, 0.82),
+      0 0 5px rgba(255, 255, 255, 0.42),
+      0 0 9px rgba(220, 168, 42, 0.36),
+      0 0 16px rgba(190, 132, 12, 0.20);
+  }
+
+  50% {
+    -webkit-text-stroke-color: rgba(255, 226, 128, 0.98);
+    text-shadow:
+      0 0 2px rgba(255, 255, 255, 0.94),
+      0 0 6px rgba(255, 255, 255, 0.55),
+      0 0 12px rgba(255, 225, 120, 0.52),
+      0 0 21px rgba(235, 181, 38, 0.30);
+  }
+}
+
+/* =========================================================
+   WHAT'S HAPPENING — BRIGHT WHITE FINAL TREATMENT
+   ========================================================= */
+
+.landing-info-grid > .landing-info-card:first-child > h3 {
+  color: #ffffff !important;
+  -webkit-text-stroke: 0 !important;
+  animation: none !important;
+
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 1),
+    0 0 6px rgba(255, 255, 255, 0.48),
+    0 0 12px rgba(255, 255, 255, 0.18) !important;
+}
