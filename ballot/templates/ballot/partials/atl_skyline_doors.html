@@ -1,0 +1,1007 @@
+{% load static %}
+
+<div id="atlSkylineEntrance" class="atl-skyline-entrance">
+  <div class="atl-door-stage">
+
+    <div class="atl-door atl-door-left">
+      <img
+        class="atl-door-art atl-door-art-left"
+        src="{% static 'ballot/img/atl_skyline_doors.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div class="atl-door atl-door-right">
+      <img
+        class="atl-door-art atl-door-art-right"
+        src="{% static 'ballot/img/atl_skyline_doors.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div class="atl-door-seam"></div>
+
+    <button type="button" id="atlDoorEnter" class="atl-door-enter">
+      ENTER
+    </button>
+
+  </div>
+</div>
+
+<style>
+html.atl-entrance-active,
+html.atl-entrance-active body {
+  overflow: hidden !important;
+}
+
+.atl-skyline-entrance {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #000;
+  perspective: 2200px;
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .8s ease, visibility .8s ease;
+}
+
+.atl-skyline-entrance.atl-entrance-finished {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.atl-door-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.atl-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  transition: transform 4s cubic-bezier(.72,.02,.18,1);
+}
+
+.atl-door-left {
+  left: 0;
+  transform-origin: left center;
+}
+
+.atl-door-right {
+  right: 0;
+  transform-origin: right center;
+}
+
+.atl-door-art {
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  max-width: none;
+  object-fit: fill;
+  object-position: center top;
+  display: block;
+  pointer-events: none;
+}
+
+.atl-door-art-left {
+  left: 0;
+}
+
+.atl-door-art-right {
+  right: 0;
+}
+
+.atl-door-seam {
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: #ffd76a;
+  box-shadow:
+    0 0 8px rgba(255,240,190,1),
+    0 0 24px rgba(255,195,45,.95),
+    0 0 50px rgba(210,25,25,.48);
+  animation: atlDoorGlow 1.8s ease-in-out infinite;
+  transition: opacity .5s ease;
+}
+
+@keyframes atlDoorGlow {
+  0%,100% {
+    box-shadow:
+      0 0 6px rgba(255,220,120,.9),
+      0 0 18px rgba(255,190,40,.7),
+      0 0 34px rgba(190,20,20,.28);
+  }
+
+  50% {
+    box-shadow:
+      0 0 10px rgba(255,250,215,1),
+      0 0 32px rgba(255,205,70,1),
+      0 0 58px rgba(220,30,30,.55);
+  }
+}
+
+.atl-door-brand {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
+  width: min(92vw, 900px);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity .6s ease, transform .6s ease;
+}
+
+.atl-door-brand-name {
+  color: #fff;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 16px rgba(255,215,106,.8),
+    0 0 34px rgba(180,20,20,.35);
+}
+
+.atl-door-brand-line {
+  margin-top: 8px;
+  color: #ffd76a;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: clamp(.72rem, 1.5vw, 1rem);
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+.atl-door-enter {
+  position: absolute;
+  z-index: 14;
+  left: 50%;
+  bottom: 7%;
+  transform: translateX(-50%);
+  padding: 12px 30px;
+  border: 1px solid rgba(255,215,106,.85);
+  border-radius: 999px;
+  background: rgba(0,0,0,.68);
+  color: #fff;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .22em;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(255,195,45,.28);
+  transition: opacity .5s ease, transform .25s ease;
+}
+
+.atl-door-enter:hover {
+  transform: translateX(-50%) scale(1.05);
+}
+
+.atl-skyline-entrance.atl-opening .atl-door-left {
+  transform: rotateY(-108deg);
+}
+
+.atl-skyline-entrance.atl-opening .atl-door-right {
+  transform: rotateY(108deg);
+}
+
+.atl-skyline-entrance.atl-opening .atl-door-seam,
+.atl-skyline-entrance.atl-opening .atl-door-enter {
+  opacity: 0;
+}
+
+.atl-skyline-entrance.atl-opening .atl-door-brand {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-18px);
+}
+
+@media (max-width: 760px) {
+  .atl-door-brand {
+    top: 8%;
+    width: calc(100vw - 30px);
+  }
+
+  .atl-door-brand-name {
+    font-size: clamp(2rem, 10vw, 3.3rem);
+    line-height: 1;
+  }
+
+  .atl-door-brand-line {
+    font-size: .64rem;
+    line-height: 1.5;
+  }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const entrance = document.getElementById("atlSkylineEntrance");
+  const button = document.getElementById("atlDoorEnter");
+
+  if (!entrance) return;
+
+  function finishEntrance() {
+    entrance.classList.add("atl-entrance-finished");
+    document.documentElement.classList.remove("atl-entrance-active");
+
+    setTimeout(function () {
+      entrance.remove();
+    }, 900);
+  }
+
+  function openDoors() {
+    if (entrance.classList.contains("atl-opening")) return;
+
+    entrance.classList.add("atl-opening");
+
+    setTimeout(finishEntrance, 1550);
+  }
+
+  document.documentElement.classList.add("atl-entrance-active");
+
+  if (button) {
+    button.addEventListener("click", openDoors);
+  }
+
+  setTimeout(openDoors, 2200);
+});
+</script>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — FIRELIGHT REVEAL
+   Light blooms from the center as the doors open.
+   ========================================================= */
+
+.atl-door-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 7;
+  top: -8%;
+  bottom: -8%;
+  left: 50%;
+  width: 5px;
+  transform: translateX(-50%) scaleX(0.15);
+  transform-origin: center center;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to right,
+      rgba(120, 0, 0, 0),
+      rgba(210, 30, 0, 0.72) 20%,
+      rgba(255, 105, 0, 0.95) 38%,
+      rgba(255, 220, 100, 1) 48%,
+      rgba(255, 250, 215, 1) 50%,
+      rgba(255, 220, 100, 1) 52%,
+      rgba(255, 105, 0, 0.95) 62%,
+      rgba(210, 30, 0, 0.72) 80%,
+      rgba(120, 0, 0, 0)
+    );
+
+  box-shadow:
+    0 0 10px rgba(255, 245, 205, 1),
+    0 0 24px rgba(255, 195, 60, 1),
+    0 0 48px rgba(255, 90, 0, 0.92),
+    0 0 85px rgba(205, 20, 0, 0.72),
+    0 0 140px rgba(150, 0, 0, 0.42);
+
+  opacity: 0;
+  filter: blur(1px);
+  transition:
+    opacity 0.18s ease,
+    transform 2.15s cubic-bezier(.18,.72,.22,1),
+    filter 1.6s ease;
+}
+
+/* Hot ignition immediately before separation */
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  opacity: 1;
+  transform: translateX(-50%) scaleX(42);
+  filter: blur(5px);
+  animation: atlFirePulse 0.24s ease-in-out 6 alternate;
+}
+
+@keyframes atlFirePulse {
+  from {
+    box-shadow:
+      0 0 10px rgba(255,245,205,1),
+      0 0 26px rgba(255,190,45,.95),
+      0 0 52px rgba(255,80,0,.82),
+      0 0 90px rgba(185,15,0,.58);
+  }
+
+  to {
+    box-shadow:
+      0 0 18px rgba(255,255,235,1),
+      0 0 42px rgba(255,215,80,1),
+      0 0 78px rgba(255,75,0,1),
+      0 0 135px rgba(220,20,0,.82),
+      0 0 190px rgba(120,0,0,.48);
+  }
+}
+
+/* Existing gold seam becomes white-hot at ignition */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  opacity: 1;
+  background: #fff8d7;
+  box-shadow:
+    0 0 12px #ffffff,
+    0 0 30px rgba(255,225,115,1),
+    0 0 62px rgba(255,95,0,.95),
+    0 0 110px rgba(205,20,0,.7);
+  animation: atlSeamIgnition .38s ease forwards;
+}
+
+@keyframes atlSeamIgnition {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1.025);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-door-stage::after {
+    animation: none !important;
+    transition-duration: .25s !important;
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — WHITE-GOLD BEAM UPGRADE
+   Bright luminous core with restrained fire at the edges
+   ========================================================= */
+
+.atl-door-stage::after {
+  width: 7px !important;
+
+  background:
+    linear-gradient(
+      to right,
+      rgba(255, 90, 0, 0) 0%,
+      rgba(255, 120, 0, 0.22) 12%,
+      rgba(255, 190, 45, 0.58) 25%,
+      rgba(255, 225, 115, 0.90) 36%,
+      rgba(255, 250, 218, 1) 44%,
+      rgba(255, 255, 255, 1) 48%,
+      #ffffff 50%,
+      rgba(255, 255, 255, 1) 52%,
+      rgba(255, 250, 218, 1) 56%,
+      rgba(255, 225, 115, 0.90) 64%,
+      rgba(255, 190, 45, 0.58) 75%,
+      rgba(255, 120, 0, 0.22) 88%,
+      rgba(255, 90, 0, 0) 100%
+    ) !important;
+
+  box-shadow:
+    0 0 5px 2px rgba(255,255,255,1),
+    0 0 14px 5px rgba(255,250,220,1),
+    0 0 28px 9px rgba(255,224,120,.98),
+    0 0 52px 16px rgba(255,190,55,.82),
+    0 0 90px 26px rgba(255,120,10,.46),
+    0 0 150px 42px rgba(205,25,0,.24) !important;
+
+  filter:
+    brightness(1.55)
+    saturate(.88)
+    blur(.4px) !important;
+}
+
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  opacity: 1 !important;
+  transform: translateX(-50%) scaleX(42);
+  filter:
+    brightness(2)
+    saturate(.72)
+    blur(2px) !important;
+
+  animation: atlDiamondBeam 0.22s ease-in-out 7 alternate !important;
+}
+
+@keyframes atlDiamondBeam {
+  from {
+    box-shadow:
+      0 0 6px 3px #ffffff,
+      0 0 18px 7px rgba(255,255,235,1),
+      0 0 36px 12px rgba(255,225,120,.98),
+      0 0 70px 22px rgba(255,175,40,.72),
+      0 0 120px 34px rgba(220,55,0,.35);
+  }
+
+  to {
+    box-shadow:
+      0 0 10px 5px #ffffff,
+      0 0 26px 10px rgba(255,255,245,1),
+      0 0 52px 18px rgba(255,235,155,1),
+      0 0 95px 30px rgba(255,195,60,.88),
+      0 0 160px 48px rgba(255,95,0,.42);
+  }
+}
+
+/* Center seam becomes an intense white-gold ignition line */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  background: #ffffff !important;
+
+  box-shadow:
+    0 0 4px 2px #ffffff,
+    0 0 12px 5px rgba(255,255,225,1),
+    0 0 26px 9px rgba(255,230,135,1),
+    0 0 50px 15px rgba(255,190,55,.9),
+    0 0 90px 25px rgba(255,100,0,.48) !important;
+
+  filter: brightness(1.8);
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — CLEAN FLASH EXIT
+   Bright ignition, then beam clears immediately
+   ========================================================= */
+
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlBeamFlashExit 0.75s ease-out forwards !important;
+}
+
+@keyframes atlBeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2) blur(1px);
+  }
+
+  18% {
+    opacity: 1;
+    filter: brightness(2.6) blur(1px);
+  }
+
+  48% {
+    opacity: .72;
+    filter: brightness(1.8) blur(2px);
+  }
+
+  72% {
+    opacity: .24;
+    filter: brightness(1.25) blur(3px);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Gold seam flashes with the beam, then disappears */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlSeamFlashExit 0.68s ease-out forwards !important;
+}
+
+@keyframes atlSeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2);
+  }
+
+  25% {
+    opacity: 1;
+    filter: brightness(2.8);
+  }
+
+  65% {
+    opacity: .35;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — CLEAN FLASH EXIT
+   Bright ignition, then beam clears immediately
+   ========================================================= */
+
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlBeamFlashExit 0.75s ease-out forwards !important;
+}
+
+@keyframes atlBeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2) blur(1px);
+  }
+
+  18% {
+    opacity: 1;
+    filter: brightness(2.6) blur(1px);
+  }
+
+  48% {
+    opacity: .72;
+    filter: brightness(1.8) blur(2px);
+  }
+
+  72% {
+    opacity: .24;
+    filter: brightness(1.25) blur(3px);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Gold seam flashes with the beam, then disappears */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlSeamFlashExit 0.68s ease-out forwards !important;
+}
+
+@keyframes atlSeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2);
+  }
+
+  25% {
+    opacity: 1;
+    filter: brightness(2.8);
+  }
+
+  65% {
+    opacity: .35;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — CLEAN FLASH EXIT
+   Bright ignition, then beam clears immediately
+   ========================================================= */
+
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlBeamFlashExit 0.75s ease-out forwards !important;
+}
+
+@keyframes atlBeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2) blur(1px);
+  }
+
+  18% {
+    opacity: 1;
+    filter: brightness(2.6) blur(1px);
+  }
+
+  48% {
+    opacity: .72;
+    filter: brightness(1.8) blur(2px);
+  }
+
+  72% {
+    opacity: .24;
+    filter: brightness(1.25) blur(3px);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Gold seam flashes with the beam, then disappears */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlSeamFlashExit 0.68s ease-out forwards !important;
+}
+
+@keyframes atlSeamFlashExit {
+  0% {
+    opacity: 1;
+    filter: brightness(2.2);
+  }
+
+  25% {
+    opacity: 1;
+    filter: brightness(2.8);
+  }
+
+  65% {
+    opacity: .35;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — PULL CAMERA BACK
+   Show more of the complete entrance composition
+   ========================================================= */
+
+.atl-door-art {
+  top: 3vh !important;
+  height: 90vh !important;
+  width: 90vw !important;
+  object-fit: fill !important;
+}
+
+/*
+  Both halves must remain aligned as one continuous image.
+  The image is centered across the full doorway.
+*/
+.atl-door-art-left {
+  left: 5vw !important;
+}
+
+.atl-door-art-right {
+  right: 5vw !important;
+}
+
+/* Black surround becomes the cinematic breathing room. */
+.atl-door-stage {
+  background: #000 !important;
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — FINAL CAMERA + PUSH BEAM TIMING
+   Beam ignites the doors, then gets out of the way.
+   ========================================================= */
+
+/* Pull the complete Atlanta entrance farther back */
+.atl-door-art {
+  top: 8vh !important;
+  height: 92vh !important;
+  width: 82vw !important;
+}
+
+.atl-door-art-left {
+  left: 9vw !important;
+}
+
+.atl-door-art-right {
+  right: 9vw !important;
+}
+
+/*
+   PUSH BEAM:
+   Violent white-gold ignition at the center,
+   then completely gone while doors continue opening.
+*/
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlPushBeam 0.48s cubic-bezier(.15,.75,.25,1) forwards !important;
+}
+
+@keyframes atlPushBeam {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(.15);
+    filter: brightness(1) blur(0);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(4);
+    filter: brightness(3.4) blur(.3px);
+  }
+
+  28% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(16);
+    filter: brightness(3) blur(.7px);
+  }
+
+  48% {
+    opacity: .72;
+    transform: translateX(-50%) scaleX(28);
+    filter: brightness(2.2) blur(1px);
+  }
+
+  70% {
+    opacity: .18;
+    transform: translateX(-50%) scaleX(34);
+    filter: brightness(1.4) blur(1.5px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(36);
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Center seam participates in ignition and vanishes quickly */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlPushSeam .42s ease-out forwards !important;
+}
+
+@keyframes atlPushSeam {
+  0% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  18% {
+    opacity: 1;
+    filter: brightness(4);
+  }
+
+  45% {
+    opacity: .8;
+    filter: brightness(3);
+  }
+
+  72% {
+    opacity: .15;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — FINAL CAMERA + PUSH BEAM TIMING
+   Beam ignites the doors, then gets out of the way.
+   ========================================================= */
+
+/* Pull the complete Atlanta entrance farther back */
+.atl-door-art {
+  top: 8vh !important;
+  height: 92vh !important;
+  width: 82vw !important;
+}
+
+.atl-door-art-left {
+  left: 9vw !important;
+}
+
+.atl-door-art-right {
+  right: 9vw !important;
+}
+
+/*
+   PUSH BEAM:
+   Violent white-gold ignition at the center,
+   then completely gone while doors continue opening.
+*/
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlPushBeam 0.48s cubic-bezier(.15,.75,.25,1) forwards !important;
+}
+
+@keyframes atlPushBeam {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(.15);
+    filter: brightness(1) blur(0);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(4);
+    filter: brightness(3.4) blur(.3px);
+  }
+
+  28% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(16);
+    filter: brightness(3) blur(.7px);
+  }
+
+  48% {
+    opacity: .72;
+    transform: translateX(-50%) scaleX(28);
+    filter: brightness(2.2) blur(1px);
+  }
+
+  70% {
+    opacity: .18;
+    transform: translateX(-50%) scaleX(34);
+    filter: brightness(1.4) blur(1.5px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(36);
+    filter: brightness(1) blur(0);
+  }
+}
+
+/* Center seam participates in ignition and vanishes quickly */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlPushSeam .42s ease-out forwards !important;
+}
+
+@keyframes atlPushSeam {
+  0% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  18% {
+    opacity: 1;
+    filter: brightness(4);
+  }
+
+  45% {
+    opacity: .8;
+    filter: brightness(3);
+  }
+
+  72% {
+    opacity: .15;
+    filter: brightness(1.5);
+  }
+
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+</style>
+
+<style>
+/* =========================================================
+   ATL SKYLINE DOORS — BEAM HARD EXIT
+   Beam pushes the doors, then disappears completely.
+   ========================================================= */
+
+.atl-skyline-entrance.atl-opening .atl-door-stage::after {
+  animation: atlBeamPushAndVanish .42s ease-out forwards !important;
+}
+
+@keyframes atlBeamPushAndVanish {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(.25);
+    filter: brightness(1) blur(0);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(5);
+    filter: brightness(3.6) blur(.25px);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(18);
+    filter: brightness(3.2) blur(.5px);
+  }
+
+  55% {
+    opacity: .55;
+    transform: translateX(-50%) scaleX(28);
+    filter: brightness(2) blur(.75px);
+  }
+
+  80% {
+    opacity: .08;
+    transform: translateX(-50%) scaleX(32);
+    filter: brightness(1.2) blur(0);
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) scaleX(32);
+    filter: none;
+    box-shadow: none;
+  }
+}
+
+/* Seam also finishes its job immediately. */
+.atl-skyline-entrance.atl-opening .atl-door-seam {
+  animation: atlSeamPushAndVanish .38s ease-out forwards !important;
+}
+
+@keyframes atlSeamPushAndVanish {
+  0% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  22% {
+    opacity: 1;
+    filter: brightness(4);
+  }
+
+  55% {
+    opacity: .45;
+    filter: brightness(2);
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    filter: none;
+    box-shadow: none;
+  }
+}
+</style>
+
+<script>
+/* Physically kill the push light after ignition.
+   The doors continue opening independently. */
+document.addEventListener("DOMContentLoaded", function () {
+  const entrance = document.getElementById("atlSkylineEntrance");
+
+  if (!entrance) return;
+
+  const observer = new MutationObserver(function () {
+    if (!entrance.classList.contains("atl-opening")) return;
+
+    setTimeout(function () {
+      entrance.classList.add("atl-beam-finished");
+    }, 1500);
+
+    observer.disconnect();
+  });
+
+  observer.observe(entrance, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+});
+</script>
+
+<style>
+/* Absolute final state — nothing earlier in the file may revive it. */
+.atl-skyline-entrance.atl-opening.atl-beam-finished .atl-door-stage::after,
+.atl-skyline-entrance.atl-opening.atl-beam-finished .atl-door-seam {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+</style>
