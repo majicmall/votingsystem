@@ -33,6 +33,24 @@ class CategoryAdmin(admin.ModelAdmin):
     ordering = ("sort_order", "name")
 
 
+class NomineeTrashFilter(admin.SimpleListFilter):
+    title = "record location"
+    parameter_name = "record_location"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("active", "Active Nominees"),
+            ("trash", "Trash"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "trash":
+            return queryset.filter(deleted_at__isnull=False)
+
+        # Default Admin view shows only records that have not been deleted.
+        return queryset.filter(deleted_at__isnull=True)
+
+
 @admin.register(Nominee)
 class NomineeAdmin(admin.ModelAdmin):
     list_display = (
@@ -44,7 +62,12 @@ class NomineeAdmin(admin.ModelAdmin):
         "photo_preview",
         "created_at",
     )
-    list_filter = ("approval_status", "is_active", "category")
+    list_filter = (
+        NomineeTrashFilter,
+        "approval_status",
+        "is_active",
+        "category",
+    )
     search_fields = ("name", "contact_email", "category__name")
     readonly_fields = ("photo_preview", "upload_token", "approved_at", "rejected_at", "created_at", "updated_at")
     actions = (
