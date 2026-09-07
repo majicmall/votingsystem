@@ -100,6 +100,9 @@ urlpatterns = [
     # Landing page
     path("", ballot_views.landing_page, name="home"),
 
+    # Homepage layout prototype — production homepage remains untouched
+    path("home-test/", ballot_views.landing_test_page, name="home_test"),
+
     # Ballot
     path("ballot/", ballot_views.ballot_view, name="ballot"),
     re_path(r"^ballot/category/(?P<category_slug>[-a-zA-Z0-9_]+)/$", ballot_views.ballot_category_view, name="ballot_category"),

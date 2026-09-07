@@ -1,12 +1,567 @@
 {% extends "ballot/base.html" %}
 {% load static billboard_ads event_promos %}
-{% block title %}ATL’s Hottest Awards Association{% endblock %}
+{% block title %}ATL’s Hottest Awards Association
+<style>
+/* =========================================================
+   ATL'S HOTTEST — AWARDS SEASON 2026 FINALE
+   HOMEPAGE TEST
+   ========================================================= */
+
+.atl-awards-season-finale {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 42px 0 18px;
+  padding: clamp(52px, 8vw, 96px) clamp(20px, 5vw, 64px);
+  border: 1px solid rgba(255, 215, 106, 0.72);
+  border-radius: 30px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(113, 10, 38, 0.48),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 12% 100%,
+      rgba(70, 4, 25, 0.42),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #020202 0%,
+      #120205 34%,
+      #2a0712 55%,
+      #0a0103 78%,
+      #000 100%
+    );
+
+  box-shadow:
+    0 30px 90px rgba(0,0,0,0.72),
+    0 0 30px rgba(255,215,106,0.14),
+    0 0 55px rgba(95,8,31,0.28),
+    inset 0 0 42px rgba(255,215,106,0.035);
+}
+
+.atl-awards-season-finale::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      115deg,
+      transparent 22%,
+      rgba(255,255,255,0.055) 47%,
+      transparent 57%
+    );
+}
+
+.atl-awards-season-glow {
+  position: absolute;
+  top: -160px;
+  left: 50%;
+  width: min(760px, 90vw);
+  height: 320px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(112, 8, 35, 0.20);
+  filter: blur(65px);
+  pointer-events: none;
+}
+
+.atl-awards-season-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.atl-awards-season-eyebrow {
+  margin: 0 0 12px;
+  color: #ffd76a;
+  font-size: clamp(0.78rem, 1.4vw, 0.95rem);
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.atl-awards-season-finale h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.35rem, 6vw, 5.2rem);
+  font-weight: 1000;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 2px 0 rgba(255,215,106,0.35),
+    0 0 22px rgba(255,255,255,0.10);
+}
+
+.atl-awards-season-finale h2 span {
+  color: #ffd76a;
+  text-shadow:
+    0 0 14px rgba(255,215,106,0.28),
+    0 0 34px rgba(255,215,106,0.12);
+}
+
+.atl-awards-season-rule {
+  width: min(230px, 55%);
+  height: 1px;
+  margin: 26px auto;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,215,106,0.95),
+      transparent
+    );
+  box-shadow: 0 0 12px rgba(255,215,106,0.25);
+}
+
+.atl-awards-season-copy {
+  margin: 0 auto 30px;
+  color: rgba(255,255,255,0.84);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.6;
+}
+
+.atl-awards-season-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 15px 30px !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0.035em;
+  text-align: center;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.42),
+    0 0 24px rgba(215,25,53,0.20);
+}
+
+@media (max-width: 760px) {
+  .atl-awards-season-finale {
+    margin-top: 28px;
+    padding: 48px 18px 52px;
+    border-radius: 24px;
+  }
+
+  .atl-awards-season-finale h2 {
+    font-size: clamp(2.25rem, 12vw, 3.7rem);
+  }
+
+  .atl-awards-season-btn {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+</style>
+
+
+<style>
+/* =========================================================
+   AWARDS SEASON 2026 — ATTENTION MARQUEE UPGRADE
+   TEST PAGE ONLY
+   ========================================================= */
+
+/* Stronger black / burgundy / gold outer environment */
+.atl-awards-season-finale {
+  border: 2px solid rgba(255, 215, 106, 0.88) !important;
+
+  background:
+    radial-gradient(
+      ellipse at 50% -5%,
+      rgba(151, 17, 50, 0.46),
+      transparent 43%
+    ),
+    radial-gradient(
+      circle at 10% 82%,
+      rgba(102, 5, 31, 0.36),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 78%,
+      rgba(70, 3, 21, 0.32),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #000000 0%,
+      #080102 20%,
+      #26050e 50%,
+      #090102 80%,
+      #000000 100%
+    ) !important;
+
+  box-shadow:
+    0 34px 100px rgba(0,0,0,0.88),
+    0 0 8px rgba(255,215,106,0.55),
+    0 0 30px rgba(255,215,106,0.20),
+    0 0 70px rgba(119,7,35,0.32),
+    inset 0 0 55px rgba(0,0,0,0.72) !important;
+}
+
+/* Fine inner gold frame */
+.atl-awards-season-finale::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255,215,106,0.24);
+  border-radius: 22px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+/* ---------------------------------------------------------
+   GOLD ENVELOPE + BALLOT EMBLEM
+   --------------------------------------------------------- */
+
+.atl-awards-ballot-emblem {
+  position: relative;
+  width: 92px;
+  height: 82px;
+  margin: 0 auto 24px;
+  filter:
+    drop-shadow(0 0 10px rgba(255,215,106,0.35))
+    drop-shadow(0 8px 18px rgba(0,0,0,0.55));
+}
+
+.atl-awards-envelope {
+  position: absolute;
+  left: 7px;
+  bottom: 0;
+  width: 78px;
+  height: 48px;
+  overflow: hidden;
+
+  border: 2px solid #ffd76a;
+  border-radius: 5px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #3b2605 0%,
+      #d6a72d 46%,
+      #ffe391 65%,
+      #7c5208 100%
+    );
+
+  box-shadow:
+    inset 0 0 12px rgba(255,255,255,0.18),
+    0 0 18px rgba(255,215,106,0.22);
+}
+
+.atl-awards-envelope::before,
+.atl-awards-envelope::after {
+  content: "";
+  position: absolute;
+  bottom: -18px;
+  width: 55px;
+  height: 55px;
+  border-top: 1px solid rgba(72,42,0,0.65);
+  background: rgba(255,215,106,0.14);
+  transform: rotate(45deg);
+}
+
+.atl-awards-envelope::before {
+  left: -27px;
+}
+
+.atl-awards-envelope::after {
+  right: -27px;
+}
+
+.atl-awards-envelope-flap {
+  position: absolute;
+  left: 50%;
+  top: -29px;
+  width: 58px;
+  height: 58px;
+
+  border-right: 2px solid rgba(255,230,150,0.82);
+  border-bottom: 2px solid rgba(255,230,150,0.82);
+
+  background:
+    linear-gradient(
+      135deg,
+      #a97610,
+      #ffe08a
+    );
+
+  transform:
+    translateX(-50%)
+    rotate(45deg);
+}
+
+.atl-awards-ballot-paper {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 50%;
+  width: 48px;
+  height: 53px;
+
+  transform:
+    translateX(-50%)
+    rotate(-3deg);
+
+  border: 2px solid #ffd76a;
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fffdf4 0%,
+      #e9dfbd 100%
+    );
+
+  box-shadow:
+    0 5px 14px rgba(0,0,0,0.45),
+    0 0 12px rgba(255,215,106,0.24);
+}
+
+.atl-awards-ballot-paper::before,
+.atl-awards-ballot-paper::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: rgba(70,20,25,0.28);
+}
+
+.atl-awards-ballot-paper::before {
+  top: 29px;
+}
+
+.atl-awards-ballot-paper::after {
+  top: 37px;
+}
+
+.atl-awards-ballot-paper span {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  color: #7e0a25;
+  font-size: 22px;
+  font-weight: 1000;
+}
+
+
+/* ---------------------------------------------------------
+   FILLED NOMINATION PANEL
+   --------------------------------------------------------- */
+
+.atl-awards-nomination-panel {
+  position: relative;
+  max-width: 680px;
+  margin: 30px auto 0;
+  padding: clamp(26px, 4vw, 38px);
+
+  border: 1px solid rgba(255,215,106,0.58);
+  border-radius: 22px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(157,19,51,0.25),
+      transparent 52%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(8,8,8,0.98),
+      rgba(43,5,15,0.96),
+      rgba(5,5,5,0.98)
+    );
+
+  box-shadow:
+    0 22px 50px rgba(0,0,0,0.58),
+    0 0 22px rgba(255,215,106,0.10),
+    inset 0 0 30px rgba(132,9,37,0.16);
+}
+
+.atl-awards-nomination-label {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 6px 13px;
+
+  border: 1px solid rgba(255,215,106,0.45);
+  border-radius: 999px;
+
+  color: #ffd76a;
+  background: rgba(0,0,0,0.48);
+
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.atl-awards-nomination-panel .atl-awards-season-copy {
+  margin-bottom: 24px;
+  color: rgba(255,255,255,0.92);
+}
+
+
+/* Make THE nomination CTA impossible to miss */
+.atl-awards-season-btn {
+  position: relative;
+  overflow: hidden;
+
+  min-height: 62px !important;
+  padding: 17px 34px !important;
+
+  border: 1px solid rgba(255,225,135,0.85) !important;
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.55),
+    0 0 18px rgba(215,25,53,0.32),
+    0 0 34px rgba(255,215,106,0.15) !important;
+}
+
+.atl-awards-season-btn::after {
+  content: "";
+  position: absolute;
+  top: -80%;
+  left: -35%;
+  width: 28%;
+  height: 260%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.42),
+      transparent
+    );
+
+  transform: rotate(18deg);
+  animation: atlNominationButtonSweep 4.8s ease-in-out infinite;
+}
+
+@keyframes atlNominationButtonSweep {
+  0%, 68% {
+    left: -40%;
+    opacity: 0;
+  }
+
+  73% {
+    opacity: 1;
+  }
+
+  88% {
+    left: 120%;
+    opacity: 0.75;
+  }
+
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .atl-awards-season-finale {
+    border-width: 1px !important;
+  }
+
+  .atl-awards-season-finale::after {
+    inset: 6px;
+    border-radius: 18px;
+  }
+
+  .atl-awards-ballot-emblem {
+    transform: scale(0.92);
+    margin-bottom: 20px;
+  }
+
+  .atl-awards-nomination-panel {
+    padding: 26px 16px 28px;
+  }
+
+  .atl-awards-season-btn {
+    min-height: 60px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+}
+</style>
+
+{% endblock %}
 
 {% block billboard %}
   {% render_billboard "homepage_top" %}
 {% endblock %}
 
 {% block content %}
+
+<style>
+/* =========================================================
+   HOMEPAGE TEST — BLACK + DEEP BURGUNDY HERO
+   TEST PAGE ONLY
+   ========================================================= */
+
+.landing-hero {
+    border: 1px solid rgba(255, 215, 106, 0.68) !important;
+
+    background:
+        radial-gradient(
+            circle at 16% 4%,
+            rgba(92, 8, 30, 0.72),
+            transparent 34%
+        ),
+        radial-gradient(
+            circle at 88% 18%,
+            rgba(70, 5, 24, 0.58),
+            transparent 38%
+        ),
+        linear-gradient(
+            135deg,
+            #020202 0%,
+            #090204 30%,
+            #260611 58%,
+            #080103 78%,
+            #000000 100%
+        ) !important;
+
+    box-shadow:
+        0 32px 100px rgba(0, 0, 0, 0.78),
+        0 0 28px rgba(92, 8, 30, 0.48),
+        0 0 58px rgba(70, 5, 24, 0.32),
+        inset 0 0 46px rgba(110, 12, 38, 0.10) !important;
+}
+
+.landing-hero::before {
+    background:
+        linear-gradient(
+            115deg,
+            transparent 0%,
+            rgba(255,255,255,0.055) 43%,
+            transparent 54%
+        ),
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(128, 18, 48, 0.18),
+            transparent 48%
+        ) !important;
+}
+
+/* Keep the nomination CTA as the primary standout button. */
+.landing-hero .btn.primary {
+    position: relative;
+    z-index: 1;
+}
+</style>
+
 
 {% include 'ballot/partials/atl_skyline_doors.html' %}
 
@@ -557,7 +1112,6 @@
 <section class="landing-hero">
     <div class="landing-grid">
       <div class="landing-copy">
-        <p class="eyebrow">ATL’s Hottest Awards Association</p>
         <h1>Nominate. Celebrate. Elevate the Culture.</h1>
         <p>
           Welcome to the official ATL’s Hottest Awards Association platform — where artists,
@@ -565,11 +1119,7 @@
         </p>
 
         <div class="landing-buttons">
-          <a class="btn primary landing-btn" href="{% url 'nominee_signup' %}">
-            Nominate ATL’s Hottest 2026
-          </a>
-
-<a class="taahaa-membership-btn" href="{% url 'membership_plans' %}">
+<a class="btn landing-btn" href="{% url 'membership_plans' %}">
   Join TAAHAA Membership
 </a>
 
@@ -577,7 +1127,7 @@
             Approved Nominee Login
           </a>
           <a class="btn landing-btn" href="{% url 'association_signup' %}">
-            Join ATL’s Hottest Awards Association
+            Join ATL’s Hottest Association
           </a>
         <a class="btn" href="{% url 'atl_tv' %}">Watch ATL’s Hottest TV</a>
 </div>
@@ -783,6 +1333,47 @@
     </article>
   </section>
 
+  <!-- =====================================================
+       ATL'S HOTTEST — AWARDS SEASON 2026 FINALE
+       ===================================================== -->
+  <section class="atl-awards-season-finale" aria-labelledby="atlAwardsSeasonTitle">
+    <div class="atl-awards-season-glow" aria-hidden="true"></div>
+
+    <div class="atl-awards-season-inner">
+
+      <div class="atl-awards-ballot-emblem" aria-hidden="true">
+        <div class="atl-awards-ballot-paper">
+          <span>✓</span>
+        </div>
+        <div class="atl-awards-envelope">
+          <div class="atl-awards-envelope-flap"></div>
+        </div>
+      </div>
+
+      <p class="atl-awards-season-eyebrow">ATL’S HOTTEST</p>
+
+      <h2 id="atlAwardsSeasonTitle">
+        AWARDS SEASON <span>2026</span>
+      </h2>
+
+      <div class="atl-awards-season-rule" aria-hidden="true"></div>
+
+      <div class="atl-awards-nomination-panel">
+        <p class="atl-awards-nomination-label">
+          NOMINATIONS ARE OPEN
+        </p>
+
+        <p class="atl-awards-season-copy">
+          The road to the title starts here.
+        </p>
+
+        <a class="btn primary atl-awards-season-btn"
+           href="{% url 'nominee_signup' %}">
+          NOMINATE ATL’S HOTTEST 2026
+        </a>
+      </div>
+    </div>
+  </section>
 
 </div>
 

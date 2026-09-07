@@ -180,7 +180,6 @@ def landing_page(request):
 
 
 
-
 @require_http_methods(["GET"])
 def nomination_thank_you(request, nominee_id=None):
     nominees = []
