@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
+from django.utils import timezone
 
 from .models import (
     AtlsHottestEvent,
@@ -74,6 +75,45 @@ class NomineeAdmin(admin.ModelAdmin):
             "fields": ("created_at", "updated_at")
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        """
+        Keep manual Admin approval in sync with the public ballot.
+
+        Changing Approval Status to Approved and clicking Save immediately
+        publishes the nominee by ensuring is_active=True and recording the
+        approval timestamp. Rejected nominees receive a rejection timestamp.
+        """
+        previous_status = None
+
+        if change and obj.pk:
+            previous_status = (
+                Nominee.objects
+                .filter(pk=obj.pk)
+                .values_list("approval_status", flat=True)
+                .first()
+            )
+
+        if obj.approval_status == Nominee.APPROVAL_APPROVED:
+            obj.is_active = True
+            obj.rejected_at = None
+
+            if not obj.approved_at:
+                obj.approved_at = timezone.now()
+
+        elif obj.approval_status == Nominee.APPROVAL_REJECTED:
+            if not obj.rejected_at:
+                obj.rejected_at = timezone.now()
+
+        super().save_model(request, obj, form, change)
+
+        # Send the approval notice only when the nominee actually transitions
+        # into Approved status. This avoids duplicate emails on later edits.
+        if (
+            obj.approval_status == Nominee.APPROVAL_APPROVED
+            and previous_status != Nominee.APPROVAL_APPROVED
+        ):
+            obj.send_approval_notice()
 
     @admin.display(description="Photo")
     def photo_preview(self, obj):
