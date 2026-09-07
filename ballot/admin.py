@@ -3,6 +3,7 @@ from django.urls import path, reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 from django.utils import timezone
+from datetime import timedelta
 
 from .models import (
     AtlsHottestEvent,
@@ -51,7 +52,7 @@ class NomineeAdmin(admin.ModelAdmin):
         "reject_selected_nominees",
         "archive_selected_nominees",
         "restore_selected_nominees",
-        "delete_selected_pending_nominees",
+        "permanently_delete_expired_nominees",
     )
 
     fieldsets = (
@@ -157,33 +158,98 @@ class NomineeAdmin(admin.ModelAdmin):
         queryset.update(is_active=True, deleted_at=None)
         self.message_user(request, f"Restored {queryset.count()} nominee(s).")
 
-    @admin.action(description="Delete selected PENDING nominees permanently")
-    def delete_selected_pending_nominees(self, request, queryset):
-        """
-        Permanently remove nominees that have never been approved.
+    # ---------------------------------------------------------
+    # SAFE DELETE / 48-HOUR TRASH
+    # ---------------------------------------------------------
 
-        Their nomination-ledger records are removed first so the ledger's
-        PROTECT rule continues protecting approved nomination history.
+    def get_deleted_objects(self, objs, request):
+        """
+        Nominee deletion is a soft delete into the 48-hour Trash.
+
+        Django normally inspects protected related objects here and blocks
+        deletion before delete_model()/delete_queryset() can run. Because
+        nothing is physically deleted during this step, protected related
+        records are intentionally left untouched.
+        """
+        deleted_objects = [
+            f"{obj.name} — {obj.category}"
+            for obj in objs
+        ]
+
+        model_count = {
+            self.model._meta.verbose_name_plural: len(deleted_objects)
+        }
+
+        perms_needed = set()
+        protected = []
+
+        return deleted_objects, model_count, perms_needed, protected
+
+    def delete_model(self, request, obj):
+        """
+        Django's normal object Delete button becomes a safe delete.
+
+        The standard Django confirmation page still asks:
+        "Are you sure?"
+
+        After confirmation, the nominee is moved to Trash instead of being
+        physically deleted. Related protected records remain untouched.
+        """
+        obj.archive()
+
+        self.message_user(
+            request,
+            f"{obj.name} was moved to Trash. "
+            "It can be restored for 48 hours."
+        )
+
+    def delete_queryset(self, request, queryset):
+        """
+        Django's standard bulk 'Delete selected' action becomes a safe delete.
+        """
+        count = queryset.count()
+
+        for nominee in queryset:
+            nominee.archive()
+
+        self.message_user(
+            request,
+            f"{count} nominee(s) moved to Trash. "
+            "They can be restored for 48 hours."
+        )
+
+    @admin.action(description="Permanently delete nominees whose 48-hour recovery period expired")
+    def permanently_delete_expired_nominees(self, request, queryset):
+        """
+        Permanently remove selected nominees only after they have spent
+        at least 48 hours in Trash.
+
+        Protected nomination-ledger records are deliberately removed here,
+        immediately before the nominee itself is permanently deleted.
         """
         from django.db import transaction
         from .models import NominationLedger
 
-        pending = queryset.filter(
-            approval_status=Nominee.APPROVAL_PENDING
+        cutoff = timezone.now() - timedelta(hours=48)
+
+        eligible = queryset.filter(
+            is_active=False,
+            deleted_at__isnull=False,
+            deleted_at__lte=cutoff,
         )
 
         skipped = queryset.exclude(
-            approval_status=Nominee.APPROVAL_PENDING
+            is_active=False,
+            deleted_at__isnull=False,
+            deleted_at__lte=cutoff,
         ).count()
 
         deleted_nominees = 0
         deleted_ledgers = 0
 
         with transaction.atomic():
-            for nominee in pending:
-                ledger_qs = NominationLedger.objects.filter(
-                    nominee=nominee
-                )
+            for nominee in eligible:
+                ledger_qs = NominationLedger.objects.filter(nominee=nominee)
 
                 ledger_count = ledger_qs.count()
                 ledger_qs.delete()
@@ -194,14 +260,14 @@ class NomineeAdmin(admin.ModelAdmin):
                 deleted_nominees += 1
 
         message = (
-            f"Deleted {deleted_nominees} pending nominee(s) and "
-            f"{deleted_ledgers} related nomination ledger record(s)."
+            f"Permanently deleted {deleted_nominees} nominee(s) "
+            f"and {deleted_ledgers} related nomination ledger record(s)."
         )
 
         if skipped:
             message += (
-                f" Skipped {skipped} nominee(s) because they were "
-                f"not pending."
+                f" Skipped {skipped} nominee(s) because their "
+                "48-hour recovery period has not expired."
             )
 
         self.message_user(request, message)
