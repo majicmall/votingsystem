@@ -100,8 +100,6 @@ urlpatterns = [
     # Landing page
     path("", ballot_views.landing_page, name="home"),
 
-    # Homepage layout prototype — production homepage remains untouched
-    path("home-test/", ballot_views.landing_test_page, name="home_test"),
 
     # Ballot
     path("ballot/", ballot_views.ballot_view, name="ballot"),
