@@ -6459,3 +6459,167 @@ header nav a:hover::before,
     display: block !important;
   }
 }
+
+/* =========================================================
+   ATL'S HOTTEST — HERO HEADLINE DEEP 24K LIVING GOLD
+   Rich molten-gold light visibly circulates inside lettering
+   ========================================================= */
+
+.landing-hero .landing-copy h1 {
+    position: relative;
+    color: transparent !important;
+
+    background-image:
+
+        /* DEEP 24K MOVING LIGHT #1 */
+        radial-gradient(
+            ellipse at 15% 25%,
+            #ffe66d 0%,
+            #ffc400 6%,
+            #e59a00 14%,
+            #b86f00 22%,
+            transparent 34%
+        ),
+
+        /* DEEP 24K MOVING LIGHT #2 */
+        radial-gradient(
+            ellipse at 78% 70%,
+            #ffd83d 0%,
+            #f5b400 7%,
+            #d78b00 15%,
+            #9f5d00 23%,
+            transparent 35%
+        ),
+
+        /* SHARP MOVING GOLD REFLECTION */
+        radial-gradient(
+            circle at 48% 45%,
+            #ffed83 0%,
+            #ffc928 5%,
+            #dc9400 12%,
+            transparent 24%
+        ),
+
+        /* QUIETER CHAMPAGNE-GOLD BASE */
+        linear-gradient(
+            120deg,
+            #d8c690 0%,
+            #bba86f 20%,
+            #e1d09a 38%,
+            #aa955c 54%,
+            #d5c184 72%,
+            #b29d65 86%,
+            #d8c690 100%
+        );
+
+    background-size:
+        118% 165%,
+        138% 155%,
+        108% 140%,
+        100% 100%;
+
+    background-position:
+        0% 15%,
+        100% 85%,
+        45% 50%,
+        center;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation: atlHeroDeepGoldMotion 4.4s ease-in-out infinite;
+}
+
+@keyframes atlHeroDeepGoldMotion {
+    0% {
+        background-position:
+            0% 10%,
+            100% 90%,
+            45% 45%,
+            center;
+    }
+
+    20% {
+        background-position:
+            32% 82%,
+            70% 15%,
+            82% 10%,
+            center;
+    }
+
+    40% {
+        background-position:
+            82% 38%,
+            22% 92%,
+            96% 72%,
+            center;
+    }
+
+    60% {
+        background-position:
+            100% 88%,
+            0% 35%,
+            48% 100%,
+            center;
+    }
+
+    80% {
+        background-position:
+            48% 0%,
+            62% 68%,
+            5% 48%,
+            center;
+    }
+
+    100% {
+        background-position:
+            0% 10%,
+            100% 90%,
+            45% 45%,
+            center;
+    }
+}
+
+.landing-hero .landing-copy h1::after {
+    content: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-hero .landing-copy h1 {
+        animation: none !important;
+    }
+}
+
+/* =========================================================
+   ATL'S HOTTEST — HERO HEADLINE WHITE SHIMMER TRIM
+   Bright platinum edge around the Living Gold lettering
+   ========================================================= */
+
+.landing-hero .landing-copy h1 {
+    -webkit-text-stroke: 0.7px rgba(255, 255, 255, 0.92);
+
+    text-shadow:
+        0 0 1px rgba(255, 255, 255, 1),
+        0 0 3px rgba(255, 255, 255, 0.72),
+        0 0 7px rgba(255, 245, 205, 0.30);
+
+    filter:
+        drop-shadow(0 0 1px rgba(255, 255, 255, 0.70))
+        drop-shadow(0 0 4px rgba(255, 221, 100, 0.20));
+}
+
+/* =========================================================
+   ATL'S HOTTEST — HERO HEADLINE GLARE REDUCTION
+   Keep crisp platinum trim without the oversized halo
+   ========================================================= */
+
+.landing-hero .landing-copy h1 {
+    -webkit-text-stroke: 0.65px rgba(255, 255, 255, 0.88) !important;
+
+    text-shadow:
+        0 0 0.7px rgba(255, 255, 255, 0.72) !important;
+
+    filter:
+        drop-shadow(0 0 0.8px rgba(255, 235, 175, 0.22)) !important;
+}
