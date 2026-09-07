@@ -1,6 +1,13 @@
 {% extends "ballot/base.html" %}
 {% load static billboard_ads event_promos %}
-{% block title %}ATL’s Hottest Awards Association
+{% block title %}ATL’s Hottest Awards Association{% endblock %}
+
+{% block billboard %}
+  {% render_billboard "homepage_top" %}
+{% endblock %}
+
+{% block content %}
+
 <style>
 /* =========================================================
    ATL'S HOTTEST — AWARDS SEASON 2026 FINALE
@@ -496,13 +503,6 @@
 }
 </style>
 
-{% endblock %}
-
-{% block billboard %}
-  {% render_billboard "homepage_top" %}
-{% endblock %}
-
-{% block content %}
 
 <style>
 /* =========================================================
