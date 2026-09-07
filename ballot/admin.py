@@ -46,7 +46,13 @@ class NomineeAdmin(admin.ModelAdmin):
     list_filter = ("approval_status", "is_active", "category")
     search_fields = ("name", "contact_email", "category__name")
     readonly_fields = ("photo_preview", "upload_token", "approved_at", "rejected_at", "created_at", "updated_at")
-    actions = ("approve_selected_nominees", "reject_selected_nominees", "archive_selected_nominees", "restore_selected_nominees")
+    actions = (
+        "approve_selected_nominees",
+        "reject_selected_nominees",
+        "archive_selected_nominees",
+        "restore_selected_nominees",
+        "delete_selected_pending_nominees",
+    )
 
     fieldsets = (
         ("Nominee", {
@@ -150,6 +156,55 @@ class NomineeAdmin(admin.ModelAdmin):
     def restore_selected_nominees(self, request, queryset):
         queryset.update(is_active=True, deleted_at=None)
         self.message_user(request, f"Restored {queryset.count()} nominee(s).")
+
+    @admin.action(description="Delete selected PENDING nominees permanently")
+    def delete_selected_pending_nominees(self, request, queryset):
+        """
+        Permanently remove nominees that have never been approved.
+
+        Their nomination-ledger records are removed first so the ledger's
+        PROTECT rule continues protecting approved nomination history.
+        """
+        from django.db import transaction
+        from .models import NominationLedger
+
+        pending = queryset.filter(
+            approval_status=Nominee.APPROVAL_PENDING
+        )
+
+        skipped = queryset.exclude(
+            approval_status=Nominee.APPROVAL_PENDING
+        ).count()
+
+        deleted_nominees = 0
+        deleted_ledgers = 0
+
+        with transaction.atomic():
+            for nominee in pending:
+                ledger_qs = NominationLedger.objects.filter(
+                    nominee=nominee
+                )
+
+                ledger_count = ledger_qs.count()
+                ledger_qs.delete()
+
+                nominee.delete()
+
+                deleted_ledgers += ledger_count
+                deleted_nominees += 1
+
+        message = (
+            f"Deleted {deleted_nominees} pending nominee(s) and "
+            f"{deleted_ledgers} related nomination ledger record(s)."
+        )
+
+        if skipped:
+            message += (
+                f" Skipped {skipped} nominee(s) because they were "
+                f"not pending."
+            )
+
+        self.message_user(request, message)
 
 
 @admin.register(Vote)
