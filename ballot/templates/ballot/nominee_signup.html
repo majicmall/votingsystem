@@ -8,6 +8,249 @@
   <p>Select up to five categories. Each category has its own clear selection box beside the category name.</p>
 </section>
 
+
+<section
+  class="card nomination-card checkin-card"
+  id="iam-atls-hottest-checkin"
+  style="
+    margin-bottom:32px;
+    border:1px solid rgba(255,215,106,.58);
+    box-shadow:
+      0 0 28px rgba(255,215,106,.12),
+      0 18px 50px rgba(0,0,0,.34);
+  "
+>
+  <div style="text-align:center;margin-bottom:26px;">
+    <p
+      class="eyebrow"
+      style="
+        color:#ffd76a;
+        letter-spacing:3px;
+        text-transform:uppercase;
+        margin-bottom:8px;
+      "
+    >
+      Proclaim It
+    </p>
+
+    <h2 style="margin-bottom:10px;">
+      I AM ATL’s Hottest Check-In
+    </h2>
+
+    <p style="margin:0 auto;max-width:720px;">
+      <strong>Are you ATL’s Hottest? Want to be nominated?</strong>
+      Check in and proclaim <strong>“I AM ATL’s Hottest.”</strong>
+    </p>
+
+    <p style="margin:10px auto 0;max-width:720px;">
+      Enter your name and valid email address, provide at least one
+      social media address or website, and select up to five categories
+      in which you want to be considered.
+    </p>
+  </div>
+
+  <form
+    class="nomination-form checkin-form"
+    method="post"
+    action="{% url 'self_nomination_checkin' %}"
+  >
+    {% csrf_token %}
+
+    {% if checkin_form.non_field_errors %}
+      <div class="alert">
+        {{ checkin_form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="nomination-fan-fields">
+      <div class="field-group">
+        <label for="{{ checkin_form.name.id_for_label }}">
+          Your Name
+        </label>
+        {{ checkin_form.name }}
+        {% if checkin_form.name.errors %}
+          <div class="field-error">
+            {{ checkin_form.name.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="field-group">
+        <label for="{{ checkin_form.email.id_for_label }}">
+          Valid Email Address
+        </label>
+        {{ checkin_form.email }}
+        {% if checkin_form.email.errors %}
+          <div class="field-error">
+            {{ checkin_form.email.errors }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:22px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.website.id_for_label }}"
+      >
+        Website
+      </label>
+
+      {{ checkin_form.website }}
+
+      {% if checkin_form.website.errors %}
+        <div class="field-error">
+          {{ checkin_form.website.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:18px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.social_link.id_for_label }}"
+      >
+        Social Media Address
+      </label>
+
+      {{ checkin_form.social_link }}
+
+      {% if checkin_form.social_link.errors %}
+        <div class="field-error">
+          {{ checkin_form.social_link.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div
+      style="
+        margin:18px 0 24px;
+        padding:16px 18px;
+        border:1px solid rgba(255,215,106,.42);
+        border-radius:14px;
+        background:rgba(255,215,106,.06);
+      "
+    >
+      <strong style="color:#ffd76a;">
+        Verification Requirement:
+      </strong>
+      You must provide at least one social media address or website
+      with your Check-In.
+    </div>
+
+    <div class="category-select-header">
+      <div>
+        <h2>Choose Your Categories</h2>
+        <p>
+          Select from one to five categories in which you want
+          to be considered.
+        </p>
+      </div>
+
+      <span class="nominee-count">Max 5</span>
+    </div>
+
+    {% if checkin_form.categories.errors %}
+      <div class="alert">
+        {{ checkin_form.categories.errors }}
+      </div>
+    {% endif %}
+
+    <div
+      id="checkin-category-limit-message"
+      class="alert"
+      role="alert"
+      aria-live="polite"
+      style="display:none;"
+    >
+      You’ve reached the maximum of 5 categories.
+    </div>
+
+    <div class="category-choice-grid checkin-category-grid">
+      {% for checkbox in checkin_form.categories %}
+        <label
+          class="category-choice-card"
+          for="{{ checkbox.id_for_label }}"
+        >
+          <span class="category-choice-name">
+            {{ checkbox.choice_label }}
+          </span>
+
+          <span class="category-choice-box">
+            {{ checkbox.tag }}
+            <span class="fake-check"></span>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <div
+      style="
+        margin:26px 0 20px;
+        padding:18px 20px;
+        border:1px solid rgba(215,25,53,.75);
+        border-radius:16px;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(215,25,53,.16),
+            rgba(0,0,0,.22)
+          );
+      "
+    >
+      <strong style="color:#ffd76a;">Important:</strong>
+      Checking in and proclaiming
+      <strong>“I AM ATL’s Hottest”</strong>
+      does not automatically place you on the official ATL’s Hottest
+      ballot. All self-nominations are subject to review and approval
+      by ATL’s Hottest. You will receive confirmation if your
+      nomination is approved.
+    </div>
+
+    <div class="nomination-optin-notice" style="margin-bottom:20px;">
+      By submitting your Check-In, you consent to receive ATL’s Hottest
+      Awards information, updates, announcements, and invitations at
+      the email address you provide.
+    </div>
+
+    <button
+      class="btn primary nomination-submit-btn"
+      type="submit"
+    >
+      I AM ATL’s Hottest — Check In
+    </button>
+  </form>
+</section>
+
+<section
+  style="
+    text-align:center;
+    margin:10px auto 28px;
+    max-width:760px;
+  "
+>
+  <p
+    class="eyebrow"
+    style="
+      color:#ffd76a;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      margin-bottom:7px;
+    "
+  >
+    Recognize ATL’s Hottest
+  </p>
+
+  <h2 style="margin:0 0 8px;">
+    Nominating Someone Else?
+  </h2>
+
+  <p style="margin:0;">
+    Use the official nomination form below to recognize someone
+    you believe should be nominated for ATL’s Hottest.
+  </p>
+</section>
+
 <section class="card nomination-card">
   
 <p class="nomination-info-note">
@@ -116,32 +359,75 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const checkboxes = Array.from(
-    document.querySelectorAll('.category-choice-grid input[type="checkbox"]')
-  );
-  const message = document.getElementById("category-limit-message");
-  const maxCategories = 5;
+  function installCategoryLimit(gridSelector, messageId) {
+    const grid = document.querySelector(gridSelector);
+    const message = document.getElementById(messageId);
 
-  checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", function () {
-      const checkedCount = checkboxes.filter((item) => item.checked).length;
+    if (!grid) {
+      return;
+    }
 
-      if (checkedCount > maxCategories) {
-        this.checked = false;
+    const checkboxes = Array.from(
+      grid.querySelectorAll('input[type="checkbox"]')
+    );
+
+    const maxCategories = 5;
+
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", function () {
+        const checkedCount = checkboxes.filter(
+          (item) => item.checked
+        ).length;
+
+        if (checkedCount > maxCategories) {
+          this.checked = false;
+
+          if (message) {
+            message.style.display = "block";
+            message.textContent =
+              "You’ve reached the maximum of 5 categories.";
+          }
+
+          return;
+        }
 
         if (message) {
-          message.style.display = "block";
-          message.textContent =
-            "You’ve reached the maximum of 5 categories.";
+          message.style.display = "none";
         }
-        return;
-      }
-
-      if (message) {
-        message.style.display = "none";
-      }
+      });
     });
-  });
+  }
+
+  installCategoryLimit(
+    ".checkin-category-grid",
+    "checkin-category-limit-message"
+  );
+
+  const regularGrid = Array.from(
+    document.querySelectorAll(".category-choice-grid")
+  ).find((grid) => !grid.classList.contains("checkin-category-grid"));
+
+  if (regularGrid) {
+    regularGrid.classList.add("regular-nomination-category-grid");
+  }
+
+  installCategoryLimit(
+    ".regular-nomination-category-grid",
+    "category-limit-message"
+  );
+
+  {% if show_checkin_errors %}
+    const checkin = document.getElementById(
+      "iam-atls-hottest-checkin"
+    );
+
+    if (checkin) {
+      checkin.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  {% endif %}
 });
 </script>
 

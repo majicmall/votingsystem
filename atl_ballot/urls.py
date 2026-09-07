@@ -152,6 +152,7 @@ urlpatterns = [
 
     # Nominee signup MUST come before nominee detail
     path("nominee/signup/", ballot_views.nominee_signup, name="nominee_signup"),
+    path("nominee/check-in/", ballot_views.self_nomination_checkin, name="self_nomination_checkin"),
     path("nomination/thank-you/", ballot_views.nomination_thank_you, name="nomination_thank_you"),
     path("nomination/thank-you/<slug:nominee_id>/", ballot_views.nomination_thank_you, name="nomination_thank_you_detail"),
 

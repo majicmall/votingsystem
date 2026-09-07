@@ -8,6 +8,7 @@ from .models import (
     Category,
     Nominee,
     AdvertisingInquiry,
+    SelfNominationCheckIn,
     validate_safe_image_upload,
 )
 
@@ -127,6 +128,99 @@ class NomineeSignupForm(forms.Form):
         if cats.count() > 5:
             raise forms.ValidationError("Choose up to 5 categories.")
         return cats
+
+
+class SelfNominationCheckInForm(forms.ModelForm):
+    categories = forms.ModelMultipleChoiceField(
+        queryset=Category.objects.filter(
+            is_active=True
+        ).order_by(
+            "group",
+            "sort_order",
+            "name",
+        ),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Choose Categories",
+        help_text="Select from one to five categories.",
+    )
+
+    class Meta:
+        model = SelfNominationCheckIn
+        fields = [
+            "name",
+            "email",
+            "website",
+            "social_link",
+            "categories",
+        ]
+        labels = {
+            "name": "Your Name",
+            "email": "Valid Email Address",
+            "website": "Website",
+            "social_link": "Social Media Address",
+        }
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter your name",
+                    "autocomplete": "name",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter your valid email address",
+                    "autocomplete": "email",
+                }
+            ),
+            "website": forms.URLInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "https://yourwebsite.com",
+                    "autocomplete": "url",
+                }
+            ),
+            "social_link": forms.URLInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "https://instagram.com/yourname",
+                    "autocomplete": "url",
+                }
+            ),
+        }
+
+    def clean_categories(self):
+        categories = self.cleaned_data["categories"]
+
+        if categories.count() < 1:
+            raise forms.ValidationError(
+                "Choose at least one category."
+            )
+
+        if categories.count() > 5:
+            raise forms.ValidationError(
+                "Choose up to 5 categories."
+            )
+
+        return categories
+
+    def clean(self):
+        cleaned = super().clean()
+
+        website = (cleaned.get("website") or "").strip()
+        social_link = (cleaned.get("social_link") or "").strip()
+
+        if not website and not social_link:
+            message = (
+                "Please provide at least one social media address "
+                "or website so ATL's Hottest can review your Check-In."
+            )
+            self.add_error("website", message)
+            self.add_error("social_link", message)
+
+        return cleaned
 
 
 class AssociationProfileForm(forms.ModelForm):

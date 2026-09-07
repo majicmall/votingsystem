@@ -1744,3 +1744,151 @@ class EventPromotionRate(models.Model):
     def __str__(self):
         return f"{self.get_package_display()} — ${self.amount}"
 
+
+# ---------------------------------------------------------------------
+# I AM ATL's Hottest Check-In
+# ---------------------------------------------------------------------
+
+class SelfNominationCheckIn(models.Model):
+    """
+    Public proclamation from a person checking in as ATL's Hottest.
+
+    A Check-In is NOT an automatic nomination.
+    Staff approval is required before official Nominee records are created.
+    """
+
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_DENIED = "denied"
+
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "Pending Review"),
+        (STATUS_APPROVED, "Approved"),
+        (STATUS_DENIED, "Denied"),
+    )
+
+    name = models.CharField(
+        max_length=160,
+        help_text="Name of the person proclaiming I AM ATL's Hottest.",
+    )
+
+    email = models.EmailField(
+        help_text="Valid email address for Check-In and approval communication.",
+    )
+
+    website = models.URLField(
+        blank=True,
+        default="",
+        help_text="Website used to help ATL's Hottest review this Check-In.",
+    )
+
+    social_link = models.URLField(
+        blank=True,
+        default="",
+        help_text="Social media address used to help ATL's Hottest review this Check-In.",
+    )
+
+    categories = models.ManyToManyField(
+        Category,
+        related_name="self_nomination_checkins",
+        help_text="Select from one to five ATL's Hottest categories.",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        db_index=True,
+    )
+
+    communications_consent = models.BooleanField(
+        default=True,
+        help_text=(
+            "Participant consented to receiving ATL's Hottest Awards "
+            "information, updates, announcements, and invitations."
+        ),
+    )
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    reviewed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    approved_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    denied_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    created_nominees = models.ManyToManyField(
+        Nominee,
+        blank=True,
+        related_name="self_nomination_checkins",
+        help_text=(
+            "Official nominee records created only after this "
+            "Check-In is approved."
+        ),
+    )
+
+    class Meta:
+        ordering = ["-submitted_at"]
+        verbose_name = "I AM ATL's Hottest Check-In"
+        verbose_name_plural = "I AM ATL's Hottest Check-Ins"
+        indexes = [
+            models.Index(fields=["status", "submitted_at"]),
+            models.Index(fields=["email"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} — {self.get_status_display()}"
+
+    def clean(self):
+        super().clean()
+
+        if not self.website and not self.social_link:
+            raise ValidationError(
+                "Please provide at least one social media address or website "
+                "so ATL's Hottest can review your Check-In."
+            )
+
+        if self.status == self.STATUS_APPROVED and self.denied_at:
+            raise ValidationError(
+                "An approved Check-In cannot also have a denied timestamp."
+            )
+
+    def mark_approved(self):
+        now = timezone.now()
+        self.status = self.STATUS_APPROVED
+        self.reviewed_at = now
+        self.approved_at = now
+        self.denied_at = None
+        self.save(
+            update_fields=[
+                "status",
+                "reviewed_at",
+                "approved_at",
+                "denied_at",
+            ]
+        )
+
+    def mark_denied(self):
+        now = timezone.now()
+        self.status = self.STATUS_DENIED
+        self.reviewed_at = now
+        self.denied_at = now
+        self.approved_at = None
+        self.save(
+            update_fields=[
+                "status",
+                "reviewed_at",
+                "denied_at",
+                "approved_at",
+            ]
+        )
+

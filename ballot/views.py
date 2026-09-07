@@ -31,7 +31,7 @@ from django.utils.html import escape
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .forms import AssociationProfileForm, CategoryRequestForm, NomineePhotoForm, NomineeProfileForm, NomineeSignupForm
+from .forms import AssociationProfileForm, CategoryRequestForm, NomineePhotoForm, NomineeProfileForm, NomineeSignupForm, SelfNominationCheckInForm
 from .models import (
     AssociationMembership,
     AssociationProfile,
@@ -40,6 +40,7 @@ from .models import (
     NominationCategoryRequest,
     NominationLedger,
     Nominee,
+    SelfNominationCheckIn,
     Vote,
 )
 from ballot.email_utils import absolute_url, extract_category_names_from_object, send_nominee_approved_email
@@ -683,6 +684,59 @@ ATL's Hottest Awards Association
         return False
 
 
+
+@require_http_methods(["POST"])
+@csrf_protect
+def self_nomination_checkin(request):
+    """
+    Receive an I AM ATL's Hottest Check-In.
+
+    A Check-In remains pending until ATL's Hottest staff reviews it.
+    No official Nominee record is created by this public submission.
+    """
+    form = SelfNominationCheckInForm(request.POST)
+
+    if not form.is_valid():
+        nomination_form = NomineeSignupForm()
+
+        messages.error(
+            request,
+            "Please correct the Check-In information below.",
+        )
+
+        return render(
+            request,
+            "ballot/nominee_signup.html",
+            {
+                "form": nomination_form,
+                "checkin_form": form,
+                "show_checkin_errors": True,
+            },
+            status=400,
+        )
+
+    checkin = form.save(commit=False)
+
+    # Public Check-Ins always enter the review queue as pending.
+    checkin.status = SelfNominationCheckIn.STATUS_PENDING
+    checkin.communications_consent = True
+    checkin.save()
+
+    # Save selected categories only after the Check-In record exists.
+    form.save_m2m()
+
+    messages.success(
+        request,
+        (
+            "Your I AM ATL's Hottest Check-In was received. "
+            "Your Check-In is pending review and does not automatically "
+            "place you on the official ATL's Hottest ballot."
+        ),
+    )
+
+    return redirect("nominee_signup")
+
+
 def nominee_signup(request):
     form = NomineeSignupForm(request.POST or None, request.FILES or None)
 
@@ -783,7 +837,14 @@ def nominee_signup(request):
 
         return redirect("nomination_thank_you")
 
-    return render(request, "ballot/nominee_signup.html", {"form": form})
+    return render(
+        request,
+        "ballot/nominee_signup.html",
+        {
+            "form": form,
+            "checkin_form": SelfNominationCheckInForm(),
+        },
+    )
 
 @staff_member_required
 @require_http_methods(["GET"])
