@@ -418,6 +418,7 @@ class Nominee(models.Model):
             login_url=absolute_url("/accounts/login/"),
             dashboard_url=absolute_url("/association/dashboard/"),
             nominee_url=nominee_url,
+            password_reset_url=absolute_url("/accounts/password-reset/"),
         )
 
 

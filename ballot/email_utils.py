@@ -110,12 +110,14 @@ def send_nominee_approved_email(
     nominee_url: str | None = None,
     temporary_password: str | None = None,
     categories: Iterable | None = None,
+    password_reset_url: str | None = None,
 ) -> None:
     """
     Send the official nominee approval email.
     """
     login_url = login_url or absolute_url("/accounts/login/")
     dashboard_url = dashboard_url or absolute_url("/association/dashboard/")
+    password_reset_url = password_reset_url or absolute_url("/accounts/password-reset/")
 
     category_names = clean_category_names(categories)
 
@@ -147,17 +149,53 @@ def send_nominee_approved_email(
     if temporary_password:
         password_block_text = f"""
 
-Temporary password:
+TEMPORARY PASSWORD:
 {temporary_password}
 
-For security, please log in and change your password when the password reset feature is available.
+This account was created for you automatically.
+
+Use the temporary password above to sign in to your ATL's Hottest account.
+
+For security, we recommend replacing it with a private password known only to you:
+{password_reset_url}
 """
         password_block_html = f"""
           <div style="margin:22px 0 0;padding:18px;border:1px solid rgba(255,215,106,0.45);border-radius:16px;background:rgba(255,215,106,0.08);">
             <p style="margin:0 0 8px;color:#ffd76a;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Temporary Password</p>
             <p style="margin:0;font-size:22px;color:#ffffff;font-weight:bold;">{escape(temporary_password)}</p>
             <p style="margin:10px 0 0;color:#e8d7a1;font-size:14px;line-height:1.5;">
-              For security, please log in and change your password when the password reset feature is available.
+              Your ATL’s Hottest account was created automatically. Use this temporary password to sign in.
+              For security, we recommend replacing it with a private password known only to you.
+            </p>
+            <p style="margin:14px 0 0;">
+              <a href="{escape(password_reset_url)}" style="color:#ffd76a;font-weight:bold;text-decoration:underline;">
+                Create Your Private Password
+              </a>
+            </p>
+          </div>
+        """
+    else:
+        password_block_text = f"""
+
+EXISTING ACCOUNT:
+An ATL's Hottest account already exists for this email address. Your nominee access has been connected to that account.
+
+Use your existing password to sign in.
+
+Forgot your password? Create a new one here:
+{password_reset_url}
+"""
+        password_block_html = f"""
+          <div style="margin:22px 0 0;padding:18px;border:1px solid rgba(255,215,106,0.35);border-radius:16px;background:rgba(255,255,255,0.05);">
+            <p style="margin:0 0 8px;color:#ffd76a;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Existing ATL’s Hottest Account</p>
+            <p style="margin:0;color:#e8e8e8;font-size:14px;line-height:1.6;">
+              An account already exists for this email address. Your nominee access has been connected to that account.
+              Use your existing password to sign in.
+            </p>
+            <p style="margin:14px 0 0;">
+              <a href="{escape(password_reset_url)}" style="color:#ffd76a;font-weight:bold;text-decoration:underline;">
+                Forgot Your Password? Reset It Here
+              </a>
             </p>
           </div>
         """
