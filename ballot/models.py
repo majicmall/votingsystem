@@ -232,6 +232,7 @@ class Category(models.Model):
         ("Professionals", "Professionals"),
         ("Fashion & Beauty", "Fashion & Beauty"),
         ("Community", "Community"),
+        ("Icons / Legends / VIPs", "Icons / Legends / VIPs"),
     )
 
     name = models.CharField(max_length=120, unique=True)

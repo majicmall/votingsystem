@@ -685,6 +685,89 @@ ATL's Hottest Awards Association
 
 
 
+def build_nomination_genre_blocks(form):
+    """
+    Organize the form's actual bound category checkbox widgets by Genre.
+
+    This preserves Django's checked state, submitted values, validation
+    errors, and future database-driven categories.
+    """
+    genre_order = [
+        "Entertainment",
+        "Events",
+        "Venues",
+        "Media",
+        "Personalities",
+        "Professionals",
+        "Fashion & Beauty",
+        "Community",
+        "Icons / Legends / VIPs",
+    ]
+
+    category_queryset = form.fields["categories"].queryset
+
+    categories_by_pk = {
+        str(category.pk): category
+        for category in category_queryset
+    }
+
+    grouped = {}
+
+    for checkbox in form["categories"]:
+        value = str(checkbox.data.get("value", ""))
+        category = categories_by_pk.get(value)
+
+        if category is None:
+            continue
+
+        genre = (getattr(category, "group", "") or "Other").strip()
+
+        grouped.setdefault(genre, []).append({
+            "category": category,
+            "checkbox": checkbox,
+        })
+
+    blocks = []
+
+    for genre in genre_order:
+        items = grouped.pop(genre, [])
+
+        if items:
+            blocks.append({
+                "genre": genre,
+                "categories": items,
+            })
+
+    for genre in sorted(grouped):
+        blocks.append({
+            "genre": genre,
+            "categories": grouped[genre],
+        })
+
+    return blocks
+
+
+@require_http_methods(["GET"])
+def iam_atls_hottest(request):
+    """
+    Public I AM ATL's Hottest Proclamation & Check-In experience.
+
+    This page is the nominee-facing gateway for people proclaiming
+    themselves ATL's Hottest. Submitting the Check-In does not create
+    an official Nominee record; submissions remain subject to review.
+    """
+    checkin_form = SelfNominationCheckInForm()
+
+    return render(
+        request,
+        "ballot/iam_atls_hottest.html",
+        {
+            "checkin_form": checkin_form,
+            "genre_blocks": build_nomination_genre_blocks(checkin_form),
+        },
+    )
+
+
 @require_http_methods(["POST"])
 @csrf_protect
 def self_nomination_checkin(request):
@@ -697,8 +780,6 @@ def self_nomination_checkin(request):
     form = SelfNominationCheckInForm(request.POST)
 
     if not form.is_valid():
-        nomination_form = NomineeSignupForm()
-
         messages.error(
             request,
             "Please correct the Check-In information below.",
@@ -706,11 +787,11 @@ def self_nomination_checkin(request):
 
         return render(
             request,
-            "ballot/nominee_signup.html",
+            "ballot/iam_atls_hottest.html",
             {
-                "form": nomination_form,
                 "checkin_form": form,
                 "show_checkin_errors": True,
+                "genre_blocks": build_nomination_genre_blocks(form),
             },
             status=400,
         )
@@ -734,7 +815,7 @@ def self_nomination_checkin(request):
         ),
     )
 
-    return redirect("nominee_signup")
+    return redirect("iam_atls_hottest")
 
 
 def nominee_signup(request):
@@ -854,7 +935,7 @@ def nominee_signup(request):
         "ballot/nominee_signup.html",
         {
             "form": form,
-            "checkin_form": SelfNominationCheckInForm(),
+            "genre_blocks": build_nomination_genre_blocks(form),
         },
     )
 
@@ -1706,6 +1787,7 @@ def ballot_view(request):
         "Professionals",
         "Fashion & Beauty",
         "Community",
+        "Icons / Legends / VIPs",
     ]
 
     genre_blocks = []

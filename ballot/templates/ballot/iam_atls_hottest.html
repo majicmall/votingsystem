@@ -1,0 +1,544 @@
+{% extends "ballot/base.html" %}
+{% block title %}I AM ATL’s Hottest | Proclamation & Check-In{% endblock %}
+
+{% block content %}
+
+<style>
+  /* =========================================================
+     ATL'S HOTTEST GENRE-ORGANIZED CATEGORY DIRECTORY
+     ========================================================= */
+
+  .genre-category-directory {
+    display: grid;
+    gap: 28px;
+    margin: 22px 0 30px;
+  }
+
+  .category-genre-section {
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+    border: 1px solid rgba(255, 215, 106, 0.32);
+    border-radius: 22px;
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        rgba(255, 215, 106, 0.09),
+        transparent 34%
+      ),
+      linear-gradient(
+        145deg,
+        rgba(255,255,255,0.045),
+        rgba(255,255,255,0.012)
+      ),
+      rgba(0,0,0,0.42);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 16px 36px rgba(0,0,0,0.18);
+  }
+
+  .category-genre-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,215,106,0.72),
+        transparent
+      );
+  }
+
+  .category-genre-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid rgba(255,215,106,0.16);
+  }
+
+  .category-genre-eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffd76a;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .category-genre-heading h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(1.15rem, 2vw, 1.55rem);
+    line-height: 1.1;
+  }
+
+  .category-genre-count {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border: 1px solid rgba(255,215,106,0.28);
+    border-radius: 999px;
+    color: #ffd76a;
+    background: rgba(0,0,0,0.46);
+    font-size: 0.67rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .category-genre-section .category-choice-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .category-genre-section .category-choice-card {
+    min-width: 0;
+    height: 100%;
+  }
+
+  .category-choice-card:has(
+    input[type="checkbox"]:checked
+  ) {
+    border-color: rgba(255,215,106,0.92) !important;
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255,215,106,0.18),
+        rgba(215,25,53,0.10)
+      ),
+      rgba(0,0,0,0.70) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.16),
+      0 0 20px rgba(255,215,106,0.18) !important;
+  }
+
+  @media (max-width: 980px) {
+    .category-genre-section .category-choice-grid {
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .genre-category-directory {
+      gap: 20px;
+    }
+
+    .category-genre-section {
+      padding: 16px;
+      border-radius: 18px;
+    }
+
+    .category-genre-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .category-genre-section .category-choice-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .category-genre-count {
+      font-size: 0.62rem;
+    }
+  }
+</style>
+
+
+
+<section class="hero small">
+  <p class="eyebrow">Proclaim It. Check In. Begin Your Journey.</p>
+
+  <h1>I AM ATL’s Hottest</h1>
+
+  <p style="max-width:820px;margin-left:auto;margin-right:auto;">
+    ATL’s Hottest begins with believing in the work you do.
+    Make your proclamation, Check In, and tell us where you
+    believe your talent, business, organization, profession,
+    or body of work belongs.
+  </p>
+</section>
+
+<section
+  class="card nomination-card"
+  style="
+    margin-bottom:32px;
+    text-align:center;
+    border:1px solid rgba(255,215,106,.52);
+    box-shadow:
+      0 0 30px rgba(255,215,106,.10),
+      0 18px 50px rgba(0,0,0,.32);
+  "
+>
+  <p
+    class="eyebrow"
+    style="
+      color:#ffd76a;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    "
+  >
+    The ATL’s Hottest Journey
+  </p>
+
+  <h2 style="margin-bottom:18px;">
+    A Proclamation Is Where Your Journey Begins
+  </h2>
+
+  <div
+    style="
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+      margin:20px auto 24px;
+      max-width:900px;
+    "
+  >
+    <span class="nominee-count">PROCLAIMED</span>
+    <span aria-hidden="true">→</span>
+    <span class="nominee-count">RECOGNIZED</span>
+    <span aria-hidden="true">→</span>
+    <span class="nominee-count">VERIFIED</span>
+    <span aria-hidden="true">→</span>
+    <span class="nominee-count">CERTIFIED</span>
+    <span aria-hidden="true">→</span>
+    <span class="nominee-count">VOTED</span>
+  </div>
+
+  <p style="max-width:800px;margin:0 auto;">
+    Checking In is your proclamation that you believe you have
+    the work, talent, business, professionalism, or contribution
+    to be considered for ATL’s Hottest. A proclamation is not
+    automatic placement on the official ballot.
+  </p>
+</section>
+
+<section
+  class="card nomination-card checkin-card"
+  id="iam-atls-hottest-checkin"
+  style="
+    margin-bottom:32px;
+    border:1px solid rgba(255,215,106,.58);
+    box-shadow:
+      0 0 28px rgba(255,215,106,.12),
+      0 18px 50px rgba(0,0,0,.34);
+  "
+>
+  <div style="text-align:center;margin-bottom:26px;">
+    <p
+      class="eyebrow"
+      style="
+        color:#ffd76a;
+        letter-spacing:3px;
+        text-transform:uppercase;
+        margin-bottom:8px;
+      "
+    >
+      Proclaim It
+    </p>
+
+    <h2 style="margin-bottom:10px;">
+      I AM ATL’s Hottest Check-In
+    </h2>
+
+    <p style="margin:0 auto;max-width:720px;">
+      <strong>Are you ATL’s Hottest? Want to be nominated?</strong>
+      Check in and proclaim <strong>“I AM ATL’s Hottest.”</strong>
+    </p>
+
+    <p style="margin:10px auto 0;max-width:720px;">
+      Enter your name and valid email address, provide at least one
+      social media address or website, and select up to five categories
+      in which you want to be considered.
+    </p>
+  </div>
+
+  <form
+    class="nomination-form checkin-form"
+    method="post"
+    action="{% url 'self_nomination_checkin' %}"
+  >
+    {% csrf_token %}
+
+    {% if checkin_form.non_field_errors %}
+      <div class="alert">
+        {{ checkin_form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="nomination-fan-fields">
+      <div class="field-group">
+        <label for="{{ checkin_form.name.id_for_label }}">
+          Your Name
+        </label>
+        {{ checkin_form.name }}
+        {% if checkin_form.name.errors %}
+          <div class="field-error">
+            {{ checkin_form.name.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="field-group">
+        <label for="{{ checkin_form.email.id_for_label }}">
+          Valid Email Address
+        </label>
+        {{ checkin_form.email }}
+        {% if checkin_form.email.errors %}
+          <div class="field-error">
+            {{ checkin_form.email.errors }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:22px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.website.id_for_label }}"
+      >
+        Website
+      </label>
+
+      {{ checkin_form.website }}
+
+      {% if checkin_form.website.errors %}
+        <div class="field-error">
+          {{ checkin_form.website.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:18px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.social_link.id_for_label }}"
+      >
+        Social Media Address
+      </label>
+
+      {{ checkin_form.social_link }}
+
+      {% if checkin_form.social_link.errors %}
+        <div class="field-error">
+          {{ checkin_form.social_link.errors }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div
+      style="
+        margin:18px 0 24px;
+        padding:16px 18px;
+        border:1px solid rgba(255,215,106,.42);
+        border-radius:14px;
+        background:rgba(255,215,106,.06);
+      "
+    >
+      <strong style="color:#ffd76a;">
+        Verification Requirement:
+      </strong>
+      You must provide at least one social media address or website
+      with your Check-In.
+    </div>
+
+    <div class="category-select-header">
+      <div>
+        <h2>Choose Your Categories</h2>
+        <p>
+          Select from one to five categories in which you want
+          to be considered.
+        </p>
+      </div>
+
+      <span class="nominee-count">Max 5</span>
+    </div>
+
+    {% if checkin_form.categories.errors %}
+      <div class="alert">
+        {{ checkin_form.categories.errors }}
+      </div>
+    {% endif %}
+
+    <div
+      id="checkin-category-limit-message"
+      class="alert"
+      role="alert"
+      aria-live="polite"
+      style="display:none;"
+    >
+      You’ve reached the maximum of 5 categories.
+    </div>
+
+    <div class="genre-category-directory checkin-category-grid">
+      {% for block in genre_blocks %}
+        <section class="category-genre-section">
+          <div class="category-genre-heading">
+            <div>
+              <span class="category-genre-eyebrow">
+                ATL’S HOTTEST GENRE
+              </span>
+
+              <h3>{{ block.genre }}</h3>
+            </div>
+
+            <span class="category-genre-count">
+              {{ block.categories|length }}
+              Categor{{ block.categories|length|pluralize:"y,ies" }}
+            </span>
+          </div>
+
+          <div class="category-choice-grid">
+            {% for item in block.categories %}
+              <label
+                class="category-choice-card"
+                for="{{ item.checkbox.id_for_label }}"
+              >
+                <span class="category-choice-name">
+                  {{ item.checkbox.choice_label }}
+                </span>
+
+                <span class="category-choice-box">
+                  {{ item.checkbox.tag }}
+                  <span class="fake-check"></span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+
+    <div
+      style="
+        margin:26px 0 20px;
+        padding:18px 20px;
+        border:1px solid rgba(215,25,53,.75);
+        border-radius:16px;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(215,25,53,.16),
+            rgba(0,0,0,.22)
+          );
+      "
+    >
+      <strong style="color:#ffd76a;">Important:</strong>
+      Checking in and proclaiming
+      <strong>“I AM ATL’s Hottest”</strong>
+      does not automatically place you on the official ATL’s Hottest
+      ballot. All self-nominations are subject to review and approval
+      by ATL’s Hottest. You will receive confirmation if your
+      nomination is approved.
+    </div>
+
+    <div class="nomination-optin-notice" style="margin-bottom:20px;">
+      By submitting your Check-In, you consent to receive ATL’s Hottest
+      Awards information, updates, announcements, and invitations at
+      the email address you provide.
+    </div>
+
+    <button
+      class="btn primary nomination-submit-btn"
+      type="submit"
+    >
+      I AM ATL’s Hottest — Check In
+    </button>
+  </form>
+</section>
+
+<section
+  class="card nomination-card"
+  style="
+    margin-top:32px;
+    text-align:center;
+  "
+>
+  <p class="eyebrow">Recognition</p>
+
+  <h2>Want To Recognize Someone Else?</h2>
+
+  <p style="max-width:720px;margin:0 auto 20px;">
+    Fans, supporters, clients, audiences, friends, and members
+    of the community can recognize someone they believe should
+    be considered for ATL’s Hottest.
+  </p>
+
+  <a class="btn" href="{% url 'nominee_signup' %}">
+    Submit a Nominee
+  </a>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const directory = document.querySelector(
+    ".checkin-category-grid"
+  );
+  const message = document.getElementById(
+    "checkin-category-limit-message"
+  );
+
+  if (!directory) {
+    return;
+  }
+
+  const checkboxes = Array.from(
+    directory.querySelectorAll('input[type="checkbox"]')
+  );
+
+  const maxCategories = 5;
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      const checkedCount = checkboxes.filter(
+        (item) => item.checked
+      ).length;
+
+      if (checkedCount > maxCategories) {
+        this.checked = false;
+
+        if (message) {
+          message.style.display = "block";
+          message.textContent =
+            "You’ve reached the maximum of 5 categories.";
+        }
+
+        return;
+      }
+
+      if (message) {
+        message.style.display = "none";
+      }
+    });
+  });
+
+  {% if show_checkin_errors %}
+    const checkin = document.getElementById(
+      "iam-atls-hottest-checkin"
+    );
+
+    if (checkin) {
+      checkin.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  {% endif %}
+});
+</script>
+
+{% endblock %}
