@@ -1669,7 +1669,9 @@ def visible_category_queryset():
     order_fields = []
     if "group" in field_names:
         order_fields.append("group")
-    if "display_order" in field_names:
+    if "sort_order" in field_names:
+        order_fields.append("sort_order")
+    elif "display_order" in field_names:
         order_fields.append("display_order")
     if "name" in field_names:
         order_fields.append("name")
@@ -1686,33 +1688,68 @@ def visible_category_queryset():
 # =========================================================
 
 def ballot_view(request):
-    from .models import Category
+    from .models import BallotSettings, Category
 
     try:
-        from .models import BallotSettings
         settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
     except Exception:
         settings_obj = None
 
-    order_fields = []
-    category_field_names = {field.name for field in Category._meta.fields}
+    categories = visible_category_queryset()
 
-    if "group" in category_field_names:
-        order_fields.append("group")
+    genre_order = [
+        "Entertainment",
+        "Events",
+        "Venues",
+        "Media",
+        "Personalities",
+        "Professionals",
+        "Fashion & Beauty",
+        "Community",
+    ]
 
-    if "display_order" in category_field_names:
-        order_fields.append("display_order")
+    genre_blocks = []
 
-    if "name" in category_field_names:
-        order_fields.append("name")
+    for genre in genre_order:
+        genre_categories = [
+            category
+            for category in categories
+            if category.group == genre
+        ]
 
-    if order_fields:
-        categories = visible_category_queryset()
-    else:
-        categories = visible_category_queryset()
+        if genre_categories:
+            genre_blocks.append({
+                "name": genre,
+                "categories": genre_categories,
+            })
+
+    # Future-proofing:
+    # If a new Genre is ever added in Admin/model choices but has not yet
+    # been added to genre_order, its active categories still appear.
+    known_genres = set(genre_order)
+
+    extra_genres = sorted({
+        category.group
+        for category in categories
+        if category.group and category.group not in known_genres
+    })
+
+    for genre in extra_genres:
+        genre_categories = [
+            category
+            for category in categories
+            if category.group == genre
+        ]
+
+        if genre_categories:
+            genre_blocks.append({
+                "name": genre,
+                "categories": genre_categories,
+            })
 
     return render(request, "ballot/ballot.html", {
         "categories": categories,
+        "genre_blocks": genre_blocks,
         "settings": settings_obj,
     })
 

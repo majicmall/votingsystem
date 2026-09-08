@@ -224,21 +224,19 @@ class CategoryQuerySet(models.QuerySet):
 
 class Category(models.Model):
     GROUP_CHOICES = (
-        ("general", "General"),
-        ("music", "Music"),
-        ("business", "Business"),
-        ("community", "Community"),
-        ("entertainment", "Entertainment"),
-        ("food", "Food"),
-        ("sports", "Sports"),
-        ("beauty", "Beauty"),
-        ("fashion", "Fashion"),
-        ("media", "Media"),
+        ("Entertainment", "Entertainment"),
+        ("Events", "Events"),
+        ("Venues", "Venues"),
+        ("Media", "Media"),
+        ("Personalities", "Personalities"),
+        ("Professionals", "Professionals"),
+        ("Fashion & Beauty", "Fashion & Beauty"),
+        ("Community", "Community"),
     )
 
     name = models.CharField(max_length=120, unique=True)
     slug = models.SlugField(max_length=140, unique=True, blank=True)
-    group = models.CharField(max_length=40, choices=GROUP_CHOICES, default="general")
+    group = models.CharField(max_length=40, choices=GROUP_CHOICES, default="Entertainment")
     description = models.TextField(blank=True, default="")
     sort_order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)

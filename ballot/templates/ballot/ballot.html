@@ -18,12 +18,12 @@
 
 <section class="hero small ballot-hero">
   <p class="eyebrow">Official Ballot</p>
-  <h1>Choose a Category</h1>
+  <h1>Choose a Genre</h1>
 
   {% if voting_open %}
-    <p>Select a category, choose your nominee, then review your final ballot before submitting.</p>
+    <p>Choose a Genre, select an ATL’s Hottest category, then choose your nominee.</p>
   {% else %}
-    <p>Preview the current ballot categories and nominees. Voting will open during the official voting period.</p>
+    <p>Explore the official ATL’s Hottest Genres, categories, and current nominees.</p>
   {% endif %}
 
   <div class="ballot-status-row">
@@ -37,53 +37,97 @@
   </div>
 </section>
 
-<section class="card ballot-category-section">
+
+<section class="card ballot-category-section genre-directory">
+
   <div class="section-title-row">
     <div>
-      <p class="eyebrow">Ballot Categories</p>
-      <h2>Browse the Current Ballot</h2>
+      <p class="eyebrow">Official Ballot</p>
+      <h2>ATL’s Hottest Genres</h2>
+      <p>Choose a category below to view its current nominees.</p>
     </div>
   </div>
 
-  <div class="ballot-category-grid">
-    {% for category in categories %}
-      <article class="ballot-category-card">
-        <div>
-          <p class="eyebrow">{{ category.group|default:"ATL’s Hottest" }}</p>
-          <h3>{{ category.name }}</h3>
 
-          {% if category.description %}
-            <p>{{ category.description }}</p>
-          {% else %}
-            <p>View current nominees in this category.</p>
-          {% endif %}
+  {% for genre in genre_blocks %}
+
+    <section class="ballot-genre-block">
+
+      <div class="ballot-genre-heading">
+        <span class="ballot-genre-line"></span>
+
+        <div>
+          <p class="eyebrow">ATL’s Hottest Genre</p>
+          <h2>{{ genre.name }}</h2>
         </div>
 
-        <a class="btn vote-card-btn" href="{% url 'ballot_category' category.slug %}">
-          View Nominees
-        </a>
-      </article>
-    {% empty %}
-      <article class="ballot-category-card">
-        <div>
-          <p class="eyebrow">Coming Soon</p>
-          <h3>No Categories Yet</h3>
-          <p>Ballot categories will appear here once they are added.</p>
-        </div>
-      </article>
-    {% endfor %}
-  </div>
+        <span class="ballot-genre-line"></span>
+      </div>
+
+
+      <div class="ballot-category-grid">
+
+        {% for category in genre.categories %}
+
+          <article class="ballot-category-card">
+
+            <div>
+              <h3>{{ category.name }}</h3>
+
+              {% if category.description %}
+                <p>{{ category.description }}</p>
+              {% else %}
+                <p>View current nominees in this category.</p>
+              {% endif %}
+            </div>
+
+            <a
+              class="btn vote-card-btn"
+              href="{% url 'ballot_category' category.slug %}"
+            >
+              View Nominees
+            </a>
+
+          </article>
+
+        {% endfor %}
+
+      </div>
+
+    </section>
+
+  {% empty %}
+
+    <article class="ballot-category-card">
+      <div>
+        <p class="eyebrow">Coming Soon</p>
+        <h3>No Categories Yet</h3>
+        <p>Ballot categories will appear here once they are added.</p>
+      </div>
+    </article>
+
+  {% endfor %}
+
 </section>
+
 
 <section class="ballot-bottom-actions">
   <div class="ballot-status-row">
-    <a class="btn" href="{% url 'nominee_signup' %}">Submit a Nomination</a>
+
+    <a class="btn" href="{% url 'nominee_signup' %}">
+      Submit a Nomination
+    </a>
 
     {% if voting_open %}
-      <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
+      <a class="btn primary" href="{% url 'ballot_review' %}">
+        Review My Votes
+      </a>
     {% else %}
-      <span class="btn disabled-vote-btn">Voting Starts October 4, 2026</span>
+      <span class="btn disabled-vote-btn">
+        Voting Starts October 4, 2026
+      </span>
     {% endif %}
+
   </div>
 </section>
 

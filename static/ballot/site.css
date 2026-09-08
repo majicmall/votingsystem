@@ -6623,3 +6623,85 @@ header nav a:hover::before,
     filter:
         drop-shadow(0 0 0.8px rgba(255, 235, 175, 0.22)) !important;
 }
+
+
+/* =========================================================
+   ATL'S HOTTEST BALLOT — GENRE DIRECTORY
+   ========================================================= */
+
+.genre-directory {
+  display: block;
+}
+
+.ballot-genre-block {
+  margin: 48px 0 64px;
+}
+
+.ballot-genre-block:first-of-type {
+  margin-top: 36px;
+}
+
+.ballot-genre-block:last-child {
+  margin-bottom: 20px;
+}
+
+.ballot-genre-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.ballot-genre-heading > div {
+  flex: 0 1 auto;
+}
+
+.ballot-genre-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.ballot-genre-heading h2 {
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ballot-genre-line {
+  display: block;
+  width: min(150px, 15vw);
+  height: 1px;
+  flex: 0 1 150px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 106, 0.85)
+  );
+}
+
+.ballot-genre-line:last-child {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 700px) {
+  .ballot-genre-block {
+    margin: 38px 0 50px;
+  }
+
+  .ballot-genre-heading {
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .ballot-genre-heading h2 {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+    letter-spacing: 0.05em;
+  }
+
+  .ballot-genre-line {
+    min-width: 20px;
+  }
+}
