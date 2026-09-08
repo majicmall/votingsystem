@@ -750,20 +750,27 @@ def nominee_signup(request):
         created_nominees = []
 
         for category in form.cleaned_data["categories"]:
-            nominee, _was_created = Nominee.objects.get_or_create(
-                name=nominee_name,
+            nominee = Nominee.find_identity_match(
                 category=category,
-                defaults={
-                    "website": form.cleaned_data.get("website", ""),
-                    "social_link": form.cleaned_data.get("social_link", ""),
-                    "contact_email": form.cleaned_data.get("contact_email", ""),
-                    "nominator_name": form.cleaned_data.get("nominator_name", ""),
-                    "nominator_email": form.cleaned_data.get("nominator_email", ""),
-                    "photo_submitted_at": timezone.now() if photo else None,
-                    "approval_status": Nominee.APPROVAL_PENDING,
-                    "is_active": True,
-                },
+                name=nominee_name,
+                contact_email=form.cleaned_data.get("contact_email", ""),
+                social_link=form.cleaned_data.get("social_link", ""),
+                website=form.cleaned_data.get("website", ""),
             )
+
+            if nominee is None:
+                nominee = Nominee.objects.create(
+                    name=nominee_name,
+                    category=category,
+                    website=form.cleaned_data.get("website", ""),
+                    social_link=form.cleaned_data.get("social_link", ""),
+                    contact_email=form.cleaned_data.get("contact_email", ""),
+                    nominator_name=form.cleaned_data.get("nominator_name", ""),
+                    nominator_email=form.cleaned_data.get("nominator_email", ""),
+                    photo_submitted_at=timezone.now() if photo else None,
+                    approval_status=Nominee.APPROVAL_PENDING,
+                    is_active=True,
+                )
 
             # If nominee already existed, still keep latest nominator/contact info.
             nominee.website = form.cleaned_data.get("website", nominee.website)
@@ -776,7 +783,12 @@ def nominee_signup(request):
                 nominee.photo.save(photo_name, ContentFile(photo_bytes), save=False)
                 nominee.photo_submitted_at = timezone.now()
 
-            nominee.approval_status = Nominee.APPROVAL_PENDING
+            # Approval safeguard:
+            # A later fan nomination must never knock an already-approved
+            # nominee/category back into Pending Review.
+            if nominee.approval_status != Nominee.APPROVAL_APPROVED:
+                nominee.approval_status = Nominee.APPROVAL_PENDING
+
             nominee.is_active = True
             nominee.save()
 

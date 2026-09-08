@@ -5,6 +5,8 @@ import secrets
 
 import uuid
 import warnings
+import re
+from urllib.parse import urlsplit, urlunsplit
 from io import BytesIO
 from pathlib import Path
 
@@ -368,6 +370,118 @@ class Nominee(models.Model):
                 i += 1
             self.id = candidate
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def normalize_identity_name(value):
+        """
+        Normalize harmless formatting differences without deciding that
+        professional/stage titles make two people the same person.
+        """
+        value = (value or "").strip().casefold()
+        value = re.sub(r"[.,'’\"`]", "", value)
+        value = re.sub(r"[-_/]+", " ", value)
+        value = re.sub(r"\s+", " ", value)
+        return value.strip()
+
+    @staticmethod
+    def normalize_identity_email(value):
+        return (value or "").strip().casefold()
+
+    @staticmethod
+    def normalize_identity_url(value):
+        """
+        Normalize website/social URLs for identity comparison only.
+        """
+        value = (value or "").strip()
+        if not value:
+            return ""
+
+        candidate = value
+        if "://" not in candidate:
+            candidate = "https://" + candidate
+
+        try:
+            parts = urlsplit(candidate)
+        except ValueError:
+            return value.casefold().rstrip("/")
+
+        host = (parts.hostname or "").casefold()
+        if host.startswith("www."):
+            host = host[4:]
+
+        path = re.sub(r"/+", "/", parts.path or "").rstrip("/")
+
+        # Ignore scheme, query string and fragments for identity matching.
+        return urlunsplit(("", host, path, "", "")).lstrip("//")
+
+    @classmethod
+    def find_identity_match(
+        cls,
+        *,
+        category,
+        name,
+        contact_email="",
+        social_link="",
+        website="",
+    ):
+        """
+        Return an existing nominee/category record only when there is
+        sufficient evidence that the submission represents that nominee.
+
+        Exact normalized names are safe to reuse.
+
+        Different name strings require matching digital identity evidence
+        (email, social profile, or website). Titles alone never force a merge.
+        """
+        candidates = cls.objects.filter(category=category)
+
+        normalized_name = cls.normalize_identity_name(name)
+        normalized_email = cls.normalize_identity_email(contact_email)
+        normalized_social = cls.normalize_identity_url(social_link)
+        normalized_website = cls.normalize_identity_url(website)
+
+        # First: harmless name-format differences.
+        for candidate in candidates:
+            if (
+                cls.normalize_identity_name(candidate.name)
+                == normalized_name
+            ):
+                return candidate
+
+        # Second: strong digital identity evidence.
+        for candidate in candidates:
+            candidate_email = cls.normalize_identity_email(
+                candidate.contact_email
+            )
+            candidate_social = cls.normalize_identity_url(
+                candidate.social_link
+            )
+            candidate_website = cls.normalize_identity_url(
+                candidate.website
+            )
+
+            email_match = bool(
+                normalized_email
+                and candidate_email
+                and normalized_email == candidate_email
+            )
+
+            social_match = bool(
+                normalized_social
+                and candidate_social
+                and normalized_social == candidate_social
+            )
+
+            website_match = bool(
+                normalized_website
+                and candidate_website
+                and normalized_website == candidate_website
+            )
+
+            if email_match or social_match or website_match:
+                return candidate
+
+        return None
 
     @property
     def photo_url(self) -> str:
