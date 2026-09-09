@@ -341,6 +341,17 @@ else:
 SITE_URL = os.environ.get("SITE_URL", "https://atlshottestawards.onrender.com")
 
 # -------------------------------------------------------------------
+# MajicMall Megaverse integration
+# -------------------------------------------------------------------
+# ATL's Hottest connects to the shared MajicMall Megaverse platform
+# through a server-to-server API. Credentials must remain in environment
+# variables and must never be committed to the repository.
+
+MEGAVERSE_API_BASE_URL = os.environ.get("MEGAVERSE_API_BASE_URL", "").rstrip("/")
+MEGAVERSE_API_KEY = os.environ.get("MEGAVERSE_API_KEY", "")
+MEGAVERSE_API_TIMEOUT = float(os.environ.get("MEGAVERSE_API_TIMEOUT", "10"))
+
+# -------------------------------------------------------------------
 # Stripe payments
 # -------------------------------------------------------------------
 # Secrets come from .env locally and Render environment variables
