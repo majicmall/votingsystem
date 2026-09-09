@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "axes",
     "ballot.apps.BallotConfig",
+    "megaverse.apps.MegaverseConfig",
 ]
 
 
