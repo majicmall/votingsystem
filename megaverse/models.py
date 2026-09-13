@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 
 class MegaverseConnection(models.Model):
@@ -50,6 +51,13 @@ class MegaverseConnection(models.Model):
     class Meta:
         verbose_name = "Megaverse Connection"
         verbose_name_plural = "Megaverse Connections"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["megaverse_user_ref"],
+                condition=~Q(megaverse_user_ref=""),
+                name="uniq_nonblank_megaverse_user_ref",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user} — MajicMall Megaverse"
