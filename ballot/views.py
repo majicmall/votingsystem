@@ -1893,6 +1893,10 @@ def choose_membership_plan(request, slug):
 # Merchandise, badges, add-ons, advertising bundles, and member upgrades.
 # =========================================================
 
+def atls_hottest_marketplace_entrance(request):
+    return render(request, "ballot/marketplace_entrance.html")
+
+
 def atls_hottest_marketplace(request):
     marketplace_items = [
         {

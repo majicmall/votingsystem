@@ -89,6 +89,11 @@ urlpatterns = [
     path("memberships/choose/<slug:slug>/", ballot_views.choose_membership_plan, name="choose_membership_plan"),
     re_path(r"^memberships/pay/(?P<slug>[-a-zA-Z0-9_]+)/$", ballot_views.membership_payment_center, name="membership_payment_center"),
     path("membership/dashboard/", ballot_views.membership_dashboard, name="membership_dashboard"),
+    path(
+        "marketplace/entrance/",
+        ballot_views.atls_hottest_marketplace_entrance,
+        name="atls_hottest_marketplace_entrance",
+    ),
     path("marketplace/", ballot_views.atls_hottest_marketplace, name="atls_hottest_marketplace"),
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
     path("advertise/click/<int:ad_id>/", ballot_views.billboard_click, name="billboard_click"),
