@@ -1027,6 +1027,49 @@
       }
     }
 
+
+    /* =========================================================
+       DESKTOP PORTAL PROPORTIONS
+       Mobile entrance is LOCKED — desktop only.
+       ========================================================= */
+    @media (min-width: 701px) {
+
+      /* Let the Shopping World architecture dominate desktop */
+      .door-stage {
+        width: min(88vw, 1280px);
+        height: min(72vh, 780px);
+      }
+
+      /* Lower the interior artwork so its upper signage clears the portal crown */
+      .doors-open .world-reveal {
+        background-position: center 42%;
+      }
+
+      /* Refine the desktop title hierarchy */
+      .zone-heading {
+        top: 14px;
+      }
+
+      .zone-eyebrow {
+        font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+        letter-spacing: 0.20em;
+        margin-bottom: 5px;
+      }
+
+      .zone-heading h1 {
+        font-size: clamp(1.65rem, 3vw, 3rem);
+        line-height: 0.98;
+        margin: 0;
+      }
+
+      .zone-subtitle {
+        max-width: 720px;
+        margin-top: 7px;
+        font-size: clamp(0.72rem, 1vw, 0.88rem);
+        line-height: 1.35;
+      }
+    }
+
     /* =========================================================
        ATL'S HOTTEST SHOPPING WORLD — MOBILE OPEN-DOOR REVEAL
        Closed-door presentation remains untouched.
