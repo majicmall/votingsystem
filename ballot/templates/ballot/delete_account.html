@@ -1,0 +1,77 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Delete Account | ATL's Hottest{% endblock %}
+
+{% block content %}
+<section style="max-width:760px;margin:0 auto;padding:42px 20px 70px;">
+  <div style="
+    padding:28px;
+    border:1px solid rgba(226,24,35,.60);
+    border-radius:20px;
+    background:linear-gradient(145deg,rgba(24,10,10,.96),rgba(4,4,4,.98));
+  ">
+    <h1 style="color:#fff;margin-top:0;">Delete Your Account</h1>
+
+    <p style="color:rgba(255,255,255,.80);line-height:1.65;">
+      Permanently deleting your ATL's Hottest account removes your
+      account access and associated account information from ATL's Hottest.
+    </p>
+
+    <p style="color:rgba(255,255,255,.80);line-height:1.65;">
+      If your ATL's Hottest account is connected to MajicMall Megaverse,
+      deleting this account removes the ATL's Hottest connection.
+      It does not delete your separate MajicMall Megaverse account.
+    </p>
+
+    <p style="color:#ff9b9b;font-weight:700;">
+      This action cannot be undone.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <label for="password" style="display:block;color:#fff;margin:20px 0 8px;">
+        Confirm your password
+      </label>
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required
+        style="width:100%;box-sizing:border-box;padding:13px;border-radius:10px;"
+      >
+
+      <label for="confirmation" style="display:block;color:#fff;margin:20px 0 8px;">
+        Type DELETE to confirm
+      </label>
+
+      <input
+        id="confirmation"
+        name="confirmation"
+        type="text"
+        autocomplete="off"
+        required
+        style="width:100%;box-sizing:border-box;padding:13px;border-radius:10px;"
+      >
+
+      <button
+        type="submit"
+        style="
+          margin-top:24px;
+          padding:13px 20px;
+          border:1px solid #ff5c5c;
+          border-radius:10px;
+          background:#8d1018;
+          color:#fff;
+          font-weight:800;
+          cursor:pointer;
+        "
+      >
+        Permanently Delete My Account
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

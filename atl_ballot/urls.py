@@ -9,6 +9,7 @@ from django.urls import include, path, re_path
 from django.views.generic import RedirectView, TemplateView
 
 from ballot import views as ballot_views
+from ballot import account_compliance
 
 
 urlpatterns = [
@@ -115,6 +116,38 @@ urlpatterns = [
     path("ballot/submit-final/", ballot_views.submit_final_ballot, name="submit_final_ballot"),
     path("ballot/confirmation/", ballot_views.ballot_confirmation, name="ballot_confirmation"),
     path("submit-votes/", ballot_views.submit_votes, name="submit_votes"),
+
+    # App Store / account compliance
+    path(
+        "account/settings/",
+        account_compliance.account_settings,
+        name="account_settings",
+    ),
+    path(
+        "account/delete/",
+        account_compliance.delete_account,
+        name="delete_account",
+    ),
+    path(
+        "account/deleted/",
+        account_compliance.account_deleted,
+        name="account_deleted",
+    ),
+    path(
+        "account-deletion/",
+        account_compliance.account_deletion_info,
+        name="account_deletion_info",
+    ),
+    path(
+        "privacy/",
+        account_compliance.privacy_policy,
+        name="privacy_policy",
+    ),
+    path(
+        "terms/",
+        account_compliance.terms_of_service,
+        name="terms_of_service",
+    ),
 
     # Accounts
     path("accounts/signup/", ballot_views.signup, name="signup"),

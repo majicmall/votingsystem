@@ -1,0 +1,59 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Account Settings | ATL's Hottest{% endblock %}
+
+{% block content %}
+<section style="max-width:900px;margin:0 auto;padding:42px 20px 70px;">
+  <div style="
+    padding:28px;
+    border:1px solid rgba(239,201,84,.45);
+    border-radius:20px;
+    background:linear-gradient(145deg,rgba(22,22,22,.96),rgba(4,4,4,.98));
+    box-shadow:0 0 28px rgba(239,201,84,.10);
+  ">
+    <p style="
+      margin:0 0 8px;
+      color:#efc954;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:.76rem;
+      font-weight:800;
+    ">
+      ATL's Hottest
+    </p>
+
+    <h1 style="margin:0 0 12px;color:#fff;">
+      Account Settings
+    </h1>
+
+    <p style="color:rgba(255,255,255,.78);line-height:1.65;">
+      Manage your ATL's Hottest account, privacy, and account access.
+    </p>
+
+    <div style="
+      margin-top:28px;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,.10);
+    ">
+      <h2 style="color:#fff;margin-top:0;">Privacy & Account</h2>
+
+      <p style="color:rgba(255,255,255,.72);line-height:1.6;">
+        You can review our privacy information or permanently delete
+        your ATL's Hottest account.
+      </p>
+
+      <p>
+        <a href="{% url 'privacy_policy' %}" style="color:#efc954;">
+          Privacy Policy
+        </a>
+      </p>
+
+      <p>
+        <a href="{% url 'delete_account' %}" style="color:#ff6b6b;">
+          Delete My Account
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

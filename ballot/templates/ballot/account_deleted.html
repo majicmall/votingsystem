@@ -1,0 +1,17 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Account Deleted | ATL's Hottest{% endblock %}
+
+{% block content %}
+<section style="max-width:760px;margin:0 auto;padding:60px 20px 80px;text-align:center;">
+  <h1 style="color:#efc954;">Account Deleted</h1>
+
+  <p style="color:rgba(255,255,255,.80);line-height:1.65;">
+    Your ATL's Hottest account has been deleted.
+  </p>
+
+  <a href="{% url 'home' %}" style="color:#efc954;">
+    Return to ATL's Hottest
+  </a>
+</section>
+{% endblock %}
