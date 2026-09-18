@@ -1174,9 +1174,11 @@ def ballot_category_view(request, category_slug):
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
 
     category = get_object_or_404(Category, slug=category_slug, is_active=True)
+    ballot_campaign = _active_campaign_for_write()
 
     nominees = list(
         Nominee.objects.filter(
+            campaign=ballot_campaign,
             category=category,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
