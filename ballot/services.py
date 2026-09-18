@@ -25,6 +25,7 @@ def clone_nominee_into_category(source, target_category):
         defaults={
             "name": source.name,
             "category": target_category,
+            "campaign": source.campaign,
             "photo": source.photo,
             "website": source.website,
             "social_link": source.social_link,

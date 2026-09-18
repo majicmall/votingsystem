@@ -22,3 +22,5 @@ media/
 .DS_Store
 .vscode/
 .idea/
+*.pre-*
+*.backup

@@ -304,6 +304,16 @@ class Nominee(models.Model):
 
     id = models.SlugField(primary_key=True, max_length=64)
     name = models.CharField(max_length=160)
+
+    campaign = models.ForeignKey(
+        "VotingCampaign",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="nominees",
+        help_text="Awards cycle associated with this nominee record.",
+    )
+
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -349,8 +359,8 @@ class Nominee(models.Model):
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["name", "category"],
-                name="unique_nominee_name_per_category",
+                fields=["campaign", "name", "category"],
+                name="unique_nominee_name_per_campaign_category",
             ),
         ]
 
@@ -418,6 +428,7 @@ class Nominee(models.Model):
         cls,
         *,
         category,
+        campaign,
         name,
         contact_email="",
         social_link="",
@@ -432,7 +443,10 @@ class Nominee(models.Model):
         Different name strings require matching digital identity evidence
         (email, social profile, or website). Titles alone never force a merge.
         """
-        candidates = cls.objects.filter(category=category)
+        candidates = cls.objects.filter(
+            category=category,
+            campaign=campaign,
+        )
 
         normalized_name = cls.normalize_identity_name(name)
         normalized_email = cls.normalize_identity_email(contact_email)
@@ -613,6 +627,14 @@ class NominationLedger(models.Model):
     more than once for the same nominee/category.
     """
 
+    campaign = models.ForeignKey(
+        "VotingCampaign",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="%(class)s_records",
+        help_text="Awards cycle associated with this record.",
+    )
     nominee = models.ForeignKey(
         Nominee,
         on_delete=models.PROTECT,
@@ -635,11 +657,24 @@ class NominationLedger(models.Model):
     )
 
     communications_consent = models.BooleanField(
-        default=True,
+        default=False,
         help_text=(
-            "By nominating and/or voting, the participant consented to receiving "
-            "ATL's Hottest Awards information, updates, announcements, and invitations."
+            "Optional consent to receive ATL's Hottest Awards news, "
+            "announcements, invitations, promotions, and marketing communications."
         ),
+    )
+
+    communications_consent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When optional promotional communications consent was recorded.",
+    )
+
+    communications_consent_version = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        help_text="Version of the communications consent language accepted.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -648,8 +683,8 @@ class NominationLedger(models.Model):
         ordering = ["-created_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=["nominator_email", "nominee", "category"],
-                name="one_nomination_per_email_nominee_category",
+                fields=["campaign", "nominator_email", "nominee", "category"],
+                name="one_nomination_per_campaign_email_nominee_category",
             ),
         ]
         indexes = [
@@ -661,8 +696,25 @@ class NominationLedger(models.Model):
     def save(self, *args, **kwargs):
         if self.nominator_email:
             self.nominator_email = self.nominator_email.strip().lower()
+
         if not self.submitted_nominee_name and self.nominee_id:
             self.submitted_nominee_name = self.nominee.name
+
+        # Optional promotional communications consent audit trail.
+        #
+        # Transactional/service communications such as nomination status,
+        # account security, password resets, receipts, and other messages
+        # necessary to provide the service are NOT controlled by this flag.
+        if self.communications_consent:
+            if not self.communications_consent_at:
+                self.communications_consent_at = timezone.now()
+
+            if not self.communications_consent_version:
+                self.communications_consent_version = "2026-09-v1"
+        else:
+            self.communications_consent_at = None
+            self.communications_consent_version = ""
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -692,6 +744,14 @@ class VoteQuerySet(models.QuerySet):
 
 
 class Vote(models.Model):
+    campaign = models.ForeignKey(
+        "VotingCampaign",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="%(class)s_records",
+        help_text="Awards cycle associated with this record.",
+    )
     email = models.EmailField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="votes")
     nominee = models.ForeignKey(Nominee, on_delete=models.CASCADE, related_name="votes")
@@ -707,8 +767,8 @@ class Vote(models.Model):
         ordering = ["-created_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=["email", "category"],
-                name="one_vote_per_email_per_category",
+                fields=["campaign", "email", "category"],
+                name="one_vote_per_email_per_campaign_category",
             ),
         ]
         indexes = [
@@ -1392,7 +1452,80 @@ class AdvertisingInquiry(models.Model):
         null=True,
     )
 
+    last_activity_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Most recent meaningful sales/workflow activity for this "
+            "advertising inquiry."
+        ),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    ACTIVITY_TRACKED_FIELDS = {
+        "is_contacted",
+        "internal_notes",
+        "converted_campaign_id",
+        "converted_at",
+        "requested_start_date",
+        "requested_end_date",
+        "requested_placements",
+        "total_budget",
+        "purchase_type",
+        "placement_interest",
+        "creative_upload",
+        "creative_notes",
+        "campaign_message",
+    }
+
+    def save(self, *args, **kwargs):
+        """
+        Maintain last_activity_at only for meaningful inquiry workflow activity.
+
+        New inquiries receive an initial activity timestamp.
+
+        Existing historical rows whose last_activity_at is NULL are NOT
+        backfilled merely because Django saves them. Their timestamp changes
+        only when a tracked workflow field actually changes.
+        """
+        from django.utils import timezone
+
+        now = timezone.now()
+
+        if self._state.adding:
+            if self.last_activity_at is None:
+                self.last_activity_at = now
+
+        elif self.pk:
+            previous = type(self).objects.filter(pk=self.pk).first()
+
+            if previous is not None:
+                changed = False
+
+                for field_name in self.ACTIVITY_TRACKED_FIELDS:
+                    if getattr(previous, field_name) != getattr(
+                        self, field_name
+                    ):
+                        changed = True
+                        break
+
+                if changed:
+                    self.last_activity_at = now
+
+        update_fields = kwargs.get("update_fields")
+
+        if update_fields is not None:
+            update_fields = set(update_fields)
+
+            if (
+                self._state.adding
+                or self.last_activity_at is not None
+            ):
+                update_fields.add("last_activity_at")
+
+            kwargs["update_fields"] = list(update_fields)
+
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["-created_at"]
@@ -1566,6 +1699,13 @@ class VotingCampaign(models.Model):
 
     class Meta:
         ordering = ["-is_active_campaign", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["is_active_campaign"],
+                condition=models.Q(is_active_campaign=True),
+                name="one_active_voting_campaign",
+            ),
+        ]
 
     def __str__(self):
         return self.name
@@ -1915,11 +2055,25 @@ class SelfNominationCheckIn(models.Model):
     )
 
     communications_consent = models.BooleanField(
-        default=True,
+        default=False,
         help_text=(
-            "Participant consented to receiving ATL's Hottest Awards "
-            "information, updates, announcements, and invitations."
+            "Optional consent to receive ATL's Hottest Awards news, "
+            "announcements, invitations, promotions, and marketing "
+            "communications."
         ),
+    )
+
+    communications_consent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When optional promotional communications consent was recorded.",
+    )
+
+    communications_consent_version = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        help_text="Version of the communications consent language accepted.",
     )
 
     submitted_at = models.DateTimeField(auto_now_add=True)

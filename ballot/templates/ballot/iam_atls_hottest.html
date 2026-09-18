@@ -306,6 +306,56 @@
       </div>
     </div>
 
+    <div
+      class="nomination-optin-notice"
+      style="margin-top:20px;"
+    >
+      <label
+        for="{{ checkin_form.communications_consent.id_for_label }}"
+        style="
+          display:flex;
+          align-items:flex-start;
+          gap:12px;
+          cursor:pointer;
+        "
+      >
+        <span style="padding-top:2px;">
+          {{ checkin_form.communications_consent }}
+        </span>
+
+        <span>
+          <strong style="display:block;margin-bottom:4px;">
+            Optional ATL’s Hottest Updates
+          </strong>
+
+          <span>
+            Yes, I’d like to receive ATL’s Hottest Awards news,
+            announcements, invitations, promotions, and marketing
+            communications.
+          </span>
+        </span>
+      </label>
+
+      <div
+        style="
+          margin-top:9px;
+          font-size:.84rem;
+          opacity:.78;
+          line-height:1.5;
+        "
+      >
+        Optional. You can submit your I AM ATL’s Hottest Check-In
+        without agreeing to promotional communications. Messages
+        necessary to process or review your Check-In may still be sent.
+      </div>
+
+      {% if checkin_form.communications_consent.errors %}
+        <div class="field-error">
+          {{ checkin_form.communications_consent.errors }}
+        </div>
+      {% endif %}
+    </div>
+
     <div style="margin-top:22px;">
       <label
         class="field-label"
@@ -360,115 +410,11 @@
       <div>
         <h2>Choose Your Categories</h2>
         <p>
-          Select from one to five categories in which you want
-          to be considered.
-        </p>
-      </div>
-
-      <span class="nominee-count">Max 5</span>
-    </div>
-
-    {% if checkin_form.categories.errors %}
-      <div class="alert">
-        {{ checkin_form.categories.errors }}
-      </div>
-    {% endif %}
-
-    <div
-      id="checkin-category-limit-message"
-      class="alert"
-      role="alert"
-      aria-live="polite"
-      style="display:none;"
-    >
-      You’ve reached the maximum of 5 categories.
-    </div>
-
-    <div class="genre-category-directory checkin-category-grid">
-      {% for block in genre_blocks %}
-        <section class="category-genre-section">
-          <div class="category-genre-heading">
-            <div>
-              <span class="category-genre-eyebrow">
-                ATL’S HOTTEST GENRE
-              </span>
-
-              <h3>{{ block.genre }}</h3>
-            </div>
-
-            <span class="category-genre-count">
-              {{ block.categories|length }}
-              Categor{{ block.categories|length|pluralize:"y,ies" }}
-            </span>
-          </div>
-
-          <div class="category-choice-grid">
-            {% for item in block.categories %}
-              <label
-                class="category-choice-card"
-                for="{{ item.checkbox.id_for_label }}"
-              >
-                <span class="category-choice-name">
-                  {{ item.checkbox.choice_label }}
-                </span>
-
-                <span class="category-choice-box">
-                  {{ item.checkbox.tag }}
-                  <span class="fake-check"></span>
-                </span>
-              </label>
-            {% endfor %}
-          </div>
-        </section>
-      {% endfor %}
-    </div>
-
-    <div
-      style="
-        margin:26px 0 20px;
-        padding:18px 20px;
-        border:1px solid rgba(215,25,53,.75);
-        border-radius:16px;
-        background:
-          linear-gradient(
-            135deg,
-            rgba(215,25,53,.16),
-            rgba(0,0,0,.22)
-          );
-      "
-    >
-      <strong style="color:#ffd76a;">Important:</strong>
-      Checking in and proclaiming
-      <strong>“I AM ATL’s Hottest”</strong>
-      does not automatically place you on the official ATL’s Hottest
-      ballot. All self-nominations are subject to review and approval
-      by ATL’s Hottest. You will receive confirmation if your
-      nomination is approved.
-    </div>
-
-    <div class="nomination-optin-notice" style="margin-bottom:20px;">
-      By submitting your Check-In, you consent to receive ATL’s Hottest
-      Awards information, updates, announcements, and invitations at
-      the email address you provide.
-    </div>
-
-    <button
-      class="btn primary nomination-submit-btn"
-      type="submit"
-    >
-      I AM ATL’s Hottest — Check In
-    </button>
-  </form>
-</section>
-
-<section
-  class="card nomination-card"
-  style="
-    margin-top:32px;
-    text-align:center;
-  "
->
-  <p class="eyebrow">Recognition</p>
+      By submitting your Check-In, you agree that ATL’s Hottest may
+      process the information you provide to review and administer your
+      Check-In. Promotional communications are optional and controlled
+      by the separate ATL’s Hottest Updates checkbox above.
+    </p>
 
   <h2>Want To Recognize Someone Else?</h2>
 

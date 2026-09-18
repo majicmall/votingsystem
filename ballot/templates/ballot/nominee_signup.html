@@ -267,7 +267,49 @@
           </div>
 
           <div class="nomination-optin-notice">
-            By submitting a nomination and/or vote, you consent to receive ATL’s Hottest Awards information, updates, announcements, and invitations at the email address you provide.
+            <label
+              for="{{ form.communications_consent.id_for_label }}"
+              style="
+                display:flex;
+                align-items:flex-start;
+                gap:12px;
+                cursor:pointer;
+              "
+            >
+              <span style="padding-top:2px;">
+                {{ form.communications_consent }}
+              </span>
+
+              <span>
+                <strong style="display:block;margin-bottom:4px;">
+                  Optional ATL’s Hottest Updates
+                </strong>
+
+                <span>
+                  Yes, I’d like to receive ATL’s Hottest Awards news,
+                  announcements, invitations, promotions, and marketing
+                  communications.
+                </span>
+              </span>
+            </label>
+
+            <div
+              style="
+                margin-top:9px;
+                font-size:.84rem;
+                opacity:.78;
+                line-height:1.5;
+              "
+            >
+              Optional. You can submit a nomination without agreeing
+              to promotional communications.
+            </div>
+
+            {% if form.communications_consent.errors %}
+              <div class="field-error">
+                {{ form.communications_consent.errors }}
+              </div>
+            {% endif %}
           </div>
         </div>
 

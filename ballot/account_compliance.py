@@ -62,10 +62,25 @@ def delete_account(request):
     user = request.user
 
     with transaction.atomic():
-        # IMPORTANT:
-        # Related ATL's Hottest user-owned records currently use CASCADE.
-        # This removes the ATL-side MajicMall Megaverse connection only;
-        # it does not delete the external MajicMall Megaverse identity.
+        # Remove account-owned uploaded profile media before deleting
+        # the database record. Django CASCADE removes related rows but
+        # does not automatically remove uploaded files from storage.
+        try:
+            association_profile = user.association_profile
+        except Exception:
+            association_profile = None
+
+        if association_profile and association_profile.profile_pic:
+            association_profile.profile_pic.delete(save=False)
+
+        # Related ATL's Hottest user-owned records use CASCADE:
+        # AssociationProfile, AssociationMembership,
+        # NominationCategoryRequest, UserMembership, and the ATL-side
+        # MajicMall Megaverse connection.
+        #
+        # This does NOT delete a separate MajicMall Megaverse identity.
+        # Historical voting, nomination, event, advertising, and payment
+        # records are governed separately by ATL's Hottest retention rules.
         user.delete()
 
     logout(request)

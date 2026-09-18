@@ -42,6 +42,7 @@ from .models import (
     Nominee,
     SelfNominationCheckIn,
     Vote,
+    VotingCampaign,
 )
 from ballot.email_utils import absolute_url, extract_category_names_from_object, send_nominee_approved_email
 from .services import approve_category_request, deny_category_request
@@ -51,6 +52,76 @@ CONFIRMATION_AD_MESSAGE = """
 Sponsored Message:
 ATL's Hottest Awards supporters help keep the culture moving. Watch for featured offers, sponsor announcements, and red-carpet updates from ATL's Hottest Awards.
 """
+
+
+def _active_campaign_for_write():
+    """
+    Resolve the one and only awards cycle that owns a new
+    nomination/vote record.
+
+    New write operations must have exactly one explicitly active
+    campaign. Historical records are never assigned here.
+
+    Fail closed:
+    - zero active campaigns -> stop
+    - multiple active campaigns -> stop
+    """
+    campaigns = list(
+        VotingCampaign.objects
+        .filter(is_active_campaign=True)
+        .order_by("pk")[:2]
+    )
+
+    if not campaigns:
+        raise RuntimeError(
+            "No active VotingCampaign is configured for this write."
+        )
+
+    if len(campaigns) > 1:
+        raise RuntimeError(
+            "Multiple active VotingCampaign records are configured. "
+            "Exactly one active campaign is required for writes."
+        )
+
+    return campaigns[0]
+
+
+def _active_voting_campaign_for_write():
+    """
+    Return the one active campaign only when voting is currently open.
+
+    Vote writes fail closed when:
+    - campaign configuration is invalid
+    - voting is manually disabled
+    - voting has not started
+    - voting has ended
+    """
+    campaign = _active_campaign_for_write()
+
+    if not campaign.is_voting_open:
+        raise RuntimeError(
+            "Voting is not open for the active VotingCampaign."
+        )
+
+    return campaign
+
+
+def _active_nomination_campaign_for_write():
+    """
+    Return the one active campaign only when nominations are enabled.
+
+    Nomination writes fail closed when:
+    - campaign configuration is invalid
+    - nominations are disabled
+    """
+    campaign = _active_campaign_for_write()
+
+    if not campaign.nominations_enabled:
+        raise RuntimeError(
+            "Nominations are disabled for the active VotingCampaign."
+        )
+
+    return campaign
 
 
 def _client_ip(request):
@@ -146,10 +217,18 @@ def _send_vote_confirmation(email, saved_votes):
 
 
 def _create_vote(email, category, nominee, request):
+    campaign = _active_voting_campaign_for_write()
+
+    if nominee.campaign_id != campaign.pk:
+        raise ValueError(
+            "Nominee does not belong to the active voting campaign."
+        )
+
     return Vote.objects.create(
         email=email,
         category=category,
         nominee=nominee,
+        campaign=campaign,
         ip_address=_client_ip(request),
         user_agent=request.META.get("HTTP_USER_AGENT", ""),
     )
@@ -313,6 +392,8 @@ def submit_votes(request):
     if not isinstance(selections, dict) or not selections:
         return JsonResponse({"message": "Please select at least one nominee."}, status=400)
 
+    voting_campaign = _active_voting_campaign_for_write()
+
     saved = []
     skipped = []
     errors = []
@@ -323,6 +404,7 @@ def submit_votes(request):
             nominee = Nominee.objects.get(
                 id=nominee_id,
                 category=category,
+                campaign=voting_campaign,
                 is_active=True,
                 approval_status=Nominee.APPROVAL_APPROVED,
             )
@@ -372,9 +454,12 @@ def vote_nominee(request, nominee_id):
 
     ballot_settings = BallotSettings.get_solo()
 
+    voting_campaign = _active_voting_campaign_for_write()
+
     nominee = get_object_or_404(
         Nominee.objects.select_related("category"),
         id=nominee_id,
+        campaign=voting_campaign,
         is_active=True,
         approval_status=Nominee.APPROVAL_APPROVED,
     )
@@ -800,7 +885,16 @@ def self_nomination_checkin(request):
 
     # Public Check-Ins always enter the review queue as pending.
     checkin.status = SelfNominationCheckIn.STATUS_PENDING
-    checkin.communications_consent = True
+
+    # Promotional communications are optional and independent
+    # from transactional Check-In / approval communications.
+    if checkin.communications_consent:
+        checkin.communications_consent_at = timezone.now()
+        checkin.communications_consent_version = "2026-09-v1"
+    else:
+        checkin.communications_consent_at = None
+        checkin.communications_consent_version = ""
+
     checkin.save()
 
     # Save selected categories only after the Check-In record exists.
@@ -829,10 +923,12 @@ def nominee_signup(request):
         if photo and hasattr(photo, "seek"):
             photo.seek(0)
         created_nominees = []
+        nomination_campaign = _active_nomination_campaign_for_write()
 
         for category in form.cleaned_data["categories"]:
             nominee = Nominee.find_identity_match(
                 category=category,
+                campaign=nomination_campaign,
                 name=nominee_name,
                 contact_email=form.cleaned_data.get("contact_email", ""),
                 social_link=form.cleaned_data.get("social_link", ""),
@@ -843,6 +939,7 @@ def nominee_signup(request):
                 nominee = Nominee.objects.create(
                     name=nominee_name,
                     category=category,
+                    campaign=nomination_campaign,
                     website=form.cleaned_data.get("website", ""),
                     social_link=form.cleaned_data.get("social_link", ""),
                     contact_email=form.cleaned_data.get("contact_email", ""),
@@ -885,10 +982,14 @@ def nominee_signup(request):
                 nominator_email=nominator_email,
                 nominee=nominee,
                 category=category,
+                campaign=nomination_campaign,
                 defaults={
                     "nominator_name": form.cleaned_data.get("nominator_name", ""),
                     "submitted_nominee_name": nominee_name,
-                    "communications_consent": True,
+                    "communications_consent": form.cleaned_data.get(
+                        "communications_consent",
+                        False,
+                    ),
                 },
             )
 
@@ -954,7 +1055,12 @@ def staff_dashboard(request):
         .order_by("-created_at")
     )
 
-    tallies = list(Vote.objects.tallies())
+    results_campaign = _active_campaign_for_write()
+    tallies = list(
+        Vote.objects
+        .filter(campaign=results_campaign)
+        .tallies()
+    )
 
     return render(
         request,
@@ -990,9 +1096,14 @@ def staff_request_deny(request, req_id):
 @staff_member_required
 @require_http_methods(["GET"])
 def tallies_json(request):
+    results_campaign = _active_campaign_for_write()
     data = {}
 
-    for row in Vote.objects.tallies():
+    for row in (
+        Vote.objects
+        .filter(campaign=results_campaign)
+        .tallies()
+    ):
         category_slug = row["category__slug"]
         data.setdefault(
             category_slug,
@@ -1015,13 +1126,18 @@ def tallies_json(request):
 @staff_member_required
 @require_http_methods(["GET"])
 def export_votes_csv(request):
+    results_campaign = _active_campaign_for_write()
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="atl_hottest_vote_tallies.csv"'
 
     writer = csv.writer(response)
     writer.writerow(["category_slug", "category_name", "nominee_id", "nominee_name", "votes"])
 
-    for row in Vote.objects.tallies():
+    for row in (
+        Vote.objects
+        .filter(campaign=results_campaign)
+        .tallies()
+    ):
         writer.writerow(
             [
                 row["category__slug"],
@@ -1093,11 +1209,14 @@ def select_ballot_nominee(request, category_slug, nominee_id):
     if closed:
         return closed
 
+    voting_campaign = _active_voting_campaign_for_write()
+
     category = get_object_or_404(Category, slug=category_slug, is_active=True)
     nominee = get_object_or_404(
         Nominee,
         id=nominee_id,
         category=category,
+        campaign=voting_campaign,
         is_active=True,
         approval_status=Nominee.APPROVAL_APPROVED,
     )
@@ -1124,6 +1243,8 @@ def ballot_review(request):
     if closed:
         return closed
 
+    voting_campaign = _active_voting_campaign_for_write()
+
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
 
     selections = request.session.get("ballot_selections", {})
@@ -1139,6 +1260,7 @@ def ballot_review(request):
         nominee = Nominee.objects.filter(
             id=nominee_id,
             category=category,
+            campaign=voting_campaign,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
         ).first()
@@ -1187,6 +1309,8 @@ def submit_final_ballot(request):
         messages.error(request, "Please select at least one nominee before submitting your final ballot.")
         return redirect("ballot")
 
+    voting_campaign = _active_voting_campaign_for_write()
+
     submitted_votes = []
     duplicate_votes = []
     unavailable_votes = []
@@ -1200,6 +1324,7 @@ def submit_final_ballot(request):
         nominee = Nominee.objects.filter(
             id=nominee_id,
             category=category,
+            campaign=voting_campaign,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
         ).first()
@@ -1211,6 +1336,7 @@ def submit_final_ballot(request):
         vote, created = Vote.objects.get_or_create(
             email=voter_email,
             category=category,
+            campaign=voting_campaign,
             defaults={"nominee": nominee},
         )
 
@@ -1297,12 +1423,12 @@ Important voting rule:
 Each voter may vote once per category per email address.
 
 Awards information:
-Watch for red carpet updates, event announcements, sponsor offers, nominee highlights, and winner announcements from ATL's Hottest Awards.
+Your ballot has been received and recorded according to the current voting rules.
 
 Special message:
 You've Been Chosen...
 
-Some voters may be selected for special acknowledgements, prize opportunities, promotional offers, or awards-related updates when applicable.
+Keep this confirmation for your records.
 
 Thank you for supporting ATL's Hottest Awards.
 """
@@ -1349,11 +1475,11 @@ Thank you for supporting ATL's Hottest Awards.
 
             <div style="margin:20px 0;padding:18px;border:1px solid rgba(215,25,53,0.7);border-radius:18px;background:linear-gradient(135deg,rgba(215,25,53,0.24),rgba(0,0,0,0.35));">
               <p style="margin:0 0 8px;color:#ffd76a;letter-spacing:2px;text-transform:uppercase;font-weight:bold;">You've Been Chosen...</p>
-              <p style="margin:0;color:#ffffff;line-height:1.6;">Some voters may be selected for special acknowledgements, prize opportunities, promotional offers, or awards-related updates when applicable.</p>
+              <p style="margin:0;color:#ffffff;line-height:1.6;">Keep this confirmation for your records.</p>
             </div>
 
             <p style="color:#f5dca0;line-height:1.6;"><strong>Voting rule:</strong> each voter may vote once per category per email address.</p>
-            <p style="color:#ffffff;">Watch for red carpet updates, event announcements, sponsor offers, nominee highlights, and winner announcements.</p>
+            <p style="color:#ffffff;">Your ballot has been received and recorded according to the current voting rules.</p>
           </div>
         </div>
       </div>
@@ -1698,10 +1824,9 @@ def is_voting_currently_open():
         # A database/configuration failure must never enable vote-changing actions.
         return False, None
 
-    # Preserve legacy behavior only when the database query succeeds
-    # and confirms that no VotingCampaign has been configured.
+    # SECURITY: no configured active campaign means voting is closed.
     if campaign is None:
-        return True, None
+        return False, None
 
     return campaign.is_voting_open, campaign
 
@@ -1898,53 +2023,82 @@ def atls_hottest_marketplace_entrance(request):
 
 
 def atls_hottest_marketplace(request):
-    marketplace_items = [
+    marketplace_departments = [
         {
-            "category": "Merchandise",
-            "name": "I Am ATL’s Hottest T-Shirt",
-            "price": "Coming Soon",
-            "description": "Official ATL’s Hottest member merchandise for fans, nominees, creators, and supporters.",
+            "symbol": "AH",
+            "kicker": "Official Collection",
+            "name": "Official ATL’s Hottest Shop",
+            "description": "Official ATL’s Hottest merchandise, recognition items, branded collections, gifts, and signature releases.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Recognition",
-            "name": "I Am ATL’s Hottest Badge",
-            "price": "Coming Soon",
-            "description": "Digital and promotional badge options for members, nominees, creators, businesses, and supporters.",
+            "symbol": "✦",
+            "kicker": "Style District",
+            "name": "Fashion & Beauty",
+            "description": "Discover Atlanta Metro fashion, designers, boutiques, beauty brands, stylists, barbers, and personal care businesses.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Merchandise",
-            "name": "ATL’s Hottest Fan",
-            "price": "Coming Soon",
-            "description": "Branded fan merchandise for events, red carpet moments, community activations, and promotional giveaways.",
+            "symbol": "◆",
+            "kicker": "Taste Atlanta Metro",
+            "name": "Food & Dining",
+            "description": "Explore restaurants, chefs, food businesses, dining experiences, menus, local favorites, and future delivery options.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Advertising",
-            "name": "3-Day Billboard/Banner Advertising Package",
-            "price": "Coming Soon",
-            "description": "Short-run advertising bundle for announcements, music releases, product drops, event promotion, and brand visibility.",
+            "symbol": "♫",
+            "kicker": "Sound Of The City",
+            "name": "Music",
+            "description": "Enter a destination for artists, releases, music merchandise, performances, media, and Atlanta Metro sound.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Advertising",
-            "name": "7-Day Spotlight Advertising Bundle",
-            "price": "Coming Soon",
-            "description": "One-week promotional package for billboard, banner, category, and ATL’s Hottest visibility opportunities.",
+            "symbol": "B",
+            "kicker": "Stories & Knowledge",
+            "name": "Books & Authors",
+            "description": "Discover authors, books, signed editions, new releases, literary experiences, and Atlanta Metro voices.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Advertising",
-            "name": "ATL TV Sponsor Add-On",
-            "price": "Coming Soon",
-            "description": "Sponsor visibility connected to ATL TV programming, nominee highlights, interviews, and promotional content.",
+            "symbol": "T",
+            "kicker": "Go Experience It",
+            "name": "Tickets & Experiences",
+            "description": "Discover events, attractions, performances, special experiences, and future ATL’s Hottest ticketing.",
+            "status": "Opening Soon",
         },
         {
-            "category": "Seller Tools",
-            "name": "Product Promotion Add-On",
-            "price": "Coming Soon",
-            "description": "Add-on for members preparing to sell products, services, offers, tickets, music, media, or branded merchandise.",
+            "symbol": "A",
+            "kicker": "Made In The ATL",
+            "name": "Creators & Art",
+            "description": "Explore creators, artists, original work, creative products, collaborations, and cultural experiences.",
+            "status": "Opening Soon",
+        },
+        {
+            "symbol": "ATL",
+            "kicker": "Atlanta Metro Commerce",
+            "name": "Local Businesses & Services",
+            "description": "Find businesses, professionals, service providers, entrepreneurs, and organizations serving Atlanta Metro.",
+            "status": "Opening Soon",
+        },
+        {
+            "symbol": "AD",
+            "kicker": "Be Seen",
+            "name": "Advertising & Promotion",
+            "description": "Access ATL’s Hottest advertising, billboard opportunities, promotional packages, sponsorships, and visibility tools.",
+            "status": "Available",
+            "url_name": "advertise_command_center",
+        },
+        {
+            "symbol": "M",
+            "kicker": "Build Your Presence",
+            "name": "Seller & Merchant Services",
+            "description": "Tools and opportunities for businesses, sellers, creators, and future merchants building their presence in the Shopping World.",
+            "status": "Opening Soon",
         },
     ]
 
     return render(request, "ballot/atls_hottest_marketplace.html", {
-        "marketplace_items": marketplace_items,
+        "marketplace_departments": marketplace_departments,
     })
 
 

@@ -1286,8 +1286,31 @@ def close_voting(modeladmin, request, queryset):
 
 @admin.action(description="Mark selected campaign as active")
 def mark_campaign_active(modeladmin, request, queryset):
-    VotingCampaign.objects.update(is_active_campaign=False)
-    queryset.update(is_active_campaign=True)
+    from django.contrib import messages
+    from django.db import transaction
+
+    if queryset.count() != 1:
+        messages.error(
+            request,
+            "Select exactly one voting campaign to mark active."
+        )
+        return
+
+    campaign = queryset.first()
+
+    with transaction.atomic():
+        VotingCampaign.objects.exclude(
+            pk=campaign.pk
+        ).update(is_active_campaign=False)
+
+        VotingCampaign.objects.filter(
+            pk=campaign.pk
+        ).update(is_active_campaign=True)
+
+    messages.success(
+        request,
+        f'"{campaign.name}" is now the active voting campaign.'
+    )
 
 
 @admin.register(VotingCampaign)

@@ -108,6 +108,25 @@ class NomineeSignupForm(forms.Form):
     )
 
 
+    communications_consent = forms.BooleanField(
+        required=False,
+        initial=False,
+        label=(
+            "Yes, I'd like to receive ATL's Hottest Awards news, "
+            "announcements, invitations, promotions, and marketing "
+            "communications."
+        ),
+        help_text=(
+            "Optional. You can submit a nomination without agreeing "
+            "to promotional communications."
+        ),
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "nomination-consent-checkbox",
+            }
+        ),
+    )
+
     nominee_name = forms.CharField(max_length=160)
     categories = forms.ModelMultipleChoiceField(
         queryset=Category.objects.filter(is_active=True).order_by("group", "sort_order", "name"),
@@ -152,6 +171,7 @@ class SelfNominationCheckInForm(forms.ModelForm):
             "email",
             "website",
             "social_link",
+            "communications_consent",
             "categories",
         ]
         labels = {
@@ -161,6 +181,11 @@ class SelfNominationCheckInForm(forms.ModelForm):
             "social_link": "Social Media Address",
         }
         widgets = {
+            "communications_consent": forms.CheckboxInput(
+                attrs={
+                    "class": "nomination-consent-checkbox",
+                }
+            ),
             "name": forms.TextInput(
                 attrs={
                     "class": "form-control",

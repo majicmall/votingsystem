@@ -1,44 +1,478 @@
 {% extends "ballot/base.html" %}
 {% load billboard_ads %}
 
-{% block title %}ATL’s Hottest Marketplace{% endblock %}
+{% block title %}ATL’s Hottest Shopping World{% endblock %}
 
 {% block billboard %}
   {% render_billboard "marketplace_top" %}
 {% endblock %}
 
 {% block content %}
-<section class="membership-payment-hero">
-  <p class="eyebrow">ATL’s Hottest Marketplace</p>
-  <h1>Benefits, Add-Ons, Merch & Advertising Bundles</h1>
+<style>
+  .shopping-world {
+    --sw-gold: #f5d76e;
+    --sw-gold-bright: #fff1ad;
+    --sw-diamond: #ffffff;
+    --sw-red: #e21823;
+    --sw-black: #030303;
+    --sw-glass: rgba(10, 10, 10, 0.84);
 
-  <p>
-    The ATL’s Hottest Marketplace is where members, nominees, creators, businesses,
-    supporters, and future merchants can access merchandise, badges, advertising packages,
-    seller tools, product promotion opportunities, and visibility add-ons.
-  </p>
+    width: min(1240px, calc(100% - 28px));
+    margin: 26px auto 70px;
+  }
 
-  <div class="intro-price-note">
-    Members are positioned as merchants in The ATL’s Hottest Zone of The MajicMall Megaverse
-    inside the Majestic Megaverse. More marketplace items and payment options will continue
-    to open as the platform expands.
+  .shopping-world-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(34px, 6vw, 70px) clamp(20px, 5vw, 64px);
+    border: 1px solid rgba(239, 201, 84, 0.52);
+    border-radius: 24px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,0.13), transparent 30%),
+      radial-gradient(circle at 50% 18%, rgba(245,215,110,0.18), transparent 42%),
+      radial-gradient(circle at 50% 100%, rgba(226,24,35,0.10), transparent 45%),
+      linear-gradient(145deg, rgba(30,30,30,0.95), rgba(7,7,7,0.97));
+    box-shadow:
+      0 0 12px rgba(255,255,255,0.08),
+      0 0 34px rgba(245,215,110,0.20),
+      inset 0 0 42px rgba(255,255,255,0.055);
+  }
+
+  .shopping-world-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        110deg,
+        transparent 20%,
+        rgba(255,255,255,0.045) 43%,
+        transparent 60%
+      );
+    transform: translateX(-100%);
+    animation: shoppingGlassSweep 9s ease-in-out infinite;
+  }
+
+  @keyframes shoppingGlassSweep {
+    0%, 65% { transform: translateX(-100%); }
+    82%, 100% { transform: translateX(100%); }
+  }
+
+  .shopping-world-eyebrow {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 10px;
+    color: var(--sw-red);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .shopping-world-hero h1 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: var(--sw-gold-bright);
+    font-size: clamp(2rem, 5vw, 4.35rem);
+    line-height: 0.98;
+    text-shadow:
+      0 0 5px rgba(255,255,255,0.38),
+      0 0 16px rgba(245,215,110,0.42),
+      0 0 30px rgba(245,215,110,0.16),
+      0 2px 12px rgba(0,0,0,0.72);
+  }
+
+  .shopping-world-primary {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 18px auto 0;
+    color: #fff;
+    font-size: clamp(1rem, 2vw, 1.22rem);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .shopping-world-tagline {
+    position: relative;
+    z-index: 1;
+    max-width: 850px;
+    margin: 12px auto 0;
+    color: rgba(255,255,255,0.90);
+    font-size: clamp(0.88rem, 1.5vw, 1rem);
+    line-height: 1.55;
+  }
+
+  .department-heading {
+    margin: 46px 0 22px;
+    text-align: center;
+  }
+
+  .department-heading .eyebrow {
+    margin: 0 0 7px;
+    color: var(--sw-red);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .department-heading h2 {
+    margin: 0;
+    color: var(--sw-gold);
+    font-size: clamp(1.65rem, 3vw, 2.6rem);
+  }
+
+  .department-heading p {
+    max-width: 680px;
+    margin: 9px auto 0;
+    color: rgba(255,255,255,0.68);
+    line-height: 1.55;
+  }
+
+  .department-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .department-card {
+    position: relative;
+    min-height: 235px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 26px;
+    border: 1px solid rgba(245,215,110,0.54);
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(255,255,255,0.10), transparent 28%),
+      radial-gradient(circle at 100% 0%, rgba(245,215,110,0.13), transparent 38%),
+      radial-gradient(circle at 100% 100%, rgba(226,24,35,0.08), transparent 38%),
+      linear-gradient(145deg, rgba(31,31,31,0.94), rgba(8,8,8,0.97));
+    box-shadow:
+      0 0 9px rgba(255,255,255,0.045),
+      0 0 22px rgba(245,215,110,0.10),
+      0 14px 34px rgba(0,0,0,0.34),
+      inset 0 0 28px rgba(255,255,255,0.045);
+    transition:
+      transform 0.28s ease,
+      border-color 0.28s ease,
+      box-shadow 0.28s ease;
+  }
+
+  .department-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 18%;
+    width: 64%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--sw-gold-bright),
+      transparent
+    );
+    opacity: 1;
+  }
+
+  .department-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(239, 201, 84, 0.78);
+    box-shadow:
+      0 0 22px rgba(239,201,84,0.10),
+      0 18px 40px rgba(0,0,0,0.46);
+  }
+
+  .department-number {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    color: rgba(239,201,84,0.15);
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .department-kicker {
+    margin: 0 0 7px;
+    color: var(--sw-red);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .department-card h3 {
+    margin: 0 0 9px;
+    color: var(--sw-gold);
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+    line-height: 1.15;
+  }
+
+  .department-card p {
+    max-width: 520px;
+    margin: 0 0 17px;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.5;
+  }
+
+  .department-symbol {
+    position: relative;
+    z-index: 1;
+    width: 54px;
+    height: 54px;
+    margin: 0 0 18px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,241,173,0.82);
+    border-radius: 50%;
+    color: #fff6cf;
+    background:
+      radial-gradient(circle at 40% 30%, rgba(255,255,255,0.20), rgba(245,215,110,0.12) 34%, rgba(0,0,0,0.80) 72%);
+    box-shadow:
+      0 0 5px rgba(255,255,255,0.20),
+      0 0 20px rgba(245,215,110,0.28),
+      inset 0 0 16px rgba(255,255,255,0.10);
+    font-size: 1.35rem;
+    font-weight: 900;
+  }
+
+  .department-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  .department-status,
+  .department-enter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 15px;
+    border-radius: 999px;
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .department-status {
+    border: 1px solid rgba(239,201,84,0.34);
+    color: rgba(255,255,255,0.72);
+    background: rgba(0,0,0,0.46);
+  }
+
+  .department-enter {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(239,201,84,0.78);
+    color: #080808;
+    background:
+      linear-gradient(
+        135deg,
+        #b88620 0%,
+        #f2d16b 34%,
+        #fff0ad 50%,
+        #d7a92f 72%,
+        #9f7117 100%
+      );
+    box-shadow:
+      0 0 12px rgba(239,201,84,0.20),
+      inset 0 1px 0 rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+
+  .department-enter::after {
+    content: "";
+    position: absolute;
+    top: -70%;
+    left: -45%;
+    width: 30%;
+    height: 240%;
+    background: rgba(255,255,255,0.45);
+    transform: rotate(24deg);
+    transition: left 0.55s ease;
+  }
+
+  .department-enter:hover {
+    transform: translateY(-2px);
+    color: #000;
+    box-shadow:
+      0 0 8px rgba(255,255,255,0.20),
+      0 0 22px rgba(239,201,84,0.34);
+  }
+
+  .department-enter:hover::after {
+    left: 120%;
+  }
+
+  .department-card.is-open {
+    border-color: rgba(239,201,84,0.62);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.12), transparent 28%),
+      radial-gradient(circle at 100% 0%, rgba(245,215,110,0.18), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(226,24,35,0.12), transparent 38%),
+      linear-gradient(145deg, rgba(34,34,34,0.96), rgba(8,8,8,0.98));
+  }
+
+  .shopping-world-footer {
+    margin-top: 28px;
+    padding: 28px 22px;
+    border: 1px solid rgba(239,201,84,0.28);
+    border-radius: 20px;
+    text-align: center;
+    background: rgba(5,5,5,0.78);
+  }
+
+  .shopping-world-footer h2 {
+    margin: 0 0 8px;
+    color: var(--sw-gold);
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+  }
+
+  .shopping-world-footer p {
+    max-width: 720px;
+    margin: 0 auto 18px;
+    color: rgba(255,255,255,0.70);
+    line-height: 1.55;
+  }
+
+  .shopping-world-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  @media (max-width: 760px) {
+    .shopping-world {
+      width: min(100% - 18px, 1240px);
+      margin-top: 14px;
+    }
+
+    .shopping-world-hero {
+      padding: 34px 17px;
+      border-radius: 18px;
+    }
+
+    .department-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .department-card {
+      min-height: 215px;
+      padding: 22px 20px;
+      border-radius: 17px;
+    }
+
+    .department-number {
+      top: 16px;
+      right: 18px;
+      font-size: 2.15rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shopping-world-hero::before {
+      animation: none;
+    }
+
+    .department-card {
+      transition: none;
+    }
+  }
+</style>
+
+<section class="shopping-world">
+
+  <header class="shopping-world-hero">
+    <p class="shopping-world-eyebrow">Welcome Inside</p>
+
+    <h1>ATL’s Hottest<br>Shopping World</h1>
+
+    <p class="shopping-world-primary">
+      Products. Services. Experiences. It’s All Here.
+    </p>
+
+    <p class="shopping-world-tagline">
+      Shop Atlanta Metro. Support Atlanta Metro. Experience ATL’s Hottest.
+    </p>
+  </header>
+
+  <div class="department-heading">
+    <p class="eyebrow">Explore The World</p>
+    <h2>Choose A Department</h2>
+    <p>
+      Enter the departments of ATL’s Hottest Shopping World and discover
+      businesses, creators, products, services, food, entertainment,
+      experiences, and opportunities throughout Atlanta Metro.
+    </p>
   </div>
-</section>
 
-<section class="membership-payment-grid marketplace-grid">
-  {% for item in marketplace_items %}
-    <article class="membership-payment-panel marketplace-item-card">
-      <p class="eyebrow">{{ item.category }}</p>
-      <h2>{{ item.name }}</h2>
-      <div class="marketplace-price">{{ item.price }}</div>
-      <p>{{ item.description }}</p>
+  <section class="department-grid" aria-label="ATL’s Hottest Shopping World departments">
+    {% for department in marketplace_departments %}
+      <article class="department-card{% if department.url_name %} is-open{% endif %}">
+        <span class="department-number">
+          {{ forloop.counter|stringformat:"02d" }}
+        </span>
 
-      <span class="btn disabled-vote-btn">Coming Soon</span>
-    </article>
-  {% endfor %}
-</section>
+        <div class="department-symbol" aria-hidden="true">
+          {{ department.symbol }}
+        </div>
 
-<section class="membership-payment-actions">
-  <a class="btn primary" href="{% url 'membership_plans' %}">Back to Memberships</a>
+        <p class="department-kicker">{{ department.kicker }}</p>
+
+        <h3>{{ department.name }}</h3>
+
+        <p>{{ department.description }}</p>
+
+        <div class="department-actions">
+          {% if department.url_name %}
+            <a class="department-enter" href="{% url department.url_name %}">
+              Enter Department
+            </a>
+          {% else %}
+            <span class="department-status">
+              {{ department.status }}
+            </span>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </section>
+
+  <footer class="shopping-world-footer">
+    <h2>Built For Atlanta Metro</h2>
+
+    <p>
+      ATL’s Hottest Shopping World is being built as a connected destination
+      for local commerce, culture, creators, businesses, events, services,
+      and experiences.
+    </p>
+
+    <div class="shopping-world-actions">
+      <a class="btn primary" href="{% url 'membership_plans' %}">
+        Memberships
+      </a>
+
+      <a class="btn" href="{% url 'advertise_command_center' %}">
+        Advertising
+      </a>
+    </div>
+  </footer>
+
 </section>
 {% endblock %}
