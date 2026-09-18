@@ -34,13 +34,46 @@ def clone_nominee_into_category(source, target_category):
         },
     )
 
+    # Campaign safety:
+    # - New clones inherit source.campaign through defaults above.
+    # - Legacy existing clones with no campaign inherit the source campaign.
+    # - Existing clones already assigned to another campaign fail closed.
+    if nominee.campaign_id is None and source.campaign_id is not None:
+        nominee.campaign = source.campaign
+    elif nominee.campaign_id != source.campaign_id:
+        raise ValueError(
+            "Cannot reuse nominee clone across awards campaigns."
+        )
+
     updates = []
+
+    if nominee.campaign_id != source.campaign_id:
+        # This branch is intentionally unreachable after the guard above,
+        # but keeps campaign mismatch handling explicit.
+        raise ValueError(
+            "Cannot reuse nominee clone across awards campaigns."
+        )
+
     if nominee.category_id != target_category.pk:
         nominee.category = target_category
         updates.append("category")
+
     if not nominee.is_active:
         nominee.is_active = True
         updates.append("is_active")
+
+    if nominee.campaign_id == source.campaign_id and nominee.campaign_id is not None:
+        if not _created and "campaign" not in updates:
+            # Persist only when this was a legacy NULL-campaign clone that
+            # inherited the source campaign above.
+            current_campaign_id = (
+                Nominee.objects
+                .filter(pk=nominee.pk)
+                .values_list("campaign_id", flat=True)
+                .first()
+            )
+            if current_campaign_id is None:
+                updates.append("campaign")
 
     if updates:
         nominee.save(update_fields=updates)
