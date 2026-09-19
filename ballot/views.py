@@ -309,58 +309,6 @@ def nomination_thank_you(request, nominee_id=None):
         "category_names": category_names,
     })
 
-@require_http_methods(["GET"])
-def ballot_view(request):
-    settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
-    ballot_campaign = _active_campaign_for_write()
-
-    categories = (
-        Category.objects.filter(is_active=True)
-        .order_by("sort_order", "name")
-    )
-
-    selections = request.session.get("ballot_selections", {})
-
-    category_blocks = []
-    for category in categories:
-        approved_count = Nominee.objects.filter(
-            campaign=ballot_campaign,
-            category=category,
-            is_active=True,
-            approval_status=Nominee.APPROVAL_APPROVED,
-        ).count()
-
-        selected_nominee = None
-        selected_nominee_id = selections.get(category.slug)
-
-        if selected_nominee_id:
-            selected_nominee = Nominee.objects.filter(
-                id=selected_nominee_id,
-                campaign=ballot_campaign,
-                category=category,
-                is_active=True,
-                approval_status=Nominee.APPROVAL_APPROVED,
-            ).first()
-
-        category_blocks.append(
-            {
-                "category": category,
-                "approved_count": approved_count,
-                "selected_nominee": selected_nominee,
-            }
-        )
-
-    return render(
-        request,
-        "ballot/ballot.html",
-        {
-            "settings": settings_obj,
-            "category_blocks": category_blocks,
-            "selections": selections,
-        },
-    )
-
-
 @require_POST
 @csrf_protect
 def submit_votes(request):
@@ -1343,7 +1291,11 @@ def submit_final_ballot(request):
             email=voter_email,
             category=category,
             campaign=voting_campaign,
-            defaults={"nominee": nominee},
+            defaults={
+                "nominee": nominee,
+                "ip_address": _client_ip(request),
+                "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+            },
         )
 
         if created:
@@ -1899,15 +1851,52 @@ def visible_category_queryset():
 # Ensures /ballot/ always shows categories while voting is closed.
 # =========================================================
 
+@require_http_methods(["GET"])
 def ballot_view(request):
-    from .models import BallotSettings, Category
+    """
+    Public ballot overview.
+
+    Categories remain visible while voting is closed for preview purposes,
+    but nominee counts and restored selections are always isolated to the
+    single active awards cycle.
+    """
+    ballot_campaign = _active_campaign_for_write()
 
     try:
         settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
     except Exception:
         settings_obj = None
 
-    categories = visible_category_queryset()
+    categories = list(visible_category_queryset())
+    selections = request.session.get("ballot_selections", {})
+
+    category_blocks = []
+
+    for category in categories:
+        approved_count = Nominee.objects.filter(
+            campaign=ballot_campaign,
+            category=category,
+            is_active=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).count()
+
+        selected_nominee = None
+        selected_nominee_id = selections.get(category.slug)
+
+        if selected_nominee_id:
+            selected_nominee = Nominee.objects.filter(
+                id=selected_nominee_id,
+                campaign=ballot_campaign,
+                category=category,
+                is_active=True,
+                approval_status=Nominee.APPROVAL_APPROVED,
+            ).first()
+
+        category_blocks.append({
+            "category": category,
+            "approved_count": approved_count,
+            "selected_nominee": selected_nominee,
+        })
 
     genre_order = [
         "Entertainment",
@@ -1937,8 +1926,7 @@ def ballot_view(request):
             })
 
     # Future-proofing:
-    # If a new Genre is ever added in Admin/model choices but has not yet
-    # been added to genre_order, its active categories still appear.
+    # If a new genre is added later, active categories still appear.
     known_genres = set(genre_order)
 
     extra_genres = sorted({
@@ -1963,6 +1951,8 @@ def ballot_view(request):
     return render(request, "ballot/ballot.html", {
         "categories": categories,
         "genre_blocks": genre_blocks,
+        "category_blocks": category_blocks,
+        "selections": selections,
         "settings": settings_obj,
     })
 
