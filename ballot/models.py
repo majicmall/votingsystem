@@ -208,14 +208,18 @@ class BallotSettings(models.Model):
 # ---------------------------------------------------------------------
 
 class CategoryQuerySet(models.QuerySet):
-    def for_ballot(self):
+    def for_ballot(self, *, campaign):
         return (
             self.filter(is_active=True)
             .order_by("group", "sort_order", "name")
             .prefetch_related(
                 models.Prefetch(
                     "nominees",
-                    queryset=Nominee.objects.filter(is_active=True).order_by("name"),
+                    queryset=Nominee.objects.filter(
+                        campaign=campaign,
+                        is_active=True,
+                        approval_status=Nominee.APPROVAL_APPROVED,
+                    ).order_by("name"),
                     to_attr="prefetched_nominees",
                 )
             )

@@ -237,9 +237,10 @@ def _create_vote(email, category, nominee, request):
 @require_http_methods(["GET"])
 def landing_page(request):
     ballot_settings = BallotSettings.get_solo()
+    ballot_campaign = _active_campaign_for_write()
 
     featured_categories = []
-    for category in Category.objects.for_ballot()[:6]:
+    for category in Category.objects.for_ballot(campaign=ballot_campaign)[:6]:
         nominees = list(getattr(category, "prefetched_nominees", []))
         featured_categories.append(
             {
@@ -311,6 +312,7 @@ def nomination_thank_you(request, nominee_id=None):
 @require_http_methods(["GET"])
 def ballot_view(request):
     settings_obj, _created = BallotSettings.objects.get_or_create(pk=1)
+    ballot_campaign = _active_campaign_for_write()
 
     categories = (
         Category.objects.filter(is_active=True)
@@ -322,6 +324,7 @@ def ballot_view(request):
     category_blocks = []
     for category in categories:
         approved_count = Nominee.objects.filter(
+            campaign=ballot_campaign,
             category=category,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
@@ -333,6 +336,7 @@ def ballot_view(request):
         if selected_nominee_id:
             selected_nominee = Nominee.objects.filter(
                 id=selected_nominee_id,
+                campaign=ballot_campaign,
                 category=category,
                 is_active=True,
                 approval_status=Nominee.APPROVAL_APPROVED,
