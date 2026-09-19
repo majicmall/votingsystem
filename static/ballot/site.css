@@ -6702,3 +6702,61 @@ header nav a:hover::before,
     min-width: 20px;
   }
 }
+
+
+/* =========================================================
+   LAUNCH-003B — AUTHORITATIVE NOMINEE PHOTO VISIBILITY
+   Preserve the complete uploaded nominee image on ballot cards.
+   No face/head/body cropping on desktop or mobile.
+   ========================================================= */
+
+.ballot-nominee-card .nominee-photo-frame,
+.nominee-card .nominee-photo-frame,
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(255, 215, 106, 0.16),
+      transparent 46%
+    ),
+    #070707;
+}
+
+.ballot-nominee-card .nominee-photo-frame img,
+.nominee-card .nominee-photo-frame img,
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+/* Category nominee pages get a larger presentation window. */
+.ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+  height: 300px;
+  min-height: 300px;
+}
+
+@media (max-width: 820px) {
+  .ballot-nominee-card .nominee-photo-frame,
+  .nominee-card .nominee-photo-frame,
+  .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame {
+    height: 320px !important;
+    min-height: 320px !important;
+  }
+
+  .ballot-nominee-card .nominee-photo-frame img,
+  .nominee-card .nominee-photo-frame img,
+  .ballot-category-only-grid .ballot-nominee-card .nominee-photo-frame img {
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+}
