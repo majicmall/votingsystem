@@ -13,6 +13,7 @@ import uuid
 import stripe
 
 from django.conf import settings as django_settings
+from django.templatetags.static import static
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
@@ -394,6 +395,11 @@ def nominee_detail(request, nominee_id):
     )
 
     nominee_url = f"{django_settings.SITE_URL}{reverse('nominee_detail', kwargs={'nominee_id': nominee.id})}"
+    nominee_image_url = (
+        f"{django_settings.SITE_URL}{nominee.photo.url}"
+        if nominee.photo
+        else f"{django_settings.SITE_URL}{static('ballot/img/atl_hottest_hero_banner.png')}"
+    )
 
     return render(
         request,
@@ -402,6 +408,7 @@ def nominee_detail(request, nominee_id):
             **get_voting_status_context(),
             "nominee": nominee,
             "nominee_url": nominee_url,
+            "nominee_image_url": nominee_image_url,
         },
     )
 

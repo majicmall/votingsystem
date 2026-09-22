@@ -2,6 +2,35 @@
 {% load billboard_ads %}
 {% block title %}{{ nominee.name }} | ATL’s Hottest{% endblock %}
 
+{% block head_meta %}
+  <link rel="canonical" href="{{ nominee_url }}">
+
+  <meta
+    name="description"
+    content="{{ nominee.name }} is an ATL’s Hottest nominee in {{ nominee.category.name }}. View the official nominee profile."
+  >
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ATL’s Hottest">
+  <meta property="og:title" content="{{ nominee.name }} | ATL’s Hottest">
+  <meta
+    property="og:description"
+    content="{{ nominee.name }} is an ATL’s Hottest nominee in {{ nominee.category.name }}. View the official nominee profile."
+  >
+  <meta property="og:url" content="{{ nominee_url }}">
+  <meta property="og:image" content="{{ nominee_image_url }}">
+  <meta property="og:image:alt" content="{{ nominee.name }} — ATL’s Hottest nominee">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ nominee.name }} | ATL’s Hottest">
+  <meta
+    name="twitter:description"
+    content="{{ nominee.name }} is an ATL’s Hottest nominee in {{ nominee.category.name }}. View the official nominee profile."
+  >
+  <meta name="twitter:image" content="{{ nominee_image_url }}">
+  <meta name="twitter:image:alt" content="{{ nominee.name }} — ATL’s Hottest nominee">
+{% endblock %}
+
 {% block billboard %}
   {% render_billboard "nominee_profile" %}
 {% endblock %}
