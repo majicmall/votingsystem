@@ -68,6 +68,48 @@
         {% endif %}
       </div>
 
+      <section class="nominee-share-card">
+        <div class="nominee-share-copy">
+          <p class="eyebrow">Share This Nominee</p>
+          <h3>Support {{ nominee.name }}</h3>
+          <p class="muted">
+            Scan the QR code or share this permanent nominee profile with friends, family, and supporters.
+          </p>
+
+          <div class="nominee-share-actions">
+            <button
+              class="btn primary"
+              id="share-nominee-btn"
+              type="button"
+              data-url="{{ nominee_url }}"
+              data-name="{{ nominee.name }}"
+            >
+              Share Nominee
+            </button>
+
+            <button
+              class="btn"
+              id="copy-nominee-link"
+              type="button"
+              data-url="{{ nominee_url }}"
+            >
+              Copy Profile Link
+            </button>
+          </div>
+
+          <p class="nominee-copy-status" id="nominee-copy-status" aria-live="polite"></p>
+        </div>
+
+        <div class="nominee-qr-wrap">
+          <img
+            class="nominee-qr-image"
+            src="{% url 'nominee_qr_code' nominee.id %}"
+            alt="QR code for {{ nominee.name }} nominee profile"
+          >
+          <span>Scan to View Profile</span>
+        </div>
+      </section>
+
       <form class="detail-vote-form" method="post" action="{% url 'vote_nominee' nominee.id %}">
         {% csrf_token %}
         <label class="field-label" for="detail-email">Email address</label>
@@ -90,4 +132,50 @@
     </div>
   </article>
 </section>
+
+<script>
+(function () {
+  const shareButton = document.getElementById("share-nominee-btn");
+  const copyButton = document.getElementById("copy-nominee-link");
+  const status = document.getElementById("nominee-copy-status");
+
+  async function copyProfileLink(url) {
+    try {
+      await navigator.clipboard.writeText(url);
+      if (status) status.textContent = "Profile link copied!";
+    } catch (error) {
+      window.prompt("Copy this nominee profile link:", url);
+    }
+  }
+
+  if (copyButton) {
+    copyButton.addEventListener("click", function () {
+      copyProfileLink(this.dataset.url);
+    });
+  }
+
+  if (shareButton) {
+    shareButton.addEventListener("click", async function () {
+      const url = this.dataset.url;
+      const name = this.dataset.name;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: name + " | ATL’s Hottest",
+            text: "View " + name + " on ATL’s Hottest.",
+            url: url
+          });
+          return;
+        } catch (error) {
+          if (error.name === "AbortError") return;
+        }
+      }
+
+      copyProfileLink(url);
+    });
+  }
+})();
+</script>
+
 {% endblock %}

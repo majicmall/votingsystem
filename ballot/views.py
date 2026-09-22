@@ -393,7 +393,39 @@ def nominee_detail(request, nominee_id):
         approval_status=Nominee.APPROVAL_APPROVED,
     )
 
-    return render(request, "ballot/nominee_detail.html", {**get_voting_status_context(), "nominee": nominee})
+    nominee_url = f"{django_settings.SITE_URL}{reverse('nominee_detail', kwargs={'nominee_id': nominee.id})}"
+
+    return render(
+        request,
+        "ballot/nominee_detail.html",
+        {
+            **get_voting_status_context(),
+            "nominee": nominee,
+            "nominee_url": nominee_url,
+        },
+    )
+
+
+@require_http_methods(["GET"])
+def nominee_qr_code(request, nominee_id):
+    nominee = get_object_or_404(
+        Nominee,
+        id=nominee_id,
+        is_active=True,
+        approval_status=Nominee.APPROVAL_APPROVED,
+    )
+
+    import qrcode
+
+    nominee_url = f"{django_settings.SITE_URL}{reverse('nominee_detail', kwargs={'nominee_id': nominee.id})}"
+
+    img = qrcode.make(nominee_url)
+
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
 @require_POST

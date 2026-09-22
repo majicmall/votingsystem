@@ -221,6 +221,7 @@ urlpatterns = [
 
     # Nominee detail MUST stay after nominee/signup/
     path("nominee/<slug:nominee_id>/", ballot_views.nominee_detail, name="nominee_detail"),
+    path("nominee/<slug:nominee_id>/qr.png", ballot_views.nominee_qr_code, name="nominee_qr_code"),
     path("nominee/<slug:nominee_id>/vote/", ballot_views.vote_nominee, name="vote_nominee"),
 
     # Admin

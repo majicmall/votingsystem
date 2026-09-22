@@ -338,7 +338,7 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
-SITE_URL = os.environ.get("SITE_URL", "https://atlshottestawards.onrender.com")
+SITE_URL = os.environ.get("SITE_URL", "https://app.atlshottest.com").rstrip("/")
 
 # -------------------------------------------------------------------
 # MajicMall Megaverse integration
