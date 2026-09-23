@@ -524,7 +524,7 @@ class Nominee(models.Model):
         self.rejected_at = timezone.now()
         self.save(update_fields=["approval_status", "rejected_at", "updated_at"])
 
-    def send_approval_email(self, user, temporary_password=None):
+    def send_approval_email(self, user, temporary_password=None, account_created=False):
         """
         Send polished nominee approval / nomination email.
 
@@ -545,6 +545,7 @@ class Nominee(models.Model):
             nominee_name=self.name,
             username=getattr(user, "username", None) or self.contact_email,
             temporary_password=temporary_password,
+            account_created=account_created,
             categories=[self.category.name] if self.category else [],
             login_url=absolute_url("/accounts/login/"),
             dashboard_url=absolute_url("/association/dashboard/"),
@@ -606,6 +607,7 @@ class Nominee(models.Model):
         self.send_approval_email(
             user,
             temporary_password=temporary_password if (created or temporary_password) else None,
+            account_created=created,
         )
 
         return user

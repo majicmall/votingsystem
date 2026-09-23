@@ -109,6 +109,7 @@ def send_nominee_approved_email(
     dashboard_url: str | None = None,
     nominee_url: str | None = None,
     temporary_password: str | None = None,
+    account_created: bool = False,
     categories: Iterable | None = None,
     password_reset_url: str | None = None,
 ) -> None:
@@ -219,13 +220,40 @@ Nominee profile:
 
     subject = "Congratulations — You’re Nominated for ATL’s Hottest Awards"
 
+    if account_created:
+        approval_text = (
+            "Your nomination has been approved, and your ATL's Hottest nominee "
+            "account has been created. You can now log in to your Association "
+            "Dashboard to review your profile information, update professional "
+            "details, and prepare for nominee updates."
+        )
+        approval_html = (
+            "Your nomination has been approved, and your "
+            "<strong style=\"color:#ffd76a;\">ATL’s Hottest nominee account has been created</strong>. "
+            "You can now log in to your Association Dashboard to review your profile "
+            "information, update professional details, and prepare for nominee updates."
+        )
+        header_status = "Your nomination has been approved and your nominee account has been created."
+    else:
+        approval_text = (
+            "Your nomination in the category below has been approved and added to "
+            "your existing ATL's Hottest nominee account. Use your existing account "
+            "to access your Association Dashboard."
+        )
+        approval_html = (
+            "Your nomination in the category below has been approved and added to "
+            "your <strong style=\"color:#ffd76a;\">existing ATL’s Hottest nominee account</strong>. "
+            "Use your existing account to access your Association Dashboard."
+        )
+        header_status = "Your nomination has been approved and added to your existing nominee account."
+
     text_body = f"""ATL's Hottest Awards
 
 Congratulations {nominee_name}!
 
 You are nominated for ATL's Hottest Awards.
 
-Your nominee account has been approved, and you can now log in to your Association Dashboard to review your profile information, update professional details, and prepare for nominee updates.
+{approval_text}
 
 Your nominated categories:
 {category_lines_text}
@@ -259,7 +287,7 @@ Official Awards • Association • Media Platform
         Congratulations, You Are Nominated
       </h1>
       <p style="margin:12px 0 0;color:#f3ddb2;font-size:16px;line-height:1.55;">
-        ATL’s Hottest Awards has approved your nominee account.
+        {header_status}
       </p>
     </div>
 
@@ -270,7 +298,7 @@ Official Awards • Association • Media Platform
 
       <p style="margin:0 0 18px;font-size:17px;line-height:1.65;color:#f5f5f5;">
         You are officially nominated for <strong style="color:#ffd76a;">ATL’s Hottest Awards</strong>. 
-        Your nominee account has been approved, and you can now log in to your Association Dashboard to review your profile information, update professional details, and prepare for nominee updates.
+        {approval_html}
       </p>
 
       <div style="margin:24px 0;padding:20px;border:1px solid rgba(255,215,106,0.48);border-radius:18px;background:rgba(255,215,106,0.075);">
