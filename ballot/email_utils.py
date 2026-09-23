@@ -4,6 +4,7 @@ from typing import Iterable
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.core import signing
 from django.utils.html import escape
 
 
@@ -355,3 +356,56 @@ Official Awards • Association • Media Platform
     )
     email.attach_alternative(html_body, "text/html")
     email.send(fail_silently=False)
+
+
+COMMUNICATIONS_UNSUBSCRIBE_SALT = "atls-hottest-communications-unsubscribe-v1"
+
+
+def communications_unsubscribe_token(email: str) -> str:
+    """
+    Create a tamper-resistant token for an email-level unsubscribe link.
+
+    The email address itself is not exposed in the public URL.
+    """
+    normalized_email = (email or "").strip().lower()
+
+    if not normalized_email:
+        raise ValueError("An email address is required.")
+
+    return signing.dumps(
+        {"email": normalized_email},
+        salt=COMMUNICATIONS_UNSUBSCRIBE_SALT,
+        compress=True,
+    )
+
+
+def communications_email_from_token(token: str) -> str:
+    """
+    Verify an unsubscribe token and return its normalized email address.
+
+    BadSignature is intentionally allowed to propagate so callers can
+    fail closed.
+    """
+    payload = signing.loads(
+        token,
+        salt=COMMUNICATIONS_UNSUBSCRIBE_SALT,
+    )
+
+    email = str(payload.get("email", "")).strip().lower()
+
+    if not email:
+        raise signing.BadSignature("Unsubscribe token has no email address.")
+
+    return email
+
+
+def communications_unsubscribe_url(email: str) -> str:
+    """
+    Build the public signed unsubscribe URL used by optional promotional
+    communications.
+    """
+    token = communications_unsubscribe_token(email)
+
+    return absolute_url(
+        f"/communications/unsubscribe/{token}/"
+    )

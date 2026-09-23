@@ -35,6 +35,88 @@
       padding-top:24px;
       border-top:1px solid rgba(255,255,255,.10);
     ">
+      <h2 style="color:#fff;margin-top:0;">
+        Communications Preferences
+      </h2>
+
+      <p style="color:rgba(255,255,255,.72);line-height:1.6;">
+        Optional Promotional Communications
+      </p>
+
+      {% if communication_preference %}
+        <p style="color:#fff;line-height:1.6;">
+          Current status:
+          {% if communication_preference.marketing_allowed %}
+            <strong style="color:#efc954;">Enabled</strong>
+          {% else %}
+            <strong style="color:#ff8b8b;">Disabled</strong>
+          {% endif %}
+        </p>
+
+        <form method="post" action="{% url 'account_settings' %}">
+          {% csrf_token %}
+
+          {% if communication_preference.marketing_allowed %}
+            <button
+              type="submit"
+              name="communications_action"
+              value="disable"
+              style="
+                padding:12px 18px;
+                border:1px solid #ff6b6b;
+                border-radius:10px;
+                background:transparent;
+                color:#ff8b8b;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              Disable Promotional Emails
+            </button>
+          {% else %}
+            <button
+              type="submit"
+              name="communications_action"
+              value="enable"
+              style="
+                padding:12px 18px;
+                border:1px solid #efc954;
+                border-radius:10px;
+                background:#efc954;
+                color:#050505;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              Enable Promotional Emails
+            </button>
+          {% endif %}
+        </form>
+
+        <p style="
+          margin-top:16px;
+          color:rgba(255,255,255,.58);
+          line-height:1.55;
+          font-size:.9rem;
+        ">
+          This preference applies only to optional news, announcements,
+          invitations, promotions, and marketing. Password resets, security
+          notices, nomination or account status messages, receipts, and other
+          necessary service communications are unaffected.
+        </p>
+      {% else %}
+        <p style="color:rgba(255,255,255,.65);line-height:1.6;">
+          Add an email address to your account to manage optional promotional
+          communications.
+        </p>
+      {% endif %}
+    </div>
+
+    <div style="
+      margin-top:28px;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,.10);
+    ">
       <h2 style="color:#fff;margin-top:0;">Privacy & Account</h2>
 
       <p style="color:rgba(255,255,255,.72);line-height:1.6;">

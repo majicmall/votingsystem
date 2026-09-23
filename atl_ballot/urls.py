@@ -139,6 +139,11 @@ urlpatterns = [
         name="account_deletion_info",
     ),
     path(
+        "communications/unsubscribe/<str:token>/",
+        account_compliance.communications_unsubscribe,
+        name="communications_unsubscribe",
+    ),
+    path(
         "privacy/",
         account_compliance.privacy_policy,
         name="privacy_policy",

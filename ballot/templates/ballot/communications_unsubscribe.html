@@ -1,0 +1,111 @@
+{% extends "ballot/base.html" %}
+
+{% block content %}
+<section style="
+  min-height:70vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px 20px;
+  background:#050505;
+">
+  <div style="
+    width:100%;
+    max-width:680px;
+    padding:34px;
+    border:1px solid rgba(239,201,84,.35);
+    border-radius:18px;
+    background:rgba(12,12,12,.96);
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+  ">
+
+    {% if invalid_token %}
+
+      <h1 style="margin-top:0;color:#fff;">
+        Invalid Unsubscribe Link
+      </h1>
+
+      <p style="color:rgba(255,255,255,.72);line-height:1.65;">
+        This communications preference link is invalid or has been altered.
+      </p>
+
+      <p>
+        <a href="{% url 'privacy_policy' %}" style="color:#efc954;">
+          Review Privacy Policy
+        </a>
+      </p>
+
+    {% elif unsubscribed %}
+
+      <h1 style="margin-top:0;color:#fff;">
+        Promotional Emails Disabled
+      </h1>
+
+      <p style="color:rgba(255,255,255,.78);line-height:1.65;">
+        Your preference has been updated. You will no longer receive
+        optional ATL's Hottest promotional communications at this email
+        address.
+      </p>
+
+      <p style="color:rgba(255,255,255,.58);line-height:1.6;">
+        Necessary service communications such as security notices,
+        password resets, nomination or account status messages, receipts,
+        and transaction information are not affected.
+      </p>
+
+    {% elif already_unsubscribed %}
+
+      <h1 style="margin-top:0;color:#fff;">
+        Promotional Emails Already Disabled
+      </h1>
+
+      <p style="color:rgba(255,255,255,.72);line-height:1.65;">
+        Optional promotional communications are already disabled for this
+        email address.
+      </p>
+
+    {% else %}
+
+      <h1 style="margin-top:0;color:#fff;">
+        Unsubscribe from Promotional Emails?
+      </h1>
+
+      <p style="color:rgba(255,255,255,.78);line-height:1.65;">
+        Confirm below to stop optional ATL's Hottest news,
+        announcements, invitations, promotions, and marketing emails.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <button
+          type="submit"
+          style="
+            padding:13px 20px;
+            border:1px solid #ff6b6b;
+            border-radius:10px;
+            background:transparent;
+            color:#ff8b8b;
+            font-weight:800;
+            cursor:pointer;
+          "
+        >
+          Confirm Unsubscribe
+        </button>
+      </form>
+
+      <p style="
+        margin-top:18px;
+        color:rgba(255,255,255,.55);
+        line-height:1.55;
+        font-size:.9rem;
+      ">
+        Opening this page does not change your preference. Your preference
+        changes only after you select Confirm Unsubscribe.
+      </p>
+
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

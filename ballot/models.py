@@ -623,6 +623,77 @@ class Nominee(models.Model):
 # Nomination Ledger
 # ---------------------------------------------------------------------
 
+class CommunicationPreference(models.Model):
+    """
+    Current email-level preference for optional ATL's Hottest promotional
+    communications.
+
+    Historical consent evidence remains on the original nomination/check-in
+    records. Transactional and service communications are not controlled by
+    this preference.
+    """
+
+    email = models.EmailField(unique=True, db_index=True)
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="communication_preference",
+        blank=True,
+        null=True,
+    )
+
+    marketing_allowed = models.BooleanField(default=False)
+
+    consented_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When promotional communications were most recently authorized.",
+    )
+
+    consent_version = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        help_text="Consent-language version associated with the current authorization.",
+    )
+
+    withdrawn_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When promotional communications were most recently withdrawn.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["email"]
+
+    def save(self, *args, **kwargs):
+        if self.email:
+            self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
+
+    def grant_marketing_consent(self, *, version="2026-09-v1"):
+        self.marketing_allowed = True
+        self.consented_at = timezone.now()
+        self.consent_version = version
+        self.withdrawn_at = None
+        self.save()
+
+    def withdraw_marketing_consent(self):
+        self.marketing_allowed = False
+        self.withdrawn_at = timezone.now()
+
+        # Preserve consented_at and consent_version as historical evidence.
+        self.save()
+
+    def __str__(self):
+        status = "allowed" if self.marketing_allowed else "withdrawn"
+        return f"{self.email} ({status})"
+
+
 class NominationLedger(models.Model):
     """
     Permanent record of each valid ATL's Hottest nomination recognition.

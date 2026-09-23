@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core import signing
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
@@ -7,24 +8,108 @@ from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
+from ballot.models import CommunicationPreference
+
 
 User = get_user_model()
 
 
 @login_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
+@csrf_protect
 def account_settings(request):
     """
     Central account-management screen.
 
-    This becomes the in-app location for security, privacy,
-    and account-deletion controls.
+    Optional promotional communications are controlled independently from
+    transactional/service messages required to operate the account.
     """
+    email = (request.user.email or "").strip().lower()
+
+    preference = None
+    if email:
+        # Prefer the preference already owned by this account. This safely
+        # handles an account email change without creating a second row for
+        # the same user.
+        preference = CommunicationPreference.objects.filter(
+            user=request.user
+        ).first()
+
+        if preference:
+            if preference.email != email:
+                email_conflict = CommunicationPreference.objects.filter(
+                    email=email
+                ).exclude(pk=preference.pk).exists()
+
+                if email_conflict:
+                    messages.error(
+                        request,
+                        "Communication preferences could not be linked to this email address.",
+                    )
+                    preference = None
+                else:
+                    preference.email = email
+                    preference.save(update_fields=["email", "updated_at"])
+        else:
+            email_preference = CommunicationPreference.objects.filter(
+                email=email
+            ).first()
+
+            if email_preference:
+                if email_preference.user_id is None:
+                    email_preference.user = request.user
+                    email_preference.save(update_fields=["user", "updated_at"])
+                    preference = email_preference
+                elif email_preference.user_id == request.user.id:
+                    preference = email_preference
+                else:
+                    messages.error(
+                        request,
+                        "Communication preferences could not be linked to this email address.",
+                    )
+            else:
+                preference = CommunicationPreference.objects.create(
+                    email=email,
+                    user=request.user,
+                    marketing_allowed=False,
+                )
+
+    if request.method == "POST":
+        if not preference:
+            messages.error(
+                request,
+                "Add an email address to your account before changing communication preferences.",
+            )
+            return redirect("account_settings")
+
+        action = request.POST.get("communications_action", "").strip()
+
+        if action == "enable":
+            preference.grant_marketing_consent()
+            messages.success(
+                request,
+                "Promotional communications have been enabled.",
+            )
+        elif action == "disable":
+            preference.withdraw_marketing_consent()
+            messages.success(
+                request,
+                "Promotional communications have been disabled.",
+            )
+        else:
+            messages.error(
+                request,
+                "We could not update that communications preference.",
+            )
+
+        return redirect("account_settings")
+
     return render(
         request,
         "ballot/account_settings.html",
         {
             "account_user": request.user,
+            "communication_preference": preference,
         },
     )
 
@@ -112,3 +197,51 @@ def privacy_policy(request):
 @require_http_methods(["GET"])
 def terms_of_service(request):
     return render(request, "ballot/terms_of_service.html")
+
+
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def communications_unsubscribe(request, token):
+    """
+    Public confirmation endpoint for withdrawing optional promotional
+    communications.
+
+    GET never changes the preference. POST performs the withdrawal.
+    """
+    from ballot.email_utils import communications_email_from_token
+
+    try:
+        email = communications_email_from_token(token)
+    except signing.BadSignature:
+        return render(
+            request,
+            "ballot/communications_unsubscribe.html",
+            {"invalid_token": True},
+            status=400,
+        )
+
+    preference = CommunicationPreference.objects.filter(email=email).first()
+
+    if request.method == "POST":
+        if preference and preference.marketing_allowed:
+            preference.withdraw_marketing_consent()
+
+        return render(
+            request,
+            "ballot/communications_unsubscribe.html",
+            {
+                "unsubscribed": True,
+                "email": email,
+            },
+        )
+
+    return render(
+        request,
+        "ballot/communications_unsubscribe.html",
+        {
+            "email": email,
+            "already_unsubscribed": bool(
+                preference and not preference.marketing_allowed
+            ),
+        },
+    )

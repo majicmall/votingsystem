@@ -38,6 +38,7 @@ from .models import (
     AssociationProfile,
     BallotSettings,
     Category,
+    CommunicationPreference,
     NominationCategoryRequest,
     NominationLedger,
     Nominee,
@@ -888,6 +889,17 @@ def self_nomination_checkin(request):
 
     checkin.save()
 
+    # An explicit promotional opt-in updates the current email-level
+    # preference. Leaving the box unchecked does not revoke an earlier
+    # authorization; withdrawal is handled separately.
+    if checkin.communications_consent:
+        preference, _ = CommunicationPreference.objects.get_or_create(
+            email=checkin.email.strip().lower(),
+        )
+        preference.grant_marketing_consent(
+            version=checkin.communications_consent_version,
+        )
+
     # Save selected categories only after the Check-In record exists.
     form.save_m2m()
 
@@ -985,6 +997,20 @@ def nominee_signup(request):
             )
 
             created_nominees.append(nominee)
+
+            # Explicit nomination-form consent grants the current
+            # email-level promotional preference. An unchecked box does
+            # not revoke an earlier authorization.
+            if (
+                form.cleaned_data.get("communications_consent", False)
+                and nominator_email
+            ):
+                preference, _ = CommunicationPreference.objects.get_or_create(
+                    email=nominator_email,
+                )
+                preference.grant_marketing_consent(
+                    version="2026-09-v1",
+                )
 
             if request.user.is_authenticated:
                 AssociationMembership.objects.get_or_create(
