@@ -1141,7 +1141,7 @@
                                 </div>
                             {% endif %}
 
-                            {% if order.status == "awaiting_payment" %}
+                            {% if order.status == "awaiting_payment" and order.is_complimentary %}
                                 <form method="post"
                                       action="{% url 'event_promotion_order_action' order.pk %}">
                                     {% csrf_token %}
@@ -1156,7 +1156,7 @@
                                         font-weight:900;
                                         cursor:pointer;
                                     ">
-                                        Mark Paid
+                                        Authorize Complimentary
                                     </button>
                                 </form>
                             {% endif %}

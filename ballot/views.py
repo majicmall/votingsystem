@@ -3653,19 +3653,33 @@ def event_promotion_order_action(request, pk):
             )
 
     elif action == "paid":
-        if order.quoted_amount <= 0 and not order.is_complimentary:
+        # SECURITY / REVENUE RULE:
+        # Normal paid promotions may only become Paid through the
+        # verified Stripe webhook. Staff cannot manually simulate
+        # successful customer payment.
+        if not order.is_complimentary:
             messages.error(
                 request,
-                "A $0.00 promotion cannot be marked Paid. "
-                "Enter a valid quote or authorize it as complimentary."
+                "Paid status is controlled by verified Stripe payment. "
+                "This order cannot be manually marked paid."
             )
             return redirect("event_approval_center")
 
+        # Complimentary campaigns are explicitly staff-authorized and
+        # do not represent collected revenue.
         order.status = "paid"
-        order.save(update_fields=["status", "updated_at"])
+        order.stripe_payment_status = ""
+        order.save(
+            update_fields=[
+                "status",
+                "stripe_payment_status",
+                "updated_at",
+            ]
+        )
+
         messages.success(
             request,
-            f"{event.title}: promotion order marked paid."
+            f"{event.title}: complimentary promotion authorized for activation."
         )
 
     elif action == "activate":
