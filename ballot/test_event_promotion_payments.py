@@ -17,6 +17,7 @@ User = get_user_model()
     STRIPE_SECRET_KEY="sk_test_008",
     STRIPE_WEBHOOK_SECRET="whsec_test_008",
 )
+@override_settings(SECURE_SSL_REDIRECT=False)
 class EventPromotionPaymentSecurityTests(TestCase):
     def setUp(self):
         now = timezone.now()
@@ -223,6 +224,7 @@ class EventPromotionPaymentSecurityTests(TestCase):
         self.assertEqual(self.order.paid_at, original_paid_at)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
 class EventPromotionStaffPaymentTests(TestCase):
     def setUp(self):
         now = timezone.now()
