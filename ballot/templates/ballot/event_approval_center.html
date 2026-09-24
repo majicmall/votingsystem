@@ -919,6 +919,273 @@
             </p>
         </div>
 
+        <!-- =====================================================
+             008-G: EVENT PROMOTION REVENUE MONEY BOARD
+             ===================================================== -->
+
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+            gap:12px;
+            margin:22px 0 26px;
+        ">
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:linear-gradient(
+                    145deg,
+                    rgba(22,92,52,.28),
+                    rgba(5,18,10,.92)
+                );
+                border:1px solid rgba(103,255,159,.28);
+                box-shadow:inset 0 0 24px rgba(73,255,139,.04);
+            ">
+                <div style="
+                    color:#8ff0ae;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Collected Revenue
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:clamp(1.45rem,5vw,2rem);
+                    font-weight:900;
+                ">
+                    ${{ revenue_metrics.collected_revenue|floatformat:2 }}
+                </div>
+
+                <div style="
+                    color:#86a991;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Stripe verified
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:linear-gradient(
+                    145deg,
+                    rgba(130,89,15,.24),
+                    rgba(20,14,4,.92)
+                );
+                border:1px solid rgba(244,199,91,.28);
+            ">
+                <div style="
+                    color:#f4c75b;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Awaiting Payment
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:clamp(1.45rem,5vw,2rem);
+                    font-weight:900;
+                ">
+                    ${{ revenue_metrics.awaiting_payment_revenue|floatformat:2 }}
+                </div>
+
+                <div style="
+                    color:#aa9564;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    {{ revenue_metrics.awaiting_payment_orders }}
+                    order{{ revenue_metrics.awaiting_payment_orders|pluralize }}
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:rgba(255,255,255,.035);
+                border:1px solid rgba(255,255,255,.11);
+            ">
+                <div style="
+                    color:#aaa;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Paid Orders
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:1.85rem;
+                    font-weight:900;
+                ">
+                    {{ revenue_metrics.paid_orders }}
+                </div>
+
+                <div style="
+                    color:#777;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Verified payments
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:rgba(255,255,255,.035);
+                border:1px solid rgba(255,255,255,.11);
+            ">
+                <div style="
+                    color:#aaa;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Active
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:1.85rem;
+                    font-weight:900;
+                ">
+                    {{ revenue_metrics.active_promotions }}
+                </div>
+
+                <div style="
+                    color:#777;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Live promotions
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:rgba(255,255,255,.035);
+                border:1px solid rgba(255,255,255,.11);
+            ">
+                <div style="
+                    color:#aaa;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Completed
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:1.85rem;
+                    font-weight:900;
+                ">
+                    {{ revenue_metrics.completed_promotions }}
+                </div>
+
+                <div style="
+                    color:#777;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Finished campaigns
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:rgba(255,255,255,.035);
+                border:1px solid rgba(255,255,255,.11);
+            ">
+                <div style="
+                    color:#aaa;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Complimentary
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:1.85rem;
+                    font-weight:900;
+                ">
+                    {{ revenue_metrics.complimentary_promotions }}
+                </div>
+
+                <div style="
+                    color:#777;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Not counted as revenue
+                </div>
+            </div>
+
+
+            <div style="
+                padding:18px 15px;
+                border-radius:16px;
+                background:rgba(255,255,255,.035);
+                border:1px solid rgba(255,255,255,.11);
+            ">
+                <div style="
+                    color:#aaa;
+                    font-size:.68rem;
+                    font-weight:900;
+                    letter-spacing:.11em;
+                    text-transform:uppercase;
+                    margin-bottom:8px;
+                ">
+                    Total Orders
+                </div>
+
+                <div style="
+                    color:#fff;
+                    font-size:1.85rem;
+                    font-weight:900;
+                ">
+                    {{ revenue_metrics.total_orders }}
+                </div>
+
+                <div style="
+                    color:#777;
+                    font-size:.72rem;
+                    margin-top:6px;
+                ">
+                    Full pipeline
+                </div>
+            </div>
+
+        </div>
+
         {% if promotion_orders %}
 
             <div style="

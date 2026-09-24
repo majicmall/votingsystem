@@ -2489,6 +2489,66 @@ def event_approval_center(request):
         "all": AtlsHottestEvent.objects.count(),
     }
 
+    # ---------------------------------------------------------
+    # 008-G: EVENT PROMOTION REVENUE COMMAND
+    # ---------------------------------------------------------
+    # Promotion orders are intentionally separate from event
+    # approval. Revenue totals only count verified Stripe-paid
+    # customer orders. Complimentary promotions never count as
+    # collected revenue.
+    promotion_orders = (
+        EventPromotionOrder.objects
+        .select_related("event")
+        .order_by("-created_at")
+    )
+
+    from django.db.models import Sum
+    from django.db.models.functions import Coalesce
+    from decimal import Decimal
+
+    money_orders = promotion_orders.filter(
+        is_complimentary=False,
+        stripe_payment_status="paid",
+        paid_at__isnull=False,
+    )
+
+    collected_revenue = money_orders.aggregate(
+        total=Coalesce(
+            Sum("quoted_amount"),
+            Decimal("0.00"),
+        )
+    )["total"]
+
+    awaiting_payment_revenue = promotion_orders.filter(
+        status="awaiting_payment",
+        is_complimentary=False,
+    ).aggregate(
+        total=Coalesce(
+            Sum("quoted_amount"),
+            Decimal("0.00"),
+        )
+    )["total"]
+
+    revenue_metrics = {
+        "collected_revenue": collected_revenue,
+        "awaiting_payment_revenue": awaiting_payment_revenue,
+        "paid_orders": money_orders.count(),
+        "awaiting_payment_orders": promotion_orders.filter(
+            status="awaiting_payment",
+            is_complimentary=False,
+        ).count(),
+        "active_promotions": promotion_orders.filter(
+            status="activated",
+        ).count(),
+        "completed_promotions": promotion_orders.filter(
+            status="completed",
+        ).count(),
+        "complimentary_promotions": promotion_orders.filter(
+            is_complimentary=True,
+        ).count(),
+        "total_orders": promotion_orders.count(),
+    }
+
     return render(
         request,
         "ballot/event_approval_center.html",
@@ -2496,6 +2556,8 @@ def event_approval_center(request):
             "events": events,
             "selected_status": selected_status,
             "counts": counts,
+            "promotion_orders": promotion_orders,
+            "revenue_metrics": revenue_metrics,
         },
     )
 
