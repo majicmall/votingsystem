@@ -21,6 +21,8 @@ from django.db import models
 from django.db.models import Count
 from django.urls import reverse
 from django.utils import timezone
+from decimal import Decimal, ROUND_HALF_UP
+from django.db.models import Sum
 from django.utils.text import slugify
 from ballot.email_utils import absolute_url, send_nominee_approved_email
 
@@ -2615,6 +2617,18 @@ class AdvertisingPlayoutReservation(models.Model):
         related_name="playout_reservations",
     )
 
+    campaign = models.ForeignKey(
+        "AdvertisingCampaign",
+        on_delete=models.PROTECT,
+        related_name="playout_reservations",
+        null=True,
+        blank=True,
+        help_text=(
+            "Paid advertising campaign that purchased this six-second "
+            "inventory unit. House and Advertise Here inventory may be blank."
+        ),
+    )
+
     source_type = models.CharField(
         max_length=30,
         choices=SOURCE_CHOICES,
@@ -2759,6 +2773,17 @@ class AdvertisingPlayoutReservation(models.Model):
                 )
             })
 
+        if (
+            self.source_type == self.SOURCE_PAID
+            and self.campaign_id is None
+        ):
+            raise ValidationError({
+                "campaign": (
+                    "Paid advertising inventory must belong to an "
+                    "Advertising Campaign."
+                )
+            })
+
 
 def reserve_advertising_appearance(
     *,
@@ -2766,6 +2791,7 @@ def reserve_advertising_appearance(
     creative,
     starts_at,
     locked_slot_price,
+    campaign=None,
 ):
     """
     Atomically reserve one complete uninterrupted appearance.
@@ -2815,6 +2841,7 @@ def reserve_advertising_appearance(
                     appearance_id=appearance_id,
                     placement=placement,
                     creative=creative,
+                    campaign=campaign,
                     source_type=creative.creative_type,
                     slot_start=slot_start,
                     slot_end=slot_end,
@@ -2834,3 +2861,364 @@ def reserve_advertising_appearance(
         ) from exc
 
     return reservations
+
+
+# =====================================================================
+# 008-H3A — CAMPAIGN PLAYOUT MONEY LEDGER
+# =====================================================================
+
+class AdvertisingRevenuePolicy(models.Model):
+    """
+    Configurable internal accounting policy for advertising media spend.
+
+    IMPORTANT:
+    The advertiser receives the full media value purchased.
+
+    Example:
+        Advertiser media spend:        $100.00
+        ATL's Hottest revenue share:    $15.00 at 15%
+        Media value delivered:         $100.00
+
+    The revenue share is an internal allocation of collected advertising
+    revenue. It does NOT reduce the advertiser's purchased media value.
+    """
+
+    name = models.CharField(
+        max_length=120,
+        default="ATL's Hottest Standard Advertising Revenue Policy",
+    )
+
+    platform_share_percent = models.DecimalField(
+        max_digits=6,
+        decimal_places=3,
+        default=Decimal("15.000"),
+        help_text=(
+            "ATL's Hottest internal share of advertising media spend. "
+            "15.000 means 15 percent."
+        ),
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+    )
+
+    effective_at = models.DateTimeField(
+        default=timezone.now,
+        db_index=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-effective_at", "-id"]
+        verbose_name = "Advertising Revenue Policy"
+        verbose_name_plural = "Advertising Revenue Policies"
+
+    def __str__(self):
+        return (
+            f"{self.name} — "
+            f"{self.platform_share_percent}%"
+        )
+
+    def clean(self):
+        super().clean()
+
+        if self.platform_share_percent < 0:
+            raise ValidationError({
+                "platform_share_percent":
+                    "Platform revenue share cannot be negative."
+            })
+
+        if self.platform_share_percent > 100:
+            raise ValidationError({
+                "platform_share_percent":
+                    "Platform revenue share cannot exceed 100 percent."
+            })
+
+    @classmethod
+    def current(cls):
+        return (
+            cls.objects
+            .filter(
+                is_active=True,
+                effective_at__lte=timezone.now(),
+            )
+            .order_by("-effective_at", "-id")
+            .first()
+        )
+
+
+class AdvertisingCampaignSpend(models.Model):
+    """
+    Immutable financial snapshot for one purchased advertising appearance.
+
+    One spend row represents ONE complete appearance, even when that
+    appearance contains multiple consecutive six-second reservations.
+
+    Example:
+        12-second creative
+        2 x six-second reservations
+        $0.75 per six-second unit
+
+        media_spend          = $1.50
+        platform_share_rate  = 15.000%
+        platform_share       = $0.23
+
+    The campaign consumes $1.50 of advertiser media budget — NOT $1.73.
+    """
+
+    campaign = models.ForeignKey(
+        "AdvertisingCampaign",
+        on_delete=models.PROTECT,
+        related_name="playout_spend_entries",
+    )
+
+    creative = models.ForeignKey(
+        "AdvertisingPlayoutCreative",
+        on_delete=models.PROTECT,
+        related_name="campaign_spend_entries",
+    )
+
+    appearance_id = models.UUIDField(
+        unique=True,
+        db_index=True,
+        help_text=(
+            "Appearance identifier shared by all six-second reservation "
+            "rows represented by this spend entry."
+        ),
+    )
+
+    placement = models.CharField(
+        max_length=50,
+        choices=BillboardAd.PLACEMENT_CHOICES,
+        db_index=True,
+    )
+
+    slot_count = models.PositiveIntegerField(
+        help_text="Number of six-second units purchased.",
+    )
+
+    locked_slot_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        help_text=(
+            "Locked sale price of one six-second unit at purchase time."
+        ),
+    )
+
+    media_spend = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        help_text=(
+            "Total advertiser media value consumed by this appearance."
+        ),
+    )
+
+    platform_share_percent = models.DecimalField(
+        max_digits=6,
+        decimal_places=3,
+        default=Decimal("15.000"),
+        help_text=(
+            "Revenue-share percentage permanently locked when purchased."
+        ),
+    )
+
+    platform_share_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        help_text=(
+            "ATL's Hottest internal revenue allocation from media spend."
+        ),
+    )
+
+    purchased_at = models.DateTimeField(
+        default=timezone.now,
+        db_index=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-purchased_at", "-id"]
+        verbose_name = "Advertising Campaign Spend"
+        verbose_name_plural = "Advertising Campaign Spend"
+
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(slot_count__gte=1),
+                name="ad_campaign_spend_slot_count_gte_one",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(locked_slot_price__gte=0),
+                name="ad_campaign_spend_slot_price_gte_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(media_spend__gte=0),
+                name="ad_campaign_spend_media_gte_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(platform_share_percent__gte=0),
+                name="ad_campaign_spend_share_percent_gte_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(platform_share_percent__lte=100),
+                name="ad_campaign_spend_share_percent_lte_100",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(platform_share_amount__gte=0),
+                name="ad_campaign_spend_share_amount_gte_zero",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.campaign} — "
+            f"{self.slot_count} slot(s) — "
+            f"${self.media_spend}"
+        )
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError(
+                "Advertising campaign spend entries are immutable."
+            )
+
+        super().save(*args, **kwargs)
+
+
+def advertising_campaign_playout_spend(campaign):
+    """
+    Media budget actually consumed by H3 playout purchases.
+    """
+    total = (
+        campaign.playout_spend_entries
+        .aggregate(total=Sum("media_spend"))
+        ["total"]
+    )
+
+    return total or Decimal("0.00")
+
+
+def advertising_campaign_playout_remaining(campaign):
+    """
+    Remaining advertiser media value available to the playout allocator.
+
+    Internal ATL's Hottest revenue allocation is deliberately NOT
+    subtracted again.
+    """
+    total_budget = campaign.total_budget or Decimal("0.00")
+
+    return (
+        total_budget -
+        advertising_campaign_playout_spend(campaign)
+    )
+
+
+def record_advertising_campaign_spend(
+    *,
+    campaign,
+    creative,
+    reservations,
+    policy=None,
+):
+    """
+    Create the immutable financial record for one complete appearance.
+
+    Reservations must all:
+      * belong to the same appearance
+      * belong to the supplied campaign
+      * use the same placement
+      * use the same locked six-second price
+    """
+
+    if not reservations:
+        raise ValidationError(
+            "At least one playout reservation is required."
+        )
+
+    appearance_ids = {
+        reservation.appearance_id
+        for reservation in reservations
+    }
+
+    if len(appearance_ids) != 1:
+        raise ValidationError(
+            "Spend may only be recorded for one appearance at a time."
+        )
+
+    if any(
+        reservation.campaign_id != campaign.pk
+        for reservation in reservations
+    ):
+        raise ValidationError(
+            "Every reservation must belong to the supplied campaign."
+        )
+
+    placements = {
+        reservation.placement
+        for reservation in reservations
+    }
+
+    if len(placements) != 1:
+        raise ValidationError(
+            "All appearance reservations must use one placement."
+        )
+
+    prices = {
+        reservation.locked_slot_price
+        for reservation in reservations
+    }
+
+    if len(prices) != 1:
+        raise ValidationError(
+            "All appearance reservations must share one locked slot price."
+        )
+
+    slot_price = next(iter(prices))
+    slot_count = len(reservations)
+
+    media_spend = (
+        slot_price * Decimal(slot_count)
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    remaining = advertising_campaign_playout_remaining(campaign)
+
+    if media_spend > remaining:
+        raise ValidationError(
+            "This appearance exceeds the campaign's remaining media budget."
+        )
+
+    if policy is None:
+        policy = AdvertisingRevenuePolicy.current()
+
+    share_percent = (
+        policy.platform_share_percent
+        if policy is not None
+        else Decimal("15.000")
+    )
+
+    platform_share = (
+        media_spend *
+        share_percent /
+        Decimal("100")
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    return AdvertisingCampaignSpend.objects.create(
+        campaign=campaign,
+        creative=creative,
+        appearance_id=next(iter(appearance_ids)),
+        placement=next(iter(placements)),
+        slot_count=slot_count,
+        locked_slot_price=slot_price,
+        media_spend=media_spend,
+        platform_share_percent=share_percent,
+        platform_share_amount=platform_share,
+    )

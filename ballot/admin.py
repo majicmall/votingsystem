@@ -6,6 +6,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import (
+    AdvertisingRevenuePolicy,
+    AdvertisingCampaignSpend,
     AdvertisingPlayoutReservation,
     AdvertisingDaypart,
     AdvertisingInventorySchedule,
@@ -1686,3 +1688,61 @@ class AdvertisingPlayoutReservationAdmin(admin.ModelAdmin):
             f"{obj.sequence_number}/"
             f"{obj.appearance_slot_count}"
         )
+
+
+
+@admin.register(AdvertisingRevenuePolicy)
+class AdvertisingRevenuePolicyAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "platform_share_percent",
+        "is_active",
+        "effective_at",
+    )
+    list_filter = ("is_active",)
+    ordering = ("-effective_at", "-id")
+
+
+@admin.register(AdvertisingCampaignSpend)
+class AdvertisingCampaignSpendAdmin(admin.ModelAdmin):
+    list_display = (
+        "campaign",
+        "placement",
+        "creative",
+        "slot_count",
+        "media_spend",
+        "platform_share_percent",
+        "platform_share_amount",
+        "purchased_at",
+    )
+
+    list_filter = (
+        "placement",
+        "platform_share_percent",
+    )
+
+    search_fields = (
+        "campaign__name",
+        "creative__name",
+        "appearance_id",
+    )
+
+    readonly_fields = (
+        "campaign",
+        "creative",
+        "appearance_id",
+        "placement",
+        "slot_count",
+        "locked_slot_price",
+        "media_spend",
+        "platform_share_percent",
+        "platform_share_amount",
+        "purchased_at",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

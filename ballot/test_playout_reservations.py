@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from ballot.models import (
+    AdvertisingCampaign,
     AdvertisingPlayoutCreative,
     AdvertisingPlayoutReservation,
     BillboardAd,
@@ -25,6 +26,12 @@ class AdvertisingPlayoutReservationTests(TestCase):
             datetime(2026, 10, 1, 12, 0, 0)
         )
 
+        self.campaign = AdvertisingCampaign.objects.create(
+            advertiser_name="H2 Test Advertiser",
+            campaign_name="H2 Reservation Tests",
+            total_budget=Decimal("1000.00"),
+        )
+
     def make_creative(self, seconds=6, creative_type="paid"):
         return AdvertisingPlayoutCreative.objects.create(
             name=f"{seconds} Second Creative",
@@ -40,6 +47,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         self.assertEqual(len(rows), 1)
@@ -56,6 +64,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         self.assertEqual(len(rows), 2)
@@ -83,6 +92,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.7500"),
+            campaign=self.campaign,
         )
 
         self.assertEqual(len(rows), 5)
@@ -101,6 +111,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("1.2500"),
+            campaign=self.campaign,
         )
 
         self.assertTrue(
@@ -123,6 +134,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative_a,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         with self.assertRaises(ValidationError):
@@ -131,6 +143,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
                 creative=creative_b,
                 starts_at=self.starts_at,
                 locked_slot_price=Decimal("0.5000"),
+                campaign=self.campaign,
             )
 
         self.assertEqual(
@@ -146,6 +159,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=blocker,
             starts_at=self.starts_at + timedelta(seconds=6),
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         twelve_second = AdvertisingPlayoutCreative.objects.create(
@@ -160,6 +174,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
                 creative=twelve_second,
                 starts_at=self.starts_at,
                 locked_slot_price=Decimal("0.5000"),
+                campaign=self.campaign,
             )
 
         # Only the original blocker survives.
@@ -179,6 +194,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         reserve_advertising_appearance(
@@ -186,6 +202,7 @@ class AdvertisingPlayoutReservationTests(TestCase):
             creative=creative,
             starts_at=self.starts_at,
             locked_slot_price=Decimal("0.5000"),
+            campaign=self.campaign,
         )
 
         self.assertEqual(
