@@ -2550,3 +2550,287 @@ class AdvertisingPlayoutCreative(models.Model):
                 "ends_at":
                     "Ending time must be later than starting time."
             })
+
+
+# =====================================================================
+# 008-H2 — SIX-SECOND PLAYOUT RESERVATION LEDGER
+# =====================================================================
+
+class AdvertisingPlayoutReservation(models.Model):
+    """
+    One row represents ownership of exactly ONE six-second inventory unit.
+
+    Longer appearances use multiple consecutive rows that share the same
+    appearance_id.
+
+    Example:
+        12-second appearance = 2 consecutive rows
+        30-second appearance = 5 consecutive rows
+        60-second appearance = 10 consecutive rows
+
+    Database uniqueness prevents two reservations from owning the same
+    advertising property at the same six-second start timestamp.
+    """
+
+    STATUS_RESERVED = "reserved"
+    STATUS_PLAYED = "played"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_MISSED = "missed"
+
+    STATUS_CHOICES = [
+        (STATUS_RESERVED, "Reserved"),
+        (STATUS_PLAYED, "Played"),
+        (STATUS_CANCELLED, "Cancelled"),
+        (STATUS_MISSED, "Missed"),
+    ]
+
+    SOURCE_PAID = "paid"
+    SOURCE_HOUSE = "house"
+    SOURCE_ADVERTISE_HERE = "advertise_here"
+
+    SOURCE_CHOICES = [
+        (SOURCE_PAID, "Paid Advertiser"),
+        (SOURCE_HOUSE, "ATL's Hottest House Promotion"),
+        (SOURCE_ADVERTISE_HERE, "Advertise Here Fallback"),
+    ]
+
+    appearance_id = models.UUIDField(
+        default=uuid.uuid4,
+        db_index=True,
+        help_text=(
+            "All six-second units belonging to one uninterrupted "
+            "appearance share this identifier."
+        ),
+    )
+
+    placement = models.CharField(
+        max_length=50,
+        choices=BillboardAd.PLACEMENT_CHOICES,
+        db_index=True,
+    )
+
+    creative = models.ForeignKey(
+        AdvertisingPlayoutCreative,
+        on_delete=models.PROTECT,
+        related_name="playout_reservations",
+    )
+
+    source_type = models.CharField(
+        max_length=30,
+        choices=SOURCE_CHOICES,
+        db_index=True,
+    )
+
+    slot_start = models.DateTimeField(
+        db_index=True,
+        help_text="Start of this exact six-second inventory unit.",
+    )
+
+    slot_end = models.DateTimeField(
+        help_text="End of this exact six-second inventory unit.",
+    )
+
+    sequence_number = models.PositiveIntegerField(
+        default=1,
+        help_text=(
+            "Position of this slot inside the complete appearance. "
+            "A 12-second appearance uses sequence numbers 1 and 2."
+        ),
+    )
+
+    appearance_slot_count = models.PositiveIntegerField(
+        default=1,
+        help_text=(
+            "Total six-second units required by the complete appearance."
+        ),
+    )
+
+    locked_slot_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        default=0,
+        help_text=(
+            "Sale price permanently locked for this six-second unit. "
+            "Future rate changes do not alter this value."
+        ),
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_RESERVED,
+        db_index=True,
+    )
+
+    played_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Actual proof-of-play timestamp.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [
+            "placement",
+            "slot_start",
+            "sequence_number",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["placement", "slot_start"],
+                name="unique_ad_playout_property_slot",
+            ),
+            models.UniqueConstraint(
+                fields=["appearance_id", "sequence_number"],
+                name="unique_ad_playout_appearance_sequence",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(locked_slot_price__gte=0),
+                name="ad_playout_locked_price_gte_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(sequence_number__gte=1),
+                name="ad_playout_sequence_gte_one",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(appearance_slot_count__gte=1),
+                name="ad_playout_slot_count_gte_one",
+            ),
+        ]
+
+        verbose_name = "Advertising Playout Reservation"
+        verbose_name_plural = "Advertising Playout Reservations"
+
+    def __str__(self):
+        return (
+            f"{self.get_placement_display()} — "
+            f"{self.slot_start} — "
+            f"{self.sequence_number}/{self.appearance_slot_count}"
+        )
+
+    def clean(self):
+        super().clean()
+
+        from datetime import timedelta
+        from django.core.exceptions import ValidationError
+
+        expected_end = self.slot_start + timedelta(
+            seconds=AdvertisingInventorySchedule.SLOT_SECONDS
+        )
+
+        if self.slot_end != expected_end:
+            raise ValidationError({
+                "slot_end": (
+                    "Every reservation row must represent exactly "
+                    "one six-second inventory unit."
+                )
+            })
+
+        if self.sequence_number > self.appearance_slot_count:
+            raise ValidationError({
+                "sequence_number": (
+                    "Sequence number cannot exceed the appearance "
+                    "slot count."
+                )
+            })
+
+        expected_slots = (
+            AdvertisingInventorySchedule
+            .slots_required_for_duration(
+                self.creative.duration_seconds
+            )
+        )
+
+        if self.appearance_slot_count != expected_slots:
+            raise ValidationError({
+                "appearance_slot_count": (
+                    "Appearance slot count must match the creative's "
+                    "six-second duration."
+                )
+            })
+
+        if self.source_type != self.creative.creative_type:
+            raise ValidationError({
+                "source_type": (
+                    "Reservation source type must match the creative type."
+                )
+            })
+
+
+def reserve_advertising_appearance(
+    *,
+    placement,
+    creative,
+    starts_at,
+    locked_slot_price,
+):
+    """
+    Atomically reserve one complete uninterrupted appearance.
+
+    Either every required six-second slot is reserved or none are.
+
+    The database uniqueness constraint provides the final collision
+    protection if another process attempts to reserve the same inventory.
+    """
+
+    from datetime import timedelta
+    from decimal import Decimal
+
+    from django.core.exceptions import ValidationError
+    from django.db import IntegrityError, transaction
+
+    slot_count = (
+        AdvertisingInventorySchedule
+        .slots_required_for_duration(
+            creative.duration_seconds
+        )
+    )
+
+    if locked_slot_price < Decimal("0"):
+        raise ValidationError(
+            "Locked slot price cannot be negative."
+        )
+
+    appearance_id = uuid.uuid4()
+    reservations = []
+
+    try:
+        with transaction.atomic():
+            for index in range(slot_count):
+                slot_start = starts_at + timedelta(
+                    seconds=(
+                        index *
+                        AdvertisingInventorySchedule.SLOT_SECONDS
+                    )
+                )
+
+                slot_end = slot_start + timedelta(
+                    seconds=AdvertisingInventorySchedule.SLOT_SECONDS
+                )
+
+                reservation = AdvertisingPlayoutReservation(
+                    appearance_id=appearance_id,
+                    placement=placement,
+                    creative=creative,
+                    source_type=creative.creative_type,
+                    slot_start=slot_start,
+                    slot_end=slot_end,
+                    sequence_number=index + 1,
+                    appearance_slot_count=slot_count,
+                    locked_slot_price=locked_slot_price,
+                )
+
+                reservation.full_clean()
+                reservation.save()
+
+                reservations.append(reservation)
+
+    except IntegrityError as exc:
+        raise ValidationError(
+            "One or more requested six-second slots are already reserved."
+        ) from exc
+
+    return reservations

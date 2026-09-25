@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import (
+    AdvertisingPlayoutReservation,
     AdvertisingDaypart,
     AdvertisingInventorySchedule,
     AdvertisingPlayoutCreative,
@@ -1639,3 +1640,49 @@ class AdvertisingPlayoutCreativeAdmin(admin.ModelAdmin):
     @admin.display(description="6-sec Slots")
     def slot_count_display(self, obj):
         return obj.slots_required
+
+
+# =====================================================================
+# 008-H2 — PLAYOUT RESERVATION LEDGER ADMIN
+# =====================================================================
+
+@admin.register(AdvertisingPlayoutReservation)
+class AdvertisingPlayoutReservationAdmin(admin.ModelAdmin):
+    list_display = (
+        "slot_start",
+        "placement",
+        "creative",
+        "source_type",
+        "appearance_position",
+        "locked_slot_price",
+        "status",
+        "played_at",
+    )
+
+    list_filter = (
+        "placement",
+        "source_type",
+        "status",
+    )
+
+    search_fields = (
+        "creative__name",
+        "appearance_id",
+    )
+
+    ordering = (
+        "-slot_start",
+    )
+
+    readonly_fields = (
+        "appearance_id",
+        "created_at",
+        "updated_at",
+    )
+
+    @admin.display(description="Appearance Slot")
+    def appearance_position(self, obj):
+        return (
+            f"{obj.sequence_number}/"
+            f"{obj.appearance_slot_count}"
+        )
