@@ -6,6 +6,9 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import (
+    AdvertisingDaypart,
+    AdvertisingInventorySchedule,
+    AdvertisingPlayoutCreative,
     AtlsHottestEvent,
     EventPromotionOrder,
     EventPromotionRate,
@@ -1551,3 +1554,88 @@ class EventPromotionRateAdmin(admin.ModelAdmin):
 
     ordering = ("display_order",)
 
+
+
+# =====================================================================
+# 008-H — SIX-SECOND PLAYOUT INVENTORY ADMIN
+# =====================================================================
+
+@admin.register(AdvertisingDaypart)
+class AdvertisingDaypartAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "start_time",
+        "end_time",
+        "sort_order",
+        "is_active",
+    )
+
+    list_filter = ("is_active",)
+
+    search_fields = ("name", "slug")
+
+    ordering = (
+        "sort_order",
+        "start_time",
+        "name",
+    )
+
+
+@admin.register(AdvertisingInventorySchedule)
+class AdvertisingInventoryScheduleAdmin(admin.ModelAdmin):
+    list_display = (
+        "placement",
+        "weekday",
+        "daypart",
+        "base_slot_price",
+        "traffic_multiplier",
+        "current_price_display",
+        "is_active",
+    )
+
+    list_filter = (
+        "placement",
+        "weekday",
+        "daypart",
+        "is_active",
+    )
+
+    ordering = (
+        "placement",
+        "weekday",
+        "daypart__sort_order",
+    )
+
+    @admin.display(description="Current 6-sec Price")
+    def current_price_display(self, obj):
+        return f"${obj.current_slot_price:.2f}"
+
+
+@admin.register(AdvertisingPlayoutCreative)
+class AdvertisingPlayoutCreativeAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "creative_type",
+        "duration_seconds",
+        "slot_count_display",
+        "priority",
+        "starts_at",
+        "ends_at",
+        "is_active",
+    )
+
+    list_filter = (
+        "creative_type",
+        "is_active",
+    )
+
+    search_fields = ("name",)
+
+    ordering = (
+        "-priority",
+        "name",
+    )
+
+    @admin.display(description="6-sec Slots")
+    def slot_count_display(self, obj):
+        return obj.slots_required

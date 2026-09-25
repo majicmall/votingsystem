@@ -2236,3 +2236,317 @@ class SelfNominationCheckIn(models.Model):
             ]
         )
 
+
+
+# =====================================================================
+# 008-H — ATL'S HOTTEST SIX-SECOND ADVERTISING PLAYOUT ENGINE
+# =====================================================================
+
+class AdvertisingDaypart(models.Model):
+    """
+    Recurring pricing period for advertising inventory.
+
+    Dayparts control pricing. They never change the atomic billboard
+    inventory unit: one slot is always exactly six seconds.
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+
+    slug = models.SlugField(
+        max_length=120,
+        unique=True,
+        blank=True,
+    )
+
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    sort_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "start_time", "name"]
+        verbose_name = "Advertising Daypart"
+        verbose_name_plural = "Advertising Dayparts"
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name) or "daypart"
+            candidate = base_slug
+            counter = 2
+
+            while (
+                AdvertisingDaypart.objects
+                .filter(slug=candidate)
+                .exclude(pk=self.pk)
+                .exists()
+            ):
+                candidate = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = candidate[:120]
+
+        super().save(*args, **kwargs)
+
+
+class AdvertisingInventorySchedule(models.Model):
+    """
+    Weekly recurring price configuration for one advertising property,
+    weekday and daypart.
+
+    Six seconds is the permanent atomic inventory unit.
+
+    Longer appearances consume consecutive six-second slots:
+        6 sec  = 1 slot
+        12 sec = 2 slots
+        30 sec = 5 slots
+        60 sec = 10 slots
+    """
+
+    SLOT_SECONDS = 6
+
+    WEEKDAY_CHOICES = [
+        (0, "Monday"),
+        (1, "Tuesday"),
+        (2, "Wednesday"),
+        (3, "Thursday"),
+        (4, "Friday"),
+        (5, "Saturday"),
+        (6, "Sunday"),
+    ]
+
+    placement = models.CharField(
+        max_length=50,
+        choices=BillboardAd.PLACEMENT_CHOICES,
+        db_index=True,
+        help_text="Advertising property/display.",
+    )
+
+    weekday = models.PositiveSmallIntegerField(
+        choices=WEEKDAY_CHOICES,
+        db_index=True,
+    )
+
+    daypart = models.ForeignKey(
+        AdvertisingDaypart,
+        on_delete=models.PROTECT,
+        related_name="inventory_schedules",
+    )
+
+    base_slot_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        default=0,
+        help_text="Base price for one six-second advertising slot.",
+    )
+
+    traffic_multiplier = models.DecimalField(
+        max_digits=7,
+        decimal_places=4,
+        default=1,
+        help_text=(
+            "Pricing multiplier for NEW inventory. "
+            "1.0000 = base rate; 1.2500 = 25% increase."
+        ),
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [
+            "placement",
+            "weekday",
+            "daypart__sort_order",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["placement", "weekday", "daypart"],
+                name="unique_ad_inventory_property_day_daypart",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(base_slot_price__gte=0),
+                name="ad_inventory_base_price_gte_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(traffic_multiplier__gt=0),
+                name="ad_inventory_traffic_multiplier_gt_zero",
+            ),
+        ]
+
+        verbose_name = "Advertising Inventory Schedule"
+        verbose_name_plural = "Advertising Inventory Schedules"
+
+    def __str__(self):
+        return (
+            f"{self.get_placement_display()} — "
+            f"{self.get_weekday_display()} — "
+            f"{self.daypart.name}"
+        )
+
+    @classmethod
+    def slots_per_minute(cls):
+        return 60 // cls.SLOT_SECONDS
+
+    @classmethod
+    def slots_per_hour(cls):
+        return cls.slots_per_minute() * 60
+
+    @classmethod
+    def slots_per_day(cls):
+        return cls.slots_per_hour() * 24
+
+    @classmethod
+    def slots_per_week(cls):
+        return cls.slots_per_day() * 7
+
+    @classmethod
+    def slots_required_for_duration(cls, duration_seconds):
+        if duration_seconds <= 0:
+            raise ValueError(
+                "Creative duration must be greater than zero."
+            )
+
+        if duration_seconds % cls.SLOT_SECONDS:
+            raise ValueError(
+                "Creative duration must be a multiple of six seconds."
+            )
+
+        return duration_seconds // cls.SLOT_SECONDS
+
+    @property
+    def current_slot_price(self):
+        """
+        Price of one NEW six-second slot.
+
+        Purchased inventory will later lock its sale price so future
+        rate changes cannot rewrite historical purchases.
+        """
+        from decimal import Decimal, ROUND_HALF_UP
+
+        amount = self.base_slot_price * self.traffic_multiplier
+
+        return amount.quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP,
+        )
+
+
+class AdvertisingPlayoutCreative(models.Model):
+    """
+    Creative eligible for the 24/7 advertising playout engine.
+
+    PAID:
+        Purchased advertiser creative.
+
+    HOUSE:
+        ATL's Hottest promotional programming.
+
+    ADVERTISE_HERE:
+        Permanent fallback when no paid or eligible house creative
+        occupies available inventory.
+    """
+
+    TYPE_PAID = "paid"
+    TYPE_HOUSE = "house"
+    TYPE_ADVERTISE_HERE = "advertise_here"
+
+    CREATIVE_TYPE_CHOICES = [
+        (TYPE_PAID, "Paid Advertiser"),
+        (TYPE_HOUSE, "ATL's Hottest House Promotion"),
+        (TYPE_ADVERTISE_HERE, "Advertise Here Fallback"),
+    ]
+
+    name = models.CharField(max_length=180)
+
+    creative_type = models.CharField(
+        max_length=30,
+        choices=CREATIVE_TYPE_CHOICES,
+        db_index=True,
+    )
+
+    duration_seconds = models.PositiveIntegerField(
+        default=6,
+        help_text=(
+            "Creative duration. Must be a multiple of six seconds."
+        ),
+    )
+
+    priority = models.PositiveIntegerField(
+        default=0,
+        help_text=(
+            "House/fallback scheduling priority. "
+            "Higher values receive greater priority."
+        ),
+    )
+
+    starts_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    ends_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-priority", "name"]
+        verbose_name = "Advertising Playout Creative"
+        verbose_name_plural = "Advertising Playout Creatives"
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def slots_required(self):
+        return (
+            AdvertisingInventorySchedule
+            .slots_required_for_duration(
+                self.duration_seconds
+            )
+        )
+
+    def clean(self):
+        super().clean()
+
+        from django.core.exceptions import ValidationError
+
+        if self.duration_seconds <= 0:
+            raise ValidationError({
+                "duration_seconds":
+                    "Creative duration must be greater than zero."
+            })
+
+        if (
+            self.duration_seconds %
+            AdvertisingInventorySchedule.SLOT_SECONDS
+        ):
+            raise ValidationError({
+                "duration_seconds":
+                    "Creative duration must be a multiple of six seconds."
+            })
+
+        if (
+            self.starts_at
+            and self.ends_at
+            and self.ends_at <= self.starts_at
+        ):
+            raise ValidationError({
+                "ends_at":
+                    "Ending time must be later than starting time."
+            })
