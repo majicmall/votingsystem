@@ -3222,3 +3222,777 @@ def record_advertising_campaign_spend(
         platform_share_percent=share_percent,
         platform_share_amount=platform_share,
     )
+
+
+# =====================================================================
+# 008-H3B-1 — ADVERTISING INVENTORY OPPORTUNITY FINDER
+# =====================================================================
+
+def advertising_daypart_contains_datetime(daypart, moment):
+    """
+    Return True when moment's local clock time belongs to daypart.
+
+    Supports both ordinary dayparts such as 09:00-17:00 and
+    overnight dayparts such as 22:00-06:00.
+
+    Equal start/end times represent a 24-hour daypart.
+    """
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+    clock = local_moment.time().replace(tzinfo=None)
+
+    start = daypart.start_time
+    end = daypart.end_time
+
+    if start == end:
+        return True
+
+    if start < end:
+        return start <= clock < end
+
+    # Overnight window, for example 22:00 -> 06:00.
+    return clock >= start or clock < end
+
+
+def advertising_inventory_schedule_for_datetime(*, placement, moment):
+    """
+    Resolve the active inventory schedule controlling one placement
+    at one exact datetime.
+
+    Overnight dayparts require special weekday handling:
+    01:00 Tuesday may belong to Monday's 22:00-06:00 schedule.
+    """
+    from datetime import timedelta
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+
+    schedules = (
+        AdvertisingInventorySchedule.objects
+        .select_related("daypart")
+        .filter(
+            placement=placement,
+            is_active=True,
+            daypart__is_active=True,
+        )
+    )
+
+    matches = []
+
+    for schedule in schedules:
+        daypart = schedule.daypart
+
+        if not advertising_daypart_contains_datetime(daypart, local_moment):
+            continue
+
+        schedule_weekday = local_moment.weekday()
+
+        # If an overnight daypart is being matched after midnight,
+        # its schedule belongs to the previous calendar weekday.
+        if (
+            daypart.start_time > daypart.end_time
+            and local_moment.time().replace(tzinfo=None) < daypart.end_time
+        ):
+            schedule_weekday = (
+                local_moment - timedelta(days=1)
+            ).weekday()
+
+        if schedule.weekday == schedule_weekday:
+            matches.append(schedule)
+
+    if not matches:
+        return None
+
+    if len(matches) > 1:
+        raise ValidationError(
+            "More than one active advertising inventory schedule "
+            "matches this placement and datetime."
+        )
+
+    return matches[0]
+
+
+def find_advertising_inventory_opportunity(
+    *,
+    placement,
+    creative,
+    starts_at,
+    campaign=None,
+):
+    """
+    Read-only H3B opportunity lookup.
+
+    Determine whether one complete creative appearance can begin at
+    starts_at without:
+
+      * leaving the campaign window,
+      * crossing into another inventory schedule/daypart,
+      * colliding with already reserved six-second inventory.
+
+    No reservation or financial record is created here.
+    """
+    from datetime import timedelta
+    from decimal import Decimal, ROUND_HALF_UP
+
+    from django.core.exceptions import ValidationError
+
+    if creative is None:
+        raise ValidationError("A playout creative is required.")
+
+    slot_count = (
+        AdvertisingInventorySchedule
+        .slots_required_for_duration(
+            creative.duration_seconds
+        )
+    )
+
+    slot_seconds = AdvertisingInventorySchedule.SLOT_SECONDS
+    appearance_end = starts_at + timedelta(
+        seconds=slot_count * slot_seconds
+    )
+
+    if campaign is not None:
+        if campaign.starts_at and starts_at < campaign.starts_at:
+            return {
+                "available": False,
+                "reason": "before_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+        if campaign.ends_at and appearance_end > campaign.ends_at:
+            return {
+                "available": False,
+                "reason": "after_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+    schedule = advertising_inventory_schedule_for_datetime(
+        placement=placement,
+        moment=starts_at,
+    )
+
+    if schedule is None:
+        return {
+            "available": False,
+            "reason": "no_inventory_schedule",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+        }
+
+    slot_starts = [
+        starts_at + timedelta(seconds=index * slot_seconds)
+        for index in range(slot_count)
+    ]
+
+    # Every atomic unit in the appearance must resolve back to the
+    # SAME schedule. This prevents an appearance from straddling a
+    # daypart/rate boundary.
+    for slot_start in slot_starts:
+        slot_schedule = advertising_inventory_schedule_for_datetime(
+            placement=placement,
+            moment=slot_start,
+        )
+
+        if (
+            slot_schedule is None
+            or slot_schedule.pk != schedule.pk
+        ):
+            return {
+                "available": False,
+                "reason": "crosses_inventory_boundary",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+            }
+
+    collision_exists = (
+        AdvertisingPlayoutReservation.objects
+        .filter(
+            placement=placement,
+            slot_start__in=slot_starts,
+        )
+        .exclude(
+            status=AdvertisingPlayoutReservation.STATUS_CANCELLED
+        )
+        .exists()
+    )
+
+    if collision_exists:
+        return {
+            "available": False,
+            "reason": "inventory_collision",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+            "schedule": schedule,
+        }
+
+    slot_price = schedule.current_slot_price
+
+    appearance_cost = (
+        slot_price * Decimal(slot_count)
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if campaign is not None:
+        remaining = advertising_campaign_playout_remaining(campaign)
+
+        if appearance_cost > remaining:
+            return {
+                "available": False,
+                "reason": "insufficient_campaign_budget",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+                "slot_price": slot_price,
+                "appearance_cost": appearance_cost,
+                "campaign_remaining": remaining,
+            }
+
+    return {
+        "available": True,
+        "reason": "available",
+        "placement": placement,
+        "starts_at": starts_at,
+        "ends_at": appearance_end,
+        "slot_count": slot_count,
+        "schedule": schedule,
+        "daypart": schedule.daypart,
+        "slot_price": slot_price,
+        "appearance_cost": appearance_cost,
+        "slot_starts": slot_starts,
+    }
+
+
+# =====================================================================
+# 008-H3B-1 — ADVERTISING INVENTORY OPPORTUNITY FINDER
+# =====================================================================
+
+def advertising_daypart_contains_datetime(daypart, moment):
+    """
+    Return True when moment's local clock time belongs to daypart.
+
+    Supports both ordinary dayparts such as 09:00-17:00 and
+    overnight dayparts such as 22:00-06:00.
+
+    Equal start/end times represent a 24-hour daypart.
+    """
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+    clock = local_moment.time().replace(tzinfo=None)
+
+    start = daypart.start_time
+    end = daypart.end_time
+
+    if start == end:
+        return True
+
+    if start < end:
+        return start <= clock < end
+
+    # Overnight window, for example 22:00 -> 06:00.
+    return clock >= start or clock < end
+
+
+def advertising_inventory_schedule_for_datetime(*, placement, moment):
+    """
+    Resolve the active inventory schedule controlling one placement
+    at one exact datetime.
+
+    Overnight dayparts require special weekday handling:
+    01:00 Tuesday may belong to Monday's 22:00-06:00 schedule.
+    """
+    from datetime import timedelta
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+
+    schedules = (
+        AdvertisingInventorySchedule.objects
+        .select_related("daypart")
+        .filter(
+            placement=placement,
+            is_active=True,
+            daypart__is_active=True,
+        )
+    )
+
+    matches = []
+
+    for schedule in schedules:
+        daypart = schedule.daypart
+
+        if not advertising_daypart_contains_datetime(daypart, local_moment):
+            continue
+
+        schedule_weekday = local_moment.weekday()
+
+        # If an overnight daypart is being matched after midnight,
+        # its schedule belongs to the previous calendar weekday.
+        if (
+            daypart.start_time > daypart.end_time
+            and local_moment.time().replace(tzinfo=None) < daypart.end_time
+        ):
+            schedule_weekday = (
+                local_moment - timedelta(days=1)
+            ).weekday()
+
+        if schedule.weekday == schedule_weekday:
+            matches.append(schedule)
+
+    if not matches:
+        return None
+
+    if len(matches) > 1:
+        raise ValidationError(
+            "More than one active advertising inventory schedule "
+            "matches this placement and datetime."
+        )
+
+    return matches[0]
+
+
+def find_advertising_inventory_opportunity(
+    *,
+    placement,
+    creative,
+    starts_at,
+    campaign=None,
+):
+    """
+    Read-only H3B opportunity lookup.
+
+    Determine whether one complete creative appearance can begin at
+    starts_at without:
+
+      * leaving the campaign window,
+      * crossing into another inventory schedule/daypart,
+      * colliding with already reserved six-second inventory.
+
+    No reservation or financial record is created here.
+    """
+    from datetime import timedelta
+    from decimal import Decimal, ROUND_HALF_UP
+
+    from django.core.exceptions import ValidationError
+
+    if creative is None:
+        raise ValidationError("A playout creative is required.")
+
+    slot_count = (
+        AdvertisingInventorySchedule
+        .slots_required_for_duration(
+            creative.duration_seconds
+        )
+    )
+
+    slot_seconds = AdvertisingInventorySchedule.SLOT_SECONDS
+    appearance_end = starts_at + timedelta(
+        seconds=slot_count * slot_seconds
+    )
+
+    if campaign is not None:
+        if campaign.starts_at and starts_at < campaign.starts_at:
+            return {
+                "available": False,
+                "reason": "before_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+        if campaign.ends_at and appearance_end > campaign.ends_at:
+            return {
+                "available": False,
+                "reason": "after_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+    schedule = advertising_inventory_schedule_for_datetime(
+        placement=placement,
+        moment=starts_at,
+    )
+
+    if schedule is None:
+        return {
+            "available": False,
+            "reason": "no_inventory_schedule",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+        }
+
+    slot_starts = [
+        starts_at + timedelta(seconds=index * slot_seconds)
+        for index in range(slot_count)
+    ]
+
+    # Every atomic unit in the appearance must resolve back to the
+    # SAME schedule. This prevents an appearance from straddling a
+    # daypart/rate boundary.
+    for slot_start in slot_starts:
+        slot_schedule = advertising_inventory_schedule_for_datetime(
+            placement=placement,
+            moment=slot_start,
+        )
+
+        if (
+            slot_schedule is None
+            or slot_schedule.pk != schedule.pk
+        ):
+            return {
+                "available": False,
+                "reason": "crosses_inventory_boundary",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+            }
+
+    collision_exists = (
+        AdvertisingPlayoutReservation.objects
+        .filter(
+            placement=placement,
+            slot_start__in=slot_starts,
+        )
+        .exclude(
+            status=AdvertisingPlayoutReservation.STATUS_CANCELLED
+        )
+        .exists()
+    )
+
+    if collision_exists:
+        return {
+            "available": False,
+            "reason": "inventory_collision",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+            "schedule": schedule,
+        }
+
+    slot_price = schedule.current_slot_price
+
+    appearance_cost = (
+        slot_price * Decimal(slot_count)
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if campaign is not None:
+        remaining = advertising_campaign_playout_remaining(campaign)
+
+        if appearance_cost > remaining:
+            return {
+                "available": False,
+                "reason": "insufficient_campaign_budget",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+                "slot_price": slot_price,
+                "appearance_cost": appearance_cost,
+                "campaign_remaining": remaining,
+            }
+
+    return {
+        "available": True,
+        "reason": "available",
+        "placement": placement,
+        "starts_at": starts_at,
+        "ends_at": appearance_end,
+        "slot_count": slot_count,
+        "schedule": schedule,
+        "daypart": schedule.daypart,
+        "slot_price": slot_price,
+        "appearance_cost": appearance_cost,
+        "slot_starts": slot_starts,
+    }
+
+
+# =====================================================================
+# 008-H3B-1 — ADVERTISING INVENTORY OPPORTUNITY FINDER
+# =====================================================================
+
+def advertising_daypart_contains_datetime(daypart, moment):
+    """
+    Return True when moment's local clock time belongs to daypart.
+
+    Supports both ordinary dayparts such as 09:00-17:00 and
+    overnight dayparts such as 22:00-06:00.
+
+    Equal start/end times represent a 24-hour daypart.
+    """
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+    clock = local_moment.time().replace(tzinfo=None)
+
+    start = daypart.start_time
+    end = daypart.end_time
+
+    if start == end:
+        return True
+
+    if start < end:
+        return start <= clock < end
+
+    # Overnight window, for example 22:00 -> 06:00.
+    return clock >= start or clock < end
+
+
+def advertising_inventory_schedule_for_datetime(*, placement, moment):
+    """
+    Resolve the active inventory schedule controlling one placement
+    at one exact datetime.
+
+    Overnight dayparts require special weekday handling:
+    01:00 Tuesday may belong to Monday's 22:00-06:00 schedule.
+    """
+    from datetime import timedelta
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    local_moment = timezone.localtime(moment) if timezone.is_aware(moment) else moment
+
+    schedules = (
+        AdvertisingInventorySchedule.objects
+        .select_related("daypart")
+        .filter(
+            placement=placement,
+            is_active=True,
+            daypart__is_active=True,
+        )
+    )
+
+    matches = []
+
+    for schedule in schedules:
+        daypart = schedule.daypart
+
+        if not advertising_daypart_contains_datetime(daypart, local_moment):
+            continue
+
+        schedule_weekday = local_moment.weekday()
+
+        # If an overnight daypart is being matched after midnight,
+        # its schedule belongs to the previous calendar weekday.
+        if (
+            daypart.start_time > daypart.end_time
+            and local_moment.time().replace(tzinfo=None) < daypart.end_time
+        ):
+            schedule_weekday = (
+                local_moment - timedelta(days=1)
+            ).weekday()
+
+        if schedule.weekday == schedule_weekday:
+            matches.append(schedule)
+
+    if not matches:
+        return None
+
+    if len(matches) > 1:
+        raise ValidationError(
+            "More than one active advertising inventory schedule "
+            "matches this placement and datetime."
+        )
+
+    return matches[0]
+
+
+def find_advertising_inventory_opportunity(
+    *,
+    placement,
+    creative,
+    starts_at,
+    campaign=None,
+):
+    """
+    Read-only H3B opportunity lookup.
+
+    Determine whether one complete creative appearance can begin at
+    starts_at without:
+
+      * leaving the campaign window,
+      * crossing into another inventory schedule/daypart,
+      * colliding with already reserved six-second inventory.
+
+    No reservation or financial record is created here.
+    """
+    from datetime import timedelta
+    from decimal import Decimal, ROUND_HALF_UP
+
+    from django.core.exceptions import ValidationError
+
+    if creative is None:
+        raise ValidationError("A playout creative is required.")
+
+    slot_count = (
+        AdvertisingInventorySchedule
+        .slots_required_for_duration(
+            creative.duration_seconds
+        )
+    )
+
+    slot_seconds = AdvertisingInventorySchedule.SLOT_SECONDS
+    appearance_end = starts_at + timedelta(
+        seconds=slot_count * slot_seconds
+    )
+
+    if campaign is not None:
+        if campaign.starts_at and starts_at < campaign.starts_at:
+            return {
+                "available": False,
+                "reason": "before_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+        if campaign.ends_at and appearance_end > campaign.ends_at:
+            return {
+                "available": False,
+                "reason": "after_campaign_window",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+            }
+
+    schedule = advertising_inventory_schedule_for_datetime(
+        placement=placement,
+        moment=starts_at,
+    )
+
+    if schedule is None:
+        return {
+            "available": False,
+            "reason": "no_inventory_schedule",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+        }
+
+    slot_starts = [
+        starts_at + timedelta(seconds=index * slot_seconds)
+        for index in range(slot_count)
+    ]
+
+    # Every atomic unit in the appearance must resolve back to the
+    # SAME schedule. This prevents an appearance from straddling a
+    # daypart/rate boundary.
+    for slot_start in slot_starts:
+        slot_schedule = advertising_inventory_schedule_for_datetime(
+            placement=placement,
+            moment=slot_start,
+        )
+
+        if (
+            slot_schedule is None
+            or slot_schedule.pk != schedule.pk
+        ):
+            return {
+                "available": False,
+                "reason": "crosses_inventory_boundary",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+            }
+
+    collision_exists = (
+        AdvertisingPlayoutReservation.objects
+        .filter(
+            placement=placement,
+            slot_start__in=slot_starts,
+        )
+        .exclude(
+            status=AdvertisingPlayoutReservation.STATUS_CANCELLED
+        )
+        .exists()
+    )
+
+    if collision_exists:
+        return {
+            "available": False,
+            "reason": "inventory_collision",
+            "placement": placement,
+            "starts_at": starts_at,
+            "ends_at": appearance_end,
+            "slot_count": slot_count,
+            "schedule": schedule,
+        }
+
+    slot_price = schedule.current_slot_price
+
+    appearance_cost = (
+        slot_price * Decimal(slot_count)
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if campaign is not None:
+        remaining = advertising_campaign_playout_remaining(campaign)
+
+        if appearance_cost > remaining:
+            return {
+                "available": False,
+                "reason": "insufficient_campaign_budget",
+                "placement": placement,
+                "starts_at": starts_at,
+                "ends_at": appearance_end,
+                "slot_count": slot_count,
+                "schedule": schedule,
+                "slot_price": slot_price,
+                "appearance_cost": appearance_cost,
+                "campaign_remaining": remaining,
+            }
+
+    return {
+        "available": True,
+        "reason": "available",
+        "placement": placement,
+        "starts_at": starts_at,
+        "ends_at": appearance_end,
+        "slot_count": slot_count,
+        "schedule": schedule,
+        "daypart": schedule.daypart,
+        "slot_price": slot_price,
+        "appearance_cost": appearance_cost,
+        "slot_starts": slot_starts,
+    }
