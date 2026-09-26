@@ -3996,3 +3996,289 @@ def find_advertising_inventory_opportunity(
         "appearance_cost": appearance_cost,
         "slot_starts": slot_starts,
     }
+
+
+# =====================================================================
+# 008-H3B-2A — CAMPAIGN PACING + PURCHASE DECISION ENGINE
+# =====================================================================
+
+def advertising_campaign_pacing_snapshot(*, campaign, moment=None):
+    """
+    Return a read-only pacing snapshot for one advertising campaign.
+
+    Linear pacing model:
+
+        elapsed_fraction = elapsed campaign time / total campaign time
+        target_spend     = total media budget * elapsed_fraction
+        pacing_delta     = target_spend - actual playout spend
+
+    Positive pacing_delta = campaign is behind pace.
+    Zero                  = exactly on pace.
+    Negative              = campaign is ahead of pace.
+
+    No database mutation occurs here.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    if moment is None:
+        moment = timezone.now()
+
+    if campaign.starts_at is None or campaign.ends_at is None:
+        raise ValidationError(
+            "Campaign pacing requires both starts_at and ends_at."
+        )
+
+    if campaign.ends_at <= campaign.starts_at:
+        raise ValidationError(
+            "Campaign end time must be after campaign start time."
+        )
+
+    total_budget = (
+        campaign.total_budget or Decimal("0.00")
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    actual_spend = (
+        advertising_campaign_playout_spend(campaign)
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    remaining_budget = (
+        total_budget - actual_spend
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    total_seconds = Decimal(
+        str(
+            (
+                campaign.ends_at - campaign.starts_at
+            ).total_seconds()
+        )
+    )
+
+    if moment <= campaign.starts_at:
+        elapsed_fraction = Decimal("0")
+        phase = "before_campaign"
+    elif moment >= campaign.ends_at:
+        elapsed_fraction = Decimal("1")
+        phase = "after_campaign"
+    else:
+        elapsed_seconds = Decimal(
+            str(
+                (
+                    moment - campaign.starts_at
+                ).total_seconds()
+            )
+        )
+
+        elapsed_fraction = (
+            elapsed_seconds / total_seconds
+        )
+
+        phase = "active"
+
+    # Keep the mathematical fraction bounded even if the supplied
+    # moment falls outside the campaign window.
+    elapsed_fraction = max(
+        Decimal("0"),
+        min(Decimal("1"), elapsed_fraction),
+    )
+
+    target_spend = (
+        total_budget * elapsed_fraction
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    pacing_delta = (
+        target_spend - actual_spend
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if pacing_delta > 0:
+        pacing_status = "under"
+    elif pacing_delta < 0:
+        pacing_status = "over"
+    else:
+        pacing_status = "on"
+
+    remaining_seconds = max(
+        Decimal("0"),
+        total_seconds * (
+            Decimal("1") - elapsed_fraction
+        ),
+    )
+
+    return {
+        "campaign": campaign,
+        "moment": moment,
+        "phase": phase,
+        "total_budget": total_budget,
+        "actual_spend": actual_spend,
+        "remaining_budget": remaining_budget,
+        "elapsed_fraction": elapsed_fraction,
+        "remaining_fraction": (
+            Decimal("1") - elapsed_fraction
+        ),
+        "target_spend": target_spend,
+        "pacing_delta": pacing_delta,
+        "pacing_status": pacing_status,
+        "total_seconds": total_seconds,
+        "remaining_seconds": remaining_seconds,
+    }
+
+
+def decide_advertising_opportunity_purchase(
+    *,
+    campaign,
+    opportunity,
+    moment=None,
+):
+    """
+    Read-only decision for whether H3B should purchase one opportunity.
+
+    H3B-2A intentionally does NOT:
+      * reserve inventory,
+      * create spend rows,
+      * modify campaign data,
+      * touch the billboard/player.
+
+    Version 1 uses conservative linear pacing.
+
+    A purchase is approved only when:
+      * the campaign is currently active by time,
+      * H3B-1 says the opportunity is available,
+      * the appearance fits remaining campaign budget,
+      * the campaign is behind its linear spend target,
+      * buying the appearance will not overshoot that target by more
+        than the cost of one appearance.
+
+    That final rule permits the engine to catch up in indivisible
+    appearance-sized increments without demanding impossible
+    fractional purchases.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    if moment is None:
+        moment = timezone.now()
+
+    snapshot = advertising_campaign_pacing_snapshot(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    def result(*, purchase, reason, appearance_cost=Decimal("0.00")):
+        return {
+            "purchase": purchase,
+            "reason": reason,
+            "appearance_cost": appearance_cost,
+            "campaign_remaining": snapshot["remaining_budget"],
+            "target_spend": snapshot["target_spend"],
+            "actual_spend": snapshot["actual_spend"],
+            "pacing_delta": snapshot["pacing_delta"],
+            "pacing_status": snapshot["pacing_status"],
+            "phase": snapshot["phase"],
+            "snapshot": snapshot,
+            "opportunity": opportunity,
+        }
+
+    if snapshot["phase"] == "before_campaign":
+        return result(
+            purchase=False,
+            reason="campaign_not_started",
+        )
+
+    if snapshot["phase"] == "after_campaign":
+        return result(
+            purchase=False,
+            reason="campaign_ended",
+        )
+
+    if not opportunity:
+        raise ValidationError(
+            "An H3B-1 advertising opportunity is required."
+        )
+
+    if not opportunity.get("available", False):
+        return result(
+            purchase=False,
+            reason=opportunity.get(
+                "reason",
+                "opportunity_unavailable",
+            ),
+        )
+
+    raw_cost = opportunity.get("appearance_cost")
+
+    if raw_cost is None:
+        raise ValidationError(
+            "Available opportunity must include appearance_cost."
+        )
+
+    appearance_cost = Decimal(raw_cost).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if appearance_cost < 0:
+        raise ValidationError(
+            "Opportunity appearance cost cannot be negative."
+        )
+
+    if appearance_cost > snapshot["remaining_budget"]:
+        return result(
+            purchase=False,
+            reason="insufficient_campaign_budget",
+            appearance_cost=appearance_cost,
+        )
+
+    if snapshot["pacing_delta"] <= 0:
+        return result(
+            purchase=False,
+            reason="not_behind_pace",
+            appearance_cost=appearance_cost,
+        )
+
+    spend_after_purchase = (
+        snapshot["actual_spend"] + appearance_cost
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    # An appearance is indivisible. Permit one appearance-sized step
+    # across the exact target, but never permit a larger leap.
+    maximum_paced_spend = (
+        snapshot["target_spend"] + appearance_cost
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if spend_after_purchase > maximum_paced_spend:
+        return result(
+            purchase=False,
+            reason="would_exceed_pacing_allowance",
+            appearance_cost=appearance_cost,
+        )
+
+    return result(
+        purchase=True,
+        reason="purchase",
+        appearance_cost=appearance_cost,
+    )
