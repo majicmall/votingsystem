@@ -4282,3 +4282,234 @@ def decide_advertising_opportunity_purchase(
         reason="purchase",
         appearance_cost=appearance_cost,
     )
+
+
+# =====================================================================
+# 008-H3B-2B — ATOMIC ADVERTISING AUTO-PURCHASE TRANSACTION
+# =====================================================================
+
+def execute_advertising_opportunity_purchase(
+    *,
+    campaign,
+    creative,
+    placement,
+    starts_at,
+    moment=None,
+    policy=None,
+):
+    """
+    Atomically purchase one complete advertising appearance.
+
+    Pipeline:
+
+        H3B-1 recheck opportunity
+            ↓
+        H3B-2A pacing decision
+            ↓
+        BEGIN OUTER TRANSACTION
+            ↓
+        lock campaign row
+            ↓
+        H3B-1 recheck inventory + current price
+            ↓
+        H3B-2A recheck pacing + remaining budget
+            ↓
+        H2 reserve all consecutive six-second units
+            ↓
+        H3A create immutable spend record
+            ↓
+        COMMIT
+
+    Any exception after the outer transaction begins rolls back BOTH
+    the reservations and spend record.
+
+    This function does not touch the live billboard/player.
+    """
+    from django.core.exceptions import ValidationError
+    from django.db import transaction
+    from django.utils import timezone
+
+    if campaign is None:
+        raise ValidationError(
+            "An advertising campaign is required."
+        )
+
+    if creative is None:
+        raise ValidationError(
+            "An advertising playout creative is required."
+        )
+
+    if not placement:
+        raise ValidationError(
+            "An advertising placement is required."
+        )
+
+    if starts_at is None:
+        raise ValidationError(
+            "An advertising appearance start time is required."
+        )
+
+    if moment is None:
+        moment = timezone.now()
+
+    # -------------------------------------------------------------
+    # Fast read-only preflight.
+    #
+    # This avoids opening a write transaction when the opportunity
+    # obviously cannot be purchased. Nothing here is authoritative;
+    # everything important is checked again after locking.
+    # -------------------------------------------------------------
+    preflight_opportunity = find_advertising_inventory_opportunity(
+        placement=placement,
+        creative=creative,
+        starts_at=starts_at,
+        campaign=campaign,
+    )
+
+    preflight_decision = decide_advertising_opportunity_purchase(
+        campaign=campaign,
+        opportunity=preflight_opportunity,
+        moment=moment,
+    )
+
+    if not preflight_decision["purchase"]:
+        return {
+            "purchased": False,
+            "reason": preflight_decision["reason"],
+            "campaign": campaign,
+            "creative": creative,
+            "placement": placement,
+            "starts_at": starts_at,
+            "opportunity": preflight_opportunity,
+            "decision": preflight_decision,
+            "reservations": [],
+            "spend": None,
+        }
+
+    with transaction.atomic():
+
+        # Serialize purchases against this campaign. This protects the
+        # remaining-budget calculation when multiple workers attempt to
+        # buy inventory for the same campaign simultaneously.
+        locked_campaign = (
+            AdvertisingCampaign.objects
+            .select_for_update()
+            .get(pk=campaign.pk)
+        )
+
+        # ---------------------------------------------------------
+        # AUTHORITATIVE H3B-1 RECHECK
+        # ---------------------------------------------------------
+        opportunity = find_advertising_inventory_opportunity(
+            placement=placement,
+            creative=creative,
+            starts_at=starts_at,
+            campaign=locked_campaign,
+        )
+
+        # ---------------------------------------------------------
+        # AUTHORITATIVE H3B-2A RECHECK
+        # ---------------------------------------------------------
+        decision = decide_advertising_opportunity_purchase(
+            campaign=locked_campaign,
+            opportunity=opportunity,
+            moment=moment,
+        )
+
+        if not decision["purchase"]:
+            return {
+                "purchased": False,
+                "reason": decision["reason"],
+                "campaign": locked_campaign,
+                "creative": creative,
+                "placement": placement,
+                "starts_at": starts_at,
+                "opportunity": opportunity,
+                "decision": decision,
+                "reservations": [],
+                "spend": None,
+            }
+
+        slot_price = opportunity.get("slot_price")
+
+        if slot_price is None:
+            raise ValidationError(
+                "Purchasable opportunity is missing its locked slot price."
+            )
+
+        # ---------------------------------------------------------
+        # H2 — ATOMIC CONSECUTIVE SIX-SECOND RESERVATION
+        # ---------------------------------------------------------
+        reservations = reserve_advertising_appearance(
+            placement=placement,
+            creative=creative,
+            starts_at=starts_at,
+            locked_slot_price=slot_price,
+            campaign=locked_campaign,
+        )
+
+        if not reservations:
+            raise ValidationError(
+                "Advertising purchase created no reservations."
+            )
+
+        appearance_ids = {
+            reservation.appearance_id
+            for reservation in reservations
+        }
+
+        if len(appearance_ids) != 1:
+            raise ValidationError(
+                "Advertising purchase reservations do not share "
+                "one appearance identifier."
+            )
+
+        appearance_id = next(iter(appearance_ids))
+
+        # Application-level idempotency protection. The outer atomic
+        # transaction ensures that if this guard or H3A fails, H2's
+        # reservations are rolled back with it.
+        if AdvertisingCampaignSpend.objects.filter(
+            campaign=locked_campaign,
+            appearance_id=appearance_id,
+        ).exists():
+            raise ValidationError(
+                "Spend has already been recorded for this appearance."
+            )
+
+        # ---------------------------------------------------------
+        # H3A — IMMUTABLE CAMPAIGN SPEND + PLATFORM SHARE
+        # ---------------------------------------------------------
+        spend = record_advertising_campaign_spend(
+            campaign=locked_campaign,
+            creative=creative,
+            reservations=reservations,
+            policy=policy,
+        )
+
+        if spend.appearance_id != appearance_id:
+            raise ValidationError(
+                "Spend record appearance does not match reservations."
+            )
+
+        expected_cost = opportunity["appearance_cost"]
+
+        if spend.media_spend != expected_cost:
+            raise ValidationError(
+                "Recorded campaign spend does not match the "
+                "authoritative opportunity cost."
+            )
+
+        return {
+            "purchased": True,
+            "reason": "purchased",
+            "campaign": locked_campaign,
+            "creative": creative,
+            "placement": placement,
+            "starts_at": starts_at,
+            "opportunity": opportunity,
+            "decision": decision,
+            "reservations": reservations,
+            "spend": spend,
+            "appearance_id": appearance_id,
+        }
