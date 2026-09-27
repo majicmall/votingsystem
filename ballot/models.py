@@ -4513,3 +4513,214 @@ def execute_advertising_opportunity_purchase(
             "spend": spend,
             "appearance_id": appearance_id,
         }
+
+
+# =========================================================
+# 008-H3B-3A
+# Advertising Campaign Creative Assignment
+# =========================================================
+
+class AdvertisingCampaignCreative(models.Model):
+    """
+    Explicit authorization linking a paid advertising campaign to a
+    playout creative.
+
+    The autonomous advertising controller may only purchase paid
+    inventory using creatives that have an active assignment for the
+    campaign.
+
+    Rotation weight and assignment priority live here rather than on
+    AdvertisingPlayoutCreative because the same creative may eventually
+    participate in different campaigns with different delivery rules.
+    """
+
+    campaign = models.ForeignKey(
+        "AdvertisingCampaign",
+        on_delete=models.CASCADE,
+        related_name="creative_assignments",
+    )
+
+    creative = models.ForeignKey(
+        "AdvertisingPlayoutCreative",
+        on_delete=models.PROTECT,
+        related_name="campaign_assignments",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            "Only active assignments may be selected by automated "
+            "campaign execution."
+        ),
+    )
+
+    rotation_weight = models.PositiveIntegerField(
+        default=100,
+        help_text=(
+            "Relative campaign-specific delivery weight. Higher values "
+            "may receive proportionally more appearances."
+        ),
+    )
+
+    priority = models.PositiveIntegerField(
+        default=100,
+        db_index=True,
+        help_text=(
+            "Campaign-specific creative priority. Lower values are "
+            "considered first when priorities differ."
+        ),
+    )
+
+    approved_at = models.DateTimeField(
+        default=timezone.now,
+        db_index=True,
+        help_text=(
+            "Time this creative was authorized for campaign delivery."
+        ),
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [
+            "priority",
+            "-rotation_weight",
+            "id",
+        ]
+
+        verbose_name = "Advertising Campaign Creative"
+        verbose_name_plural = "Advertising Campaign Creatives"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["campaign", "creative"],
+                name="unique_ad_campaign_creative_assignment",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(rotation_weight__gte=1),
+                name="ad_campaign_creative_rotation_weight_gte_one",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(priority__gte=1),
+                name="ad_campaign_creative_priority_gte_one",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.campaign.campaign_name} — "
+            f"{self.creative.name}"
+        )
+
+    def clean(self):
+        super().clean()
+
+        if (
+            self.creative_id
+            and self.creative.creative_type
+            != AdvertisingPlayoutCreative.TYPE_PAID
+        ):
+            raise ValidationError({
+                "creative": (
+                    "Campaign creative assignments may only authorize "
+                    "paid advertising creatives."
+                )
+            })
+
+    def is_eligible_at(self, moment=None):
+        """
+        Return True only when both the assignment and underlying paid
+        creative are currently eligible for automated campaign use.
+        """
+
+        moment = moment or timezone.now()
+
+        if not self.is_active:
+            return False
+
+        creative = self.creative
+
+        if creative.creative_type != AdvertisingPlayoutCreative.TYPE_PAID:
+            return False
+
+        if not creative.is_active:
+            return False
+
+        if creative.starts_at and moment < creative.starts_at:
+            return False
+
+        if creative.ends_at and moment >= creative.ends_at:
+            return False
+
+        return True
+
+
+def advertising_campaign_eligible_creative_assignments(
+    *,
+    campaign,
+    moment=None,
+):
+    """
+    Return active, explicitly authorized paid creative assignments for
+    one campaign at the supplied moment.
+
+    This is the authorization boundary used by the future H3B-3B
+    autonomous shopping controller.
+    """
+
+    moment = moment or timezone.now()
+
+    assignments = (
+        campaign.creative_assignments
+        .select_related("creative")
+        .filter(
+            is_active=True,
+            creative__creative_type=AdvertisingPlayoutCreative.TYPE_PAID,
+            creative__is_active=True,
+        )
+        .order_by(
+            "priority",
+            "-rotation_weight",
+            "id",
+        )
+    )
+
+    return [
+        assignment
+        for assignment in assignments
+        if assignment.is_eligible_at(moment)
+    ]
+
+
+def advertising_campaign_creative_is_authorized(
+    *,
+    campaign,
+    creative,
+    moment=None,
+):
+    """
+    Boolean authorization check for autonomous paid advertising.
+
+    Historical reservation/spend relationships are deliberately NOT
+    treated as authorization. The campaign must possess a current,
+    active AdvertisingCampaignCreative assignment.
+    """
+
+    moment = moment or timezone.now()
+
+    assignment = (
+        campaign.creative_assignments
+        .select_related("creative")
+        .filter(
+            creative=creative,
+            is_active=True,
+        )
+        .first()
+    )
+
+    if assignment is None:
+        return False
+
+    return assignment.is_eligible_at(moment)

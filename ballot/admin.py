@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import (
+    AdvertisingCampaignCreative,
     AdvertisingRevenuePolicy,
     AdvertisingCampaignSpend,
     AdvertisingPlayoutReservation,
@@ -1746,3 +1747,38 @@ class AdvertisingCampaignSpendAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+
+@admin.register(AdvertisingCampaignCreative)
+class AdvertisingCampaignCreativeAdmin(admin.ModelAdmin):
+    list_display = (
+        "campaign",
+        "creative",
+        "is_active",
+        "rotation_weight",
+        "priority",
+        "approved_at",
+    )
+
+    list_filter = (
+        "is_active",
+        "creative__creative_type",
+    )
+
+    search_fields = (
+        "campaign__campaign_name",
+        "campaign__advertiser_name",
+        "creative__name",
+    )
+
+    ordering = (
+        "priority",
+        "-rotation_weight",
+        "id",
+    )
+
+    autocomplete_fields = (
+        "campaign",
+        "creative",
+    )
