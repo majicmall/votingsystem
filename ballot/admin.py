@@ -6,6 +6,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import (
+    AdvertisingShoppingRunnerLock,
+    AdvertisingShoppingExecution,
     AdvertisingCampaignCreative,
     AdvertisingRevenuePolicy,
     AdvertisingCampaignSpend,
@@ -1782,3 +1784,86 @@ class AdvertisingCampaignCreativeAdmin(admin.ModelAdmin):
         "campaign",
         "creative",
     )
+
+
+# =====================================================================
+# 008-H3B-4A — AUTONOMOUS SHOPPING EXECUTION ADMIN
+# =====================================================================
+
+@admin.register(AdvertisingShoppingExecution)
+class AdvertisingShoppingExecutionAdmin(admin.ModelAdmin):
+    list_display = (
+        "execution_id",
+        "status",
+        "started_at",
+        "finished_at",
+        "processed_count",
+        "purchased_count",
+        "skipped_count",
+        "failed_count",
+    )
+
+    list_filter = (
+        "status",
+        "started_at",
+    )
+
+    search_fields = (
+        "execution_id",
+        "failure_type",
+        "failure_message",
+    )
+
+    ordering = (
+        "-started_at",
+        "-id",
+    )
+
+    readonly_fields = (
+        "execution_id",
+        "status",
+        "started_at",
+        "finished_at",
+        "lease_expires_at",
+        "lookahead_minutes",
+        "campaign_limit",
+        "processed_count",
+        "purchased_count",
+        "skipped_count",
+        "failed_count",
+        "failure_type",
+        "failure_message",
+        "created_at",
+        "updated_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(AdvertisingShoppingRunnerLock)
+class AdvertisingShoppingRunnerLockAdmin(admin.ModelAdmin):
+    list_display = (
+        "key",
+        "owner_token",
+        "acquired_at",
+        "lease_expires_at",
+        "updated_at",
+    )
+
+    readonly_fields = (
+        "key",
+        "owner_token",
+        "acquired_at",
+        "lease_expires_at",
+        "updated_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

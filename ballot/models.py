@@ -5382,3 +5382,535 @@ def run_autonomous_advertising_shopping_pass(
         "failed_count": failed_count,
         "campaign_results": campaign_results,
     }
+
+
+# =====================================================================
+# 008-H3B-4A — AUTONOMOUS SHOPPING EXECUTION SAFETY
+# =====================================================================
+
+class AdvertisingShoppingRunnerLock(models.Model):
+    """
+    Singleton lease protecting the platform-wide autonomous advertising
+    shopping runner from overlapping execution.
+
+    The lock is a LEASE, not a permanent boolean mutex.
+
+    Why:
+        A worker may crash, restart, or be killed without executing normal
+        cleanup. A permanent boolean lock could strand autonomous buying
+        forever.
+
+    lease_expires_at therefore allows a later worker to recover a stale lock.
+
+    Lock acquisition is performed through a conditional database UPDATE.
+    The update succeeds only when the lease is currently available.
+
+    This gives the runner an atomic claim operation without depending solely
+    on SELECT ... FOR UPDATE semantics, which differ between SQLite
+    development and PostgreSQL production.
+    """
+
+    SINGLETON_KEY = "autonomous_advertising_shopper"
+
+    key = models.CharField(
+        max_length=100,
+        unique=True,
+        default=SINGLETON_KEY,
+        editable=False,
+    )
+
+    owner_token = models.UUIDField(
+        null=True,
+        blank=True,
+        db_index=True,
+        editable=False,
+        help_text=(
+            "Unique token identifying the execution currently holding "
+            "the autonomous shopping lease."
+        ),
+    )
+
+    acquired_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    lease_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        editable=False,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = "Advertising Shopping Runner Lock"
+        verbose_name_plural = "Advertising Shopping Runner Lock"
+
+    def __str__(self):
+        if self.owner_token:
+            return (
+                f"Advertising shopping runner lock — "
+                f"{self.owner_token}"
+            )
+
+        return "Advertising shopping runner lock — available"
+
+
+class AdvertisingShoppingExecution(models.Model):
+    """
+    Durable audit record for one attempt to execute H3B-3C.
+
+    This ledger records operational execution — it does NOT replace the
+    H3A immutable financial spend ledger.
+
+    Financial truth remains:
+
+        H3B-2B atomic purchase
+            ↓
+        H2 reservation rows
+            ↓
+        H3A campaign spend ledger
+
+    H3B-4A records when the autonomous platform runner attempted to operate,
+    whether it obtained the execution lease, and the aggregate H3B-3C result.
+    """
+
+    STATUS_RUNNING = "running"
+    STATUS_COMPLETED = "completed"
+    STATUS_FAILED = "failed"
+    STATUS_LOCKED_OUT = "locked_out"
+
+    STATUS_CHOICES = [
+        (STATUS_RUNNING, "Running"),
+        (STATUS_COMPLETED, "Completed"),
+        (STATUS_FAILED, "Failed"),
+        (STATUS_LOCKED_OUT, "Locked Out"),
+    ]
+
+    execution_id = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        db_index=True,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        db_index=True,
+    )
+
+    started_at = models.DateTimeField(
+        default=timezone.now,
+        db_index=True,
+    )
+
+    finished_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+
+    lease_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Lease expiration assigned when this execution acquired "
+            "the autonomous shopping runner lock."
+        ),
+    )
+
+    lookahead_minutes = models.PositiveIntegerField(
+        default=60,
+    )
+
+    campaign_limit = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )
+
+    processed_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    purchased_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    skipped_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    failed_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    failure_type = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
+
+    failure_message = models.TextField(
+        blank=True,
+        default="",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["-started_at", "-id"]
+        verbose_name = "Advertising Shopping Execution"
+        verbose_name_plural = "Advertising Shopping Executions"
+
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(lookahead_minutes__gte=1),
+                name="ad_shop_execution_lookahead_gte_one",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(campaign_limit__isnull=True) |
+                    models.Q(campaign_limit__gte=1)
+                ),
+                name="ad_shop_execution_campaign_limit_valid",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.execution_id} — "
+            f"{self.get_status_display()} — "
+            f"{self.started_at}"
+        )
+
+
+def ensure_advertising_shopping_runner_lock():
+    """
+    Ensure the singleton lock row exists.
+
+    This function intentionally does not claim the lock.
+    """
+    lock, _ = AdvertisingShoppingRunnerLock.objects.get_or_create(
+        key=AdvertisingShoppingRunnerLock.SINGLETON_KEY,
+    )
+
+    return lock
+
+
+def acquire_advertising_shopping_runner_lock(
+    *,
+    owner_token,
+    moment=None,
+    lease_seconds=300,
+):
+    """
+    Atomically attempt to acquire the autonomous shopping runner lease.
+
+    Returns:
+        {
+            "acquired": bool,
+            "lock": AdvertisingShoppingRunnerLock,
+            "owner_token": UUID,
+            "lease_expires_at": datetime | None,
+        }
+
+    The database UPDATE is conditional:
+
+        owner_token IS NULL
+            OR
+        lease_expires_at IS NULL
+            OR
+        lease_expires_at <= now
+
+    Therefore two workers racing for the same available lease cannot both
+    successfully update the row under normal database atomic-update
+    guarantees.
+
+    The owner token also protects release: one worker may never release
+    another worker's lease.
+    """
+    from datetime import timedelta
+
+    from django.core.exceptions import ValidationError
+    from django.db import IntegrityError
+    from django.db.models import Q
+    from django.utils import timezone
+
+    moment = moment or timezone.now()
+
+    if owner_token is None:
+        raise ValidationError(
+            "An owner token is required to acquire the advertising "
+            "shopping runner lock."
+        )
+
+    if (
+        isinstance(lease_seconds, bool)
+        or not isinstance(lease_seconds, int)
+        or lease_seconds <= 0
+    ):
+        raise ValidationError(
+            "Lease seconds must be a positive integer."
+        )
+
+    # Bootstrap the singleton row. The IntegrityError recovery handles the
+    # rare race where two workers attempt first creation simultaneously.
+    try:
+        ensure_advertising_shopping_runner_lock()
+    except IntegrityError:
+        pass
+
+    lease_expires_at = moment + timedelta(
+        seconds=lease_seconds,
+    )
+
+    updated = (
+        AdvertisingShoppingRunnerLock.objects
+        .filter(
+            key=AdvertisingShoppingRunnerLock.SINGLETON_KEY,
+        )
+        .filter(
+            Q(owner_token__isnull=True) |
+            Q(lease_expires_at__isnull=True) |
+            Q(lease_expires_at__lte=moment)
+        )
+        .update(
+            owner_token=owner_token,
+            acquired_at=moment,
+            lease_expires_at=lease_expires_at,
+            updated_at=moment,
+        )
+    )
+
+    lock = AdvertisingShoppingRunnerLock.objects.get(
+        key=AdvertisingShoppingRunnerLock.SINGLETON_KEY,
+    )
+
+    acquired = (
+        updated == 1
+        and lock.owner_token == owner_token
+    )
+
+    return {
+        "acquired": acquired,
+        "lock": lock,
+        "owner_token": owner_token,
+        "lease_expires_at": (
+            lease_expires_at
+            if acquired
+            else lock.lease_expires_at
+        ),
+    }
+
+
+def release_advertising_shopping_runner_lock(
+    *,
+    owner_token,
+):
+    """
+    Release the autonomous shopping lease only when owner_token matches.
+
+    Returns True when this caller released the lease.
+    Returns False when the lease was absent or belonged to another worker.
+    """
+    if owner_token is None:
+        return False
+
+    updated = (
+        AdvertisingShoppingRunnerLock.objects
+        .filter(
+            key=AdvertisingShoppingRunnerLock.SINGLETON_KEY,
+            owner_token=owner_token,
+        )
+        .update(
+            owner_token=None,
+            acquired_at=None,
+            lease_expires_at=None,
+            updated_at=timezone.now(),
+        )
+    )
+
+    return updated == 1
+
+
+def run_guarded_autonomous_advertising_shopping_pass(
+    *,
+    moment=None,
+    lookahead_minutes=60,
+    policy=None,
+    campaign_limit=None,
+    lease_seconds=300,
+):
+    """
+    H3B-4A guarded execution boundary around H3B-3C.
+
+    This is the function future schedulers and management commands should call.
+
+    They should NOT call H3B-3C directly.
+
+    Pipeline:
+
+        scheduler / manual command / future worker
+                    ↓
+              H3B-4A guard
+                    ↓
+              acquire lease
+               /        \\
+          unavailable   acquired
+              ↓            ↓
+          safe exit      H3B-3C
+                           ↓
+                    execution ledger
+                           ↓
+                     release lease
+
+    A lease is always released from a finally block when this process still
+    owns it.
+
+    Unexpected H3B-3C exceptions are recorded in the execution ledger and
+    then re-raised. Operational callers therefore receive a truthful failure
+    while the database retains the audit evidence.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    moment = moment or timezone.now()
+
+    if (
+        isinstance(lookahead_minutes, bool)
+        or not isinstance(lookahead_minutes, int)
+        or lookahead_minutes <= 0
+    ):
+        raise ValidationError(
+            "Autonomous shopping lookahead must be a positive integer."
+        )
+
+    if campaign_limit is not None:
+        if (
+            isinstance(campaign_limit, bool)
+            or not isinstance(campaign_limit, int)
+            or campaign_limit <= 0
+        ):
+            raise ValidationError(
+                "Campaign limit must be a positive integer."
+            )
+
+    if (
+        isinstance(lease_seconds, bool)
+        or not isinstance(lease_seconds, int)
+        or lease_seconds <= 0
+    ):
+        raise ValidationError(
+            "Lease seconds must be a positive integer."
+        )
+
+    owner_token = uuid.uuid4()
+
+    claim = acquire_advertising_shopping_runner_lock(
+        owner_token=owner_token,
+        moment=moment,
+        lease_seconds=lease_seconds,
+    )
+
+    if not claim["acquired"]:
+        execution = AdvertisingShoppingExecution.objects.create(
+            status=AdvertisingShoppingExecution.STATUS_LOCKED_OUT,
+            started_at=moment,
+            finished_at=timezone.now(),
+            lookahead_minutes=lookahead_minutes,
+            campaign_limit=campaign_limit,
+            failure_type="runner_lock_unavailable",
+            failure_message=(
+                "Autonomous advertising shopping pass was not started "
+                "because another execution currently owns the runner lease."
+            ),
+        )
+
+        return {
+            "executed": False,
+            "reason": "runner_lock_unavailable",
+            "execution": execution,
+            "runner_result": None,
+        }
+
+    execution = AdvertisingShoppingExecution.objects.create(
+        execution_id=owner_token,
+        status=AdvertisingShoppingExecution.STATUS_RUNNING,
+        started_at=moment,
+        lease_expires_at=claim["lease_expires_at"],
+        lookahead_minutes=lookahead_minutes,
+        campaign_limit=campaign_limit,
+    )
+
+    try:
+        runner_result = run_autonomous_advertising_shopping_pass(
+            moment=moment,
+            lookahead_minutes=lookahead_minutes,
+            policy=policy,
+            campaign_limit=campaign_limit,
+        )
+
+        execution.status = (
+            AdvertisingShoppingExecution.STATUS_COMPLETED
+        )
+        execution.finished_at = timezone.now()
+        execution.processed_count = runner_result["processed_count"]
+        execution.purchased_count = runner_result["purchased_count"]
+        execution.skipped_count = runner_result["skipped_count"]
+        execution.failed_count = runner_result["failed_count"]
+
+        execution.save(
+            update_fields=[
+                "status",
+                "finished_at",
+                "processed_count",
+                "purchased_count",
+                "skipped_count",
+                "failed_count",
+                "updated_at",
+            ]
+        )
+
+        return {
+            "executed": True,
+            "reason": "completed",
+            "execution": execution,
+            "runner_result": runner_result,
+        }
+
+    except Exception as exc:
+        execution.status = (
+            AdvertisingShoppingExecution.STATUS_FAILED
+        )
+        execution.finished_at = timezone.now()
+        execution.failure_type = exc.__class__.__name__
+        execution.failure_message = str(exc)
+
+        execution.save(
+            update_fields=[
+                "status",
+                "finished_at",
+                "failure_type",
+                "failure_message",
+                "updated_at",
+            ]
+        )
+
+        raise
+
+    finally:
+        release_advertising_shopping_runner_lock(
+            owner_token=owner_token,
+        )
