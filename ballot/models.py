@@ -5202,3 +5202,183 @@ def run_automated_advertising_shopper(
         "candidates_considered": len(candidates),
         "purchase_result": purchase_result,
     }
+
+
+# =====================================================================
+# 008-H3B-3C — AUTONOMOUS ADVERTISING SHOPPING RUNNER
+# =====================================================================
+
+def advertising_campaign_runner_queryset(*, moment=None):
+    """
+    Return campaigns eligible to receive an autonomous shopping pass.
+
+    This is deliberately a cheap database-level gate.
+
+    H3B-3B remains responsible for the authoritative campaign window,
+    pacing, budget, property, creative, inventory, and purchase checks.
+
+    A campaign must:
+      * be ACTIVE
+      * have started
+      * not have ended
+
+    Campaigns are processed deterministically by end time and primary key.
+    """
+    from django.db.models import Q
+    from django.utils import timezone
+
+    moment = moment or timezone.now()
+
+    return (
+        AdvertisingCampaign.objects
+        .filter(
+            status=AdvertisingCampaign.STATUS_ACTIVE,
+            starts_at__lte=moment,
+        )
+        .filter(
+            Q(ends_at__isnull=True) |
+            Q(ends_at__gt=moment)
+        )
+        .order_by(
+            "ends_at",
+            "id",
+        )
+    )
+
+
+def run_autonomous_advertising_shopping_pass(
+    *,
+    moment=None,
+    lookahead_minutes=60,
+    policy=None,
+    campaign_limit=None,
+):
+    """
+    H3B-3C platform-wide autonomous shopping runner.
+
+    Run one isolated H3B-3B shopping attempt for each currently eligible
+    advertising campaign.
+
+    CRITICAL SAFETY RULE:
+
+        ONE RUNNER PASS
+            x
+        ONE CAMPAIGN
+            =
+        MAXIMUM ONE PURCHASED APPEARANCE
+
+    H3B-3C never creates reservations or financial records directly.
+    Every purchase must flow through:
+
+        H3B-3C
+            ↓
+        H3B-3B autonomous shopper
+            ↓
+        H3B-2B atomic purchase
+            ↓
+        H2 six-second reservation ledger
+            ↓
+        H3A immutable campaign spend ledger
+
+    Failure isolation:
+        An exception raised while processing one campaign is captured in
+        that campaign's runner result. Remaining campaigns continue.
+
+    campaign_limit:
+        Optional operational cap on the number of campaigns processed in
+        this pass. This limits campaigns attempted — not purchases.
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    moment = moment or timezone.now()
+
+    if lookahead_minutes <= 0:
+        raise ValidationError(
+            "Autonomous shopping lookahead must be greater than zero."
+        )
+
+    if campaign_limit is not None:
+        if (
+            isinstance(campaign_limit, bool)
+            or not isinstance(campaign_limit, int)
+            or campaign_limit <= 0
+        ):
+            raise ValidationError(
+                "Campaign limit must be a positive integer."
+            )
+
+    campaigns = advertising_campaign_runner_queryset(
+        moment=moment,
+    )
+
+    if campaign_limit is not None:
+        campaigns = campaigns[:campaign_limit]
+
+    campaign_results = []
+
+    purchased_count = 0
+    skipped_count = 0
+    failed_count = 0
+
+    for campaign in campaigns:
+        try:
+            result = run_automated_advertising_shopper(
+                campaign=campaign,
+                moment=moment,
+                lookahead_minutes=lookahead_minutes,
+                policy=policy,
+            )
+
+        except Exception as exc:
+            # Campaign-level containment is intentional here.
+            #
+            # A malformed or unexpectedly failing campaign must never stop
+            # autonomous execution for every other advertiser.
+            failed_count += 1
+
+            campaign_results.append({
+                "campaign": campaign,
+                "campaign_id": campaign.pk,
+                "campaign_name": campaign.campaign_name,
+                "status": "failed",
+                "purchased": False,
+                "reason": "campaign_runner_exception",
+                "shopper_result": None,
+                "exception_type": exc.__class__.__name__,
+                "exception_message": str(exc),
+            })
+
+            continue
+
+        if result["purchased"]:
+            purchased_count += 1
+            status = "purchased"
+        else:
+            skipped_count += 1
+            status = "skipped"
+
+        campaign_results.append({
+            "campaign": campaign,
+            "campaign_id": campaign.pk,
+            "campaign_name": campaign.campaign_name,
+            "status": status,
+            "purchased": result["purchased"],
+            "reason": result["reason"],
+            "shopper_result": result,
+            "exception_type": None,
+            "exception_message": "",
+        })
+
+    processed_count = len(campaign_results)
+
+    return {
+        "moment": moment,
+        "lookahead_minutes": lookahead_minutes,
+        "campaign_limit": campaign_limit,
+        "processed_count": processed_count,
+        "purchased_count": purchased_count,
+        "skipped_count": skipped_count,
+        "failed_count": failed_count,
+        "campaign_results": campaign_results,
+    }
