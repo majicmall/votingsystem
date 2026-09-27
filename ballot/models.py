@@ -4724,3 +4724,481 @@ def advertising_campaign_creative_is_authorized(
         return False
 
     return assignment.is_eligible_at(moment)
+
+
+# =====================================================================
+# 008-H3B-3B — AUTOMATED ADVERTISING SHOPPING CONTROLLER
+# =====================================================================
+
+def advertising_campaign_current_properties(
+    *,
+    campaign,
+    moment=None,
+):
+    """
+    Return the campaign's currently usable purchased advertising properties.
+
+    This is intentionally campaign-owned inventory only. H3B-3B may not
+    autonomously shop placements the advertiser did not purchase.
+    """
+    from decimal import Decimal
+
+    from django.utils import timezone
+
+    moment = moment or timezone.now()
+
+    properties = (
+        campaign.billboard_ads
+        .filter(is_active=True)
+        .order_by(
+            "priority",
+            "-rotation_weight",
+            "id",
+        )
+    )
+
+    eligible = []
+
+    for property_ad in properties:
+        allocated = property_ad.allocated_budget or Decimal("0")
+        minimum = property_ad.minimum_spend or Decimal("0")
+
+        if allocated < minimum:
+            continue
+
+        if property_ad.starts_at and moment < property_ad.starts_at:
+            continue
+
+        if property_ad.ends_at and moment >= property_ad.ends_at:
+            continue
+
+        eligible.append(property_ad)
+
+    return eligible
+
+
+def _advertising_next_six_second_boundary(moment):
+    """
+    Move a datetime onto the next six-second inventory boundary.
+
+    If already exactly aligned, the supplied moment is returned.
+    """
+    from datetime import timedelta
+
+    slot_seconds = AdvertisingInventorySchedule.SLOT_SECONDS
+
+    if moment.microsecond:
+        moment = moment.replace(microsecond=0) + timedelta(seconds=1)
+
+    remainder = moment.second % slot_seconds
+
+    if remainder:
+        moment += timedelta(seconds=(slot_seconds - remainder))
+
+    return moment
+
+
+def find_automated_advertising_purchase_candidates(
+    *,
+    campaign,
+    moment=None,
+    lookahead_minutes=60,
+):
+    """
+    Read-only H3B-3B candidate discovery.
+
+    Search:
+
+        campaign purchased properties
+            x
+        campaign-authorized paid creatives
+            x
+        future six-second inventory
+
+    Candidate discovery never reserves inventory and never creates spend.
+
+    Version 1 searches forward in six-second increments and returns every
+    candidate that H3B-1 reports available AND H3B-2A says pacing permits.
+
+    The final controller will buy at most ONE candidate per invocation.
+    """
+    from datetime import timedelta
+
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    if campaign is None:
+        raise ValidationError(
+            "An advertising campaign is required."
+        )
+
+    if lookahead_minutes <= 0:
+        raise ValidationError(
+            "Automated shopping lookahead must be greater than zero."
+        )
+
+    moment = moment or timezone.now()
+
+    if campaign.status != AdvertisingCampaign.STATUS_ACTIVE:
+        return []
+
+    snapshot = advertising_campaign_pacing_snapshot(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if snapshot["phase"] != "active":
+        return []
+
+    if snapshot["pacing_delta"] <= 0:
+        return []
+
+    properties = advertising_campaign_current_properties(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if not properties:
+        return []
+
+    assignments = advertising_campaign_eligible_creative_assignments(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if not assignments:
+        return []
+
+    search_start = _advertising_next_six_second_boundary(moment)
+
+    search_end = search_start + timedelta(
+        minutes=lookahead_minutes
+    )
+
+    if campaign.ends_at:
+        search_end = min(search_end, campaign.ends_at)
+
+    candidates = []
+
+    slot_step = timedelta(
+        seconds=AdvertisingInventorySchedule.SLOT_SECONDS
+    )
+
+    # Avoid duplicate searches when a campaign happens to contain more
+    # than one BillboardAd record for the same placement.
+    placement_properties = {}
+
+    for property_ad in properties:
+        current = placement_properties.get(property_ad.placement)
+
+        if current is None:
+            placement_properties[property_ad.placement] = property_ad
+            continue
+
+        current_key = (
+            current.priority,
+            -current.rotation_weight,
+            current.pk,
+        )
+        candidate_key = (
+            property_ad.priority,
+            -property_ad.rotation_weight,
+            property_ad.pk,
+        )
+
+        if candidate_key < current_key:
+            placement_properties[property_ad.placement] = property_ad
+
+    ordered_properties = sorted(
+        placement_properties.values(),
+        key=lambda property_ad: (
+            property_ad.priority,
+            -property_ad.rotation_weight,
+            property_ad.pk,
+        ),
+    )
+
+    for property_ad in ordered_properties:
+        for assignment in assignments:
+            creative = assignment.creative
+            starts_at = search_start
+
+            while starts_at < search_end:
+                opportunity = find_advertising_inventory_opportunity(
+                    placement=property_ad.placement,
+                    creative=creative,
+                    starts_at=starts_at,
+                    campaign=campaign,
+                )
+
+                if opportunity.get("available", False):
+                    decision = decide_advertising_opportunity_purchase(
+                        campaign=campaign,
+                        opportunity=opportunity,
+                        moment=moment,
+                    )
+
+                    if decision["purchase"]:
+                        candidates.append({
+                            "campaign": campaign,
+                            "property": property_ad,
+                            "assignment": assignment,
+                            "creative": creative,
+                            "placement": property_ad.placement,
+                            "starts_at": starts_at,
+                            "opportunity": opportunity,
+                            "decision": decision,
+                        })
+
+                        # We only need the earliest buyable time for each
+                        # property/creative pair in this controller pass.
+                        break
+
+                starts_at += slot_step
+
+    return candidates
+
+
+def choose_automated_advertising_purchase_candidate(
+    *,
+    candidates,
+):
+    """
+    Deterministically choose ONE H3B-3B candidate.
+
+    Ranking v1:
+
+      1. earliest available inventory
+      2. property priority
+      3. campaign creative priority
+      4. higher property rotation weight
+      5. higher creative rotation weight
+      6. lower appearance cost
+      7. stable database identifiers
+
+    Rotation weights are preserved in the ranking without introducing
+    randomness. A later controller can add delivery-history-aware weighted
+    rotation without changing the campaign/creative ownership architecture.
+    """
+    if not candidates:
+        return None
+
+    return min(
+        candidates,
+        key=lambda candidate: (
+            candidate["starts_at"],
+            candidate["property"].priority,
+            candidate["assignment"].priority,
+            -candidate["property"].rotation_weight,
+            -candidate["assignment"].rotation_weight,
+            candidate["opportunity"]["appearance_cost"],
+            candidate["property"].pk,
+            candidate["assignment"].pk,
+        ),
+    )
+
+
+def run_automated_advertising_shopper(
+    *,
+    campaign,
+    moment=None,
+    lookahead_minutes=60,
+    policy=None,
+):
+    """
+    H3B-3B autonomous advertising shopping controller.
+
+    ONE invocation may purchase AT MOST ONE complete appearance.
+
+    The controller itself never writes reservation or spend rows.
+    The winning candidate is handed to H3B-2B, which remains the
+    authoritative atomic transaction boundary.
+
+    Pipeline:
+
+        active campaign
+            ↓
+        active campaign window
+            ↓
+        behind pacing target
+            ↓
+        current purchased properties
+            ↓
+        authorized H3B-3A creatives
+            ↓
+        search future six-second inventory
+            ↓
+        H3B-1 opportunity
+            ↓
+        H3B-2A purchase decision
+            ↓
+        deterministic candidate selection
+            ↓
+        H3B-2B atomic purchase
+            ↓
+        STOP
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    if campaign is None:
+        raise ValidationError(
+            "An advertising campaign is required."
+        )
+
+    moment = moment or timezone.now()
+
+    def stopped(reason, **extra):
+        result = {
+            "purchased": False,
+            "reason": reason,
+            "campaign": campaign,
+            "moment": moment,
+            "candidate": None,
+            "candidates_considered": 0,
+            "purchase_result": None,
+        }
+        result.update(extra)
+        return result
+
+    # -------------------------------------------------------------
+    # CAMPAIGN AUTHORIZATION GATE
+    # -------------------------------------------------------------
+    if campaign.status != AdvertisingCampaign.STATUS_ACTIVE:
+        return stopped("campaign_not_active")
+
+    # -------------------------------------------------------------
+    # PACING / WINDOW GATE
+    # -------------------------------------------------------------
+    snapshot = advertising_campaign_pacing_snapshot(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if snapshot["phase"] == "before_campaign":
+        return stopped(
+            "campaign_not_started",
+            snapshot=snapshot,
+        )
+
+    if snapshot["phase"] == "after_campaign":
+        return stopped(
+            "campaign_ended",
+            snapshot=snapshot,
+        )
+
+    if snapshot["remaining_budget"] <= 0:
+        return stopped(
+            "campaign_budget_exhausted",
+            snapshot=snapshot,
+        )
+
+    if snapshot["pacing_delta"] <= 0:
+        return stopped(
+            "not_behind_pace",
+            snapshot=snapshot,
+        )
+
+    # -------------------------------------------------------------
+    # PROPERTY AUTHORIZATION GATE
+    # -------------------------------------------------------------
+    properties = advertising_campaign_current_properties(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if not properties:
+        return stopped(
+            "no_current_campaign_properties",
+            snapshot=snapshot,
+        )
+
+    # -------------------------------------------------------------
+    # CREATIVE AUTHORIZATION GATE
+    # -------------------------------------------------------------
+    assignments = advertising_campaign_eligible_creative_assignments(
+        campaign=campaign,
+        moment=moment,
+    )
+
+    if not assignments:
+        return stopped(
+            "no_authorized_campaign_creatives",
+            snapshot=snapshot,
+        )
+
+    # -------------------------------------------------------------
+    # SHOP
+    # -------------------------------------------------------------
+    candidates = find_automated_advertising_purchase_candidates(
+        campaign=campaign,
+        moment=moment,
+        lookahead_minutes=lookahead_minutes,
+    )
+
+    if not candidates:
+        return stopped(
+            "no_buyable_inventory",
+            snapshot=snapshot,
+        )
+
+    winner = choose_automated_advertising_purchase_candidate(
+        candidates=candidates,
+    )
+
+    if winner is None:
+        return stopped(
+            "no_buyable_inventory",
+            snapshot=snapshot,
+        )
+
+    # Defense in depth:
+    # Never trust a candidate merely because discovery produced it.
+    if not advertising_campaign_creative_is_authorized(
+        campaign=campaign,
+        creative=winner["creative"],
+        moment=moment,
+    ):
+        return stopped(
+            "creative_authorization_changed",
+            snapshot=snapshot,
+            candidates_considered=len(candidates),
+        )
+
+    current_property_ids = {
+        property_ad.pk
+        for property_ad in advertising_campaign_current_properties(
+            campaign=campaign,
+            moment=moment,
+        )
+    }
+
+    if winner["property"].pk not in current_property_ids:
+        return stopped(
+            "property_authorization_changed",
+            snapshot=snapshot,
+            candidates_considered=len(candidates),
+        )
+
+    # -------------------------------------------------------------
+    # H3B-2B IS THE ONLY MONEY/RESERVATION WRITE PATH
+    # -------------------------------------------------------------
+    purchase_result = execute_advertising_opportunity_purchase(
+        campaign=campaign,
+        creative=winner["creative"],
+        placement=winner["placement"],
+        starts_at=winner["starts_at"],
+        moment=moment,
+        policy=policy,
+    )
+
+    return {
+        "purchased": purchase_result["purchased"],
+        "reason": purchase_result["reason"],
+        "campaign": campaign,
+        "moment": moment,
+        "snapshot": snapshot,
+        "candidate": winner,
+        "candidates_considered": len(candidates),
+        "purchase_result": purchase_result,
+    }
