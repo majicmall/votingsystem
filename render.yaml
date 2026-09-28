@@ -54,4 +54,4 @@ services:
 
 databases:
   - name: atlshottestawards-db
-    plan: free
+    plan: basic-256mb
