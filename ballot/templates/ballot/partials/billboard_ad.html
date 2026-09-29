@@ -1,7 +1,16 @@
 {% load static %}
 
 {% if ad %}
-<section class="mm-billboard mm-billboard-live">
+<section
+  class="mm-billboard mm-billboard-live"
+  {% if billboard_mode == "ambe" and ambe_appearance_id %}
+    data-ambe-proof-of-play="true"
+    data-ambe-appearance-id="{{ ambe_appearance_id }}"
+    data-ambe-placement="{{ placement }}"
+    data-ambe-sequence-number="{{ ambe_sequence_number }}"
+    data-ambe-appearance-slot-count="{{ ambe_appearance_slot_count }}"
+  {% endif %}
+>
   <a
     class="mm-billboard-link"
     href="{% url 'billboard_click' ad.id %}"
@@ -65,4 +74,160 @@
 
   </a>
 </section>
+{% endif %}
+
+{% if billboard_mode == "ambe" and ambe_appearance_id %}
+<script>
+(function () {
+  "use strict";
+
+  const billboard = document.currentScript
+    ? document.currentScript.previousElementSibling
+    : null;
+
+  if (
+    !billboard ||
+    billboard.dataset.ambeProofOfPlay !== "true"
+  ) {
+    return;
+  }
+
+  const appearanceId = billboard.dataset.ambeAppearanceId;
+  const placement = billboard.dataset.ambePlacement;
+
+  if (!appearanceId || !placement) {
+    return;
+  }
+
+  const slotCount = Math.max(
+    1,
+    parseInt(
+      billboard.dataset.ambeAppearanceSlotCount || "1",
+      10
+    ) || 1
+  );
+
+  /*
+   * One AMBE inventory unit is six seconds.
+   *
+   * Proof of Play is acknowledged only after the browser has
+   * continuously presented the complete scheduled appearance.
+   *
+   * Rendering the template is NOT Proof of Play.
+   */
+  const requiredPlaybackMs = slotCount * 6000;
+
+  let visiblePlaybackMs = 0;
+  let lastStartedAt = null;
+  let acknowledgementSent = false;
+  let completionTimer = null;
+
+  function csrfToken() {
+    const cookie = document.cookie
+      .split("; ")
+      .find(function (row) {
+        return row.startsWith("csrftoken=");
+      });
+
+    return cookie
+      ? decodeURIComponent(cookie.split("=")[1])
+      : "";
+  }
+
+  function clearCompletionTimer() {
+    if (completionTimer !== null) {
+      window.clearTimeout(completionTimer);
+      completionTimer = null;
+    }
+  }
+
+  function addVisibleElapsedTime() {
+    if (lastStartedAt === null) {
+      return;
+    }
+
+    visiblePlaybackMs += performance.now() - lastStartedAt;
+    lastStartedAt = null;
+  }
+
+  function sendAcknowledgement() {
+    if (acknowledgementSent) {
+      return;
+    }
+
+    acknowledgementSent = true;
+    clearCompletionTimer();
+    addVisibleElapsedTime();
+
+    fetch(
+      "{% url 'acknowledge_advertising_play' %}",
+      {
+        method: "POST",
+        credentials: "same-origin",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken()
+        },
+        body: JSON.stringify({
+          appearance_id: appearanceId,
+          placement: placement
+        })
+      }
+    ).catch(function () {
+      /*
+       * Do not fabricate Proof of Play client-side.
+       * If delivery acknowledgement fails, the authoritative
+       * reservation remains unplayed on the server.
+       */
+    });
+  }
+
+  function scheduleCompletion() {
+    if (
+      acknowledgementSent ||
+      document.visibilityState !== "visible"
+    ) {
+      return;
+    }
+
+    const remainingMs = Math.max(
+      0,
+      requiredPlaybackMs - visiblePlaybackMs
+    );
+
+    if (remainingMs === 0) {
+      sendAcknowledgement();
+      return;
+    }
+
+    lastStartedAt = performance.now();
+
+    completionTimer = window.setTimeout(
+      sendAcknowledgement,
+      remainingMs
+    );
+  }
+
+  function pauseCompletion() {
+    clearCompletionTimer();
+    addVisibleElapsedTime();
+  }
+
+  document.addEventListener(
+    "visibilitychange",
+    function () {
+      if (document.visibilityState === "visible") {
+        scheduleCompletion();
+      } else {
+        pauseCompletion();
+      }
+    }
+  );
+
+  if (document.visibilityState === "visible") {
+    scheduleCompletion();
+  }
+})();
+</script>
 {% endif %}

@@ -3781,3 +3781,141 @@ def event_promotion_order_action(request, pk):
 
     return redirect("event_approval_center")
 
+
+
+# =========================================================
+# 009-A2D — AMBE DELIVERY ACKNOWLEDGEMENT
+# =========================================================
+
+import json
+import uuid
+
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+
+@require_POST
+def acknowledge_advertising_play(request):
+    """
+    Browser/player acknowledgement for one completed AMBE appearance.
+
+    IMPORTANT:
+    Rendering/selecting an advertisement is not Proof of Play.
+
+    Only a completed presentation may call this endpoint. The
+    authoritative state transition remains owned by
+    record_advertising_appearance_play().
+    """
+    from ballot.models import (
+        AdvertisingPlayoutReservation,
+        record_advertising_appearance_play,
+    )
+
+    try:
+        payload = json.loads(request.body or b"{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "invalid_json",
+            },
+            status=400,
+        )
+
+    appearance_value = payload.get("appearance_id")
+    placement = payload.get("placement")
+
+    if not appearance_value:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "appearance_id_required",
+            },
+            status=400,
+        )
+
+    if not placement:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "placement_required",
+            },
+            status=400,
+        )
+
+    try:
+        appearance_id = uuid.UUID(str(appearance_value))
+    except (TypeError, ValueError, AttributeError):
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "invalid_appearance_id",
+            },
+            status=400,
+        )
+
+    reservations = list(
+        AdvertisingPlayoutReservation.objects
+        .filter(appearance_id=appearance_id)
+        .order_by("sequence_number", "pk")
+    )
+
+    if not reservations:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "unknown_appearance",
+            },
+            status=404,
+        )
+
+    reservation_placements = {
+        reservation.placement
+        for reservation in reservations
+    }
+
+    if reservation_placements != {placement}:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "placement_mismatch",
+            },
+            status=409,
+        )
+
+    # The client does not choose the authoritative Proof-of-Play
+    # timestamp. The server records when acknowledgement arrives.
+    played_at = timezone.now()
+
+    try:
+        result = record_advertising_appearance_play(
+            appearance_id=appearance_id,
+            played_at=played_at,
+        )
+    except ValidationError as exc:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "play_rejected",
+                "errors": exc.messages,
+            },
+            status=409,
+        )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "recorded": result["recorded"],
+            "reason": result["reason"],
+            "appearance_id": str(appearance_id),
+            "placement": placement,
+            "slot_count": result.get("slot_count"),
+            "played_at": (
+                result.get("played_at").isoformat()
+                if result.get("played_at")
+                else None
+            ),
+        }
+    )
