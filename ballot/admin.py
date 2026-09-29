@@ -1622,6 +1622,7 @@ class AdvertisingPlayoutCreativeAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "creative_type",
+        "billboard_ad",
         "duration_seconds",
         "slot_count_display",
         "priority",
@@ -1635,7 +1636,15 @@ class AdvertisingPlayoutCreativeAdmin(admin.ModelAdmin):
         "is_active",
     )
 
-    search_fields = ("name",)
+    search_fields = (
+        "name",
+        "billboard_ad__title",
+        "billboard_ad__advertiser_name",
+    )
+
+    autocomplete_fields = (
+        "billboard_ad",
+    )
 
     ordering = (
         "-priority",

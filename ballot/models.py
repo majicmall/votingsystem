@@ -2470,6 +2470,25 @@ class AdvertisingPlayoutCreative(models.Model):
 
     name = models.CharField(max_length=180)
 
+    # ---------------------------------------------------------
+    # 009-A2B — LIVE PRESENTATION BRIDGE
+    #
+    # The playout creative remains the scheduling object.
+    # BillboardAd remains the advertiser-facing presentation
+    # object containing artwork, CTA, destination and placement.
+    # ---------------------------------------------------------
+    billboard_ad = models.ForeignKey(
+        "BillboardAd",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="playout_creatives",
+        help_text=(
+            "Optional billboard presentation rendered when this "
+            "playout creative is delivered."
+        ),
+    )
+
     creative_type = models.CharField(
         max_length=30,
         choices=CREATIVE_TYPE_CHOICES,
@@ -2552,6 +2571,23 @@ class AdvertisingPlayoutCreative(models.Model):
                 "ends_at":
                     "Ending time must be later than starting time."
             })
+
+        # -----------------------------------------------------
+        # 009-A2B — PRESENTATION CONTRACT
+        # -----------------------------------------------------
+        if self.billboard_ad_id:
+            billboard = self.billboard_ad
+
+            if (
+                self.creative_type == self.TYPE_PAID
+                and billboard.campaign_id is None
+            ):
+                raise ValidationError({
+                    "billboard_ad": (
+                        "Paid playout creatives must use a billboard "
+                        "presentation owned by an advertising campaign."
+                    )
+                })
 
 
 # =====================================================================
