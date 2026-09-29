@@ -5914,3 +5914,203 @@ def run_guarded_autonomous_advertising_shopping_pass(
         release_advertising_shopping_runner_lock(
             owner_token=owner_token,
         )
+
+
+# =====================================================================
+# 009-A1 — AUTHORITATIVE PROOF-OF-PLAY RECORDER
+# =====================================================================
+
+def record_advertising_appearance_play(
+    *,
+    appearance_id,
+    played_at=None,
+):
+    """
+    Record one COMPLETE advertising appearance as actually played.
+
+    IMPORTANT:
+    A reservation is not Proof of Play.
+    A purchase is not Proof of Play.
+
+    This operation is the authoritative transition from scheduled
+    inventory to verified delivery.
+
+    All six-second reservation rows belonging to the appearance are
+    transitioned atomically:
+
+        reserved -> played
+
+    Every row receives the same actual proof-of-play timestamp.
+
+    Safety guarantees:
+    - appearance must exist
+    - complete appearance must be present
+    - sequence must be structurally complete
+    - every slot must still be reserved
+    - cancelled/missed/mixed-state appearances cannot become played
+    - duplicate Proof-of-Play recording is idempotent
+    - rows are locked during the transition
+    """
+
+    from django.core.exceptions import ValidationError
+    from django.db import transaction
+    from django.utils import timezone
+
+    if not appearance_id:
+        raise ValidationError(
+            "An advertising appearance ID is required."
+        )
+
+    played_at = played_at or timezone.now()
+
+    with transaction.atomic():
+
+        reservations = list(
+            AdvertisingPlayoutReservation.objects
+            .select_for_update()
+            .filter(appearance_id=appearance_id)
+            .order_by("sequence_number", "pk")
+        )
+
+        if not reservations:
+            raise ValidationError(
+                "Advertising appearance does not exist."
+            )
+
+        expected_slot_count = reservations[0].appearance_slot_count
+
+        if expected_slot_count < 1:
+            raise ValidationError(
+                "Advertising appearance has an invalid slot count."
+            )
+
+        if len(reservations) != expected_slot_count:
+            raise ValidationError(
+                "Advertising appearance is incomplete and cannot be "
+                "recorded as played."
+            )
+
+        expected_sequence = list(
+            range(1, expected_slot_count + 1)
+        )
+
+        actual_sequence = [
+            reservation.sequence_number
+            for reservation in reservations
+        ]
+
+        if actual_sequence != expected_sequence:
+            raise ValidationError(
+                "Advertising appearance has an invalid slot sequence "
+                "and cannot be recorded as played."
+            )
+
+        # All rows belonging to an appearance must describe the same
+        # complete appearance contract.
+        first = reservations[0]
+
+        for reservation in reservations[1:]:
+            if (
+                reservation.placement != first.placement
+                or reservation.creative_id != first.creative_id
+                or reservation.campaign_id != first.campaign_id
+                or reservation.source_type != first.source_type
+                or reservation.appearance_slot_count
+                != first.appearance_slot_count
+            ):
+                raise ValidationError(
+                    "Advertising appearance reservation rows do not "
+                    "share one consistent playout contract."
+                )
+
+        statuses = {
+            reservation.status
+            for reservation in reservations
+        }
+
+        # -------------------------------------------------------------
+        # IDEMPOTENCY
+        # -------------------------------------------------------------
+        if statuses == {
+            AdvertisingPlayoutReservation.STATUS_PLAYED
+        }:
+            timestamps = {
+                reservation.played_at
+                for reservation in reservations
+            }
+
+            if None in timestamps or len(timestamps) != 1:
+                raise ValidationError(
+                    "Played advertising appearance has inconsistent "
+                    "Proof-of-Play timestamps."
+                )
+
+            return {
+                "recorded": False,
+                "reason": "already_played",
+                "appearance_id": first.appearance_id,
+                "played_at": first.played_at,
+                "placement": first.placement,
+                "creative": first.creative,
+                "campaign": first.campaign,
+                "source_type": first.source_type,
+                "slot_count": expected_slot_count,
+                "reservations": reservations,
+            }
+
+        # -------------------------------------------------------------
+        # STATE AUTHORIZATION
+        # -------------------------------------------------------------
+        if statuses != {
+            AdvertisingPlayoutReservation.STATUS_RESERVED
+        }:
+            raise ValidationError(
+                "Only a fully reserved advertising appearance may be "
+                "recorded as played."
+            )
+
+        # -------------------------------------------------------------
+        # PROOF OF PLAY
+        # -------------------------------------------------------------
+        reservation_ids = [
+            reservation.pk
+            for reservation in reservations
+        ]
+
+        updated = (
+            AdvertisingPlayoutReservation.objects
+            .filter(
+                pk__in=reservation_ids,
+                status=AdvertisingPlayoutReservation.STATUS_RESERVED,
+            )
+            .update(
+                status=AdvertisingPlayoutReservation.STATUS_PLAYED,
+                played_at=played_at,
+            )
+        )
+
+        if updated != expected_slot_count:
+            raise ValidationError(
+                "Advertising appearance changed while Proof of Play "
+                "was being recorded."
+            )
+
+        # Keep the returned objects consistent with database state.
+        for reservation in reservations:
+            reservation.status = (
+                AdvertisingPlayoutReservation.STATUS_PLAYED
+            )
+            reservation.played_at = played_at
+
+        return {
+            "recorded": True,
+            "reason": "played",
+            "appearance_id": first.appearance_id,
+            "played_at": played_at,
+            "placement": first.placement,
+            "creative": first.creative,
+            "campaign": first.campaign,
+            "source_type": first.source_type,
+            "slot_count": expected_slot_count,
+            "reservations": reservations,
+        }
