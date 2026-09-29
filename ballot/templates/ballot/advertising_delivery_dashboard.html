@@ -1,0 +1,357 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}Advertising Delivery Operations | ATL’s Hottest{% endblock %}
+
+{% block content %}
+
+<style>
+  .ambe-report-shell {
+    max-width: 1240px;
+    margin: 34px auto 70px;
+  }
+
+  .ambe-report-hero,
+  .ambe-campaign-card,
+  .ambe-empty {
+    border: 1px solid rgba(212, 175, 55, .35);
+    background:
+      linear-gradient(
+        145deg,
+        rgba(20,20,20,.96),
+        rgba(3,3,3,.98)
+      );
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.38),
+      inset 0 1px 0 rgba(255,255,255,.05);
+    border-radius: 22px;
+  }
+
+  .ambe-report-hero {
+    padding: 34px;
+    margin-bottom: 26px;
+  }
+
+  .ambe-eyebrow {
+    margin: 0 0 8px;
+    color: #d9b74b;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .ambe-report-hero h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    line-height: 1;
+  }
+
+  .ambe-report-hero p:last-child {
+    max-width: 760px;
+    margin: 18px 0 0;
+    opacity: .78;
+  }
+
+  .ambe-campaign-list {
+    display: grid;
+    gap: 20px;
+  }
+
+  .ambe-campaign-card {
+    padding: 26px;
+  }
+
+  .ambe-campaign-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+
+  .ambe-campaign-head h2 {
+    margin: 3px 0 6px;
+  }
+
+  .ambe-advertiser {
+    margin: 0;
+    opacity: .7;
+  }
+
+  .ambe-status {
+    display: inline-flex;
+    padding: 8px 12px;
+    border: 1px solid rgba(212,175,55,.4);
+    border-radius: 999px;
+    color: #e4c75f;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .ambe-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .ambe-metric {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.035);
+    border-radius: 14px;
+  }
+
+  .ambe-metric span {
+    display: block;
+    margin-bottom: 8px;
+    opacity: .58;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  .ambe-metric strong {
+    display: block;
+    font-size: 1.35rem;
+  }
+
+  .ambe-progress {
+    height: 8px;
+    margin: 20px 0 8px;
+    overflow: hidden;
+    background: rgba(255,255,255,.08);
+    border-radius: 999px;
+  }
+
+  .ambe-progress > span {
+    display: block;
+    width: var(--delivery);
+    max-width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(
+        90deg,
+        #8b6a10,
+        #f1d56a,
+        #fff0a0
+      );
+  }
+
+  .ambe-progress-copy {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: .82rem;
+    opacity: .7;
+  }
+
+  .ambe-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .ambe-report-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 18px;
+    border: 1px solid #d7b84b;
+    border-radius: 999px;
+    color: #f4dc7a;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .ambe-empty {
+    padding: 42px;
+    text-align: center;
+  }
+
+  .ambe-empty strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.35rem;
+  }
+
+  @media (max-width: 1050px) {
+    .ambe-metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .ambe-report-shell {
+      margin-top: 20px;
+    }
+
+    .ambe-report-hero,
+    .ambe-campaign-card {
+      padding: 20px;
+    }
+
+    .ambe-campaign-head {
+      display: block;
+    }
+
+    .ambe-status {
+      margin-top: 12px;
+    }
+
+    .ambe-metrics {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ambe-actions {
+      justify-content: stretch;
+    }
+
+    .ambe-report-button {
+      width: 100%;
+    }
+  }
+</style>
+
+<section class="ambe-report-shell">
+
+  <header class="ambe-report-hero">
+    <p class="ambe-eyebrow">
+      AMBE · Advertising Operations
+    </p>
+
+    <h1>Delivery Command Center</h1>
+
+    <p>
+      Authoritative campaign delivery, media spend,
+      and verified Proof-of-Play reporting.
+    </p>
+  </header>
+
+  {% if campaign_rows %}
+
+    <section class="ambe-campaign-list">
+
+      {% for row in campaign_rows %}
+
+        <article class="ambe-campaign-card">
+
+          <div class="ambe-campaign-head">
+            <div>
+              <p class="ambe-eyebrow">
+                Campaign #{{ row.campaign.pk }}
+              </p>
+
+              <h2>{{ row.campaign.campaign_name }}</h2>
+
+              <p class="ambe-advertiser">
+                {{ row.campaign.advertiser_name }}
+              </p>
+            </div>
+
+            <span class="ambe-status">
+              {{ row.campaign.status }}
+            </span>
+          </div>
+
+          <div class="ambe-metrics">
+
+            <div class="ambe-metric">
+              <span>Purchased</span>
+              <strong>
+                {{ row.analytics.purchased_appearances }}
+              </strong>
+            </div>
+
+            <div class="ambe-metric">
+              <span>Verified Plays</span>
+              <strong>
+                {{ row.analytics.played_appearances }}
+              </strong>
+            </div>
+
+            <div class="ambe-metric">
+              <span>Delivery</span>
+              <strong>
+                {{ row.analytics.delivery_percentage }}%
+              </strong>
+            </div>
+
+            <div class="ambe-metric">
+              <span>Media Spend</span>
+              <strong>
+                ${{ row.analytics.media_spend|floatformat:2 }}
+              </strong>
+            </div>
+
+            <div class="ambe-metric">
+              <span>Delivered Value</span>
+              <strong>
+                ${{ row.analytics.delivered_media_spend|floatformat:2 }}
+              </strong>
+            </div>
+
+            <div class="ambe-metric">
+              <span>Outstanding</span>
+              <strong>
+                ${{ row.analytics.outstanding_media_spend|floatformat:2 }}
+              </strong>
+            </div>
+
+          </div>
+
+          <div
+            class="ambe-progress"
+            style="--delivery: {{ row.analytics.delivery_percentage }}%;"
+          >
+            <span></span>
+          </div>
+
+          <div class="ambe-progress-copy">
+            <span>
+              {{ row.analytics.played_appearances }}
+              verified of
+              {{ row.analytics.purchased_appearances }}
+              purchased appearances
+            </span>
+
+            <span>
+              {{ row.analytics.outstanding_appearances }}
+              outstanding
+            </span>
+          </div>
+
+          <div class="ambe-actions">
+            <a
+              class="ambe-report-button"
+              href="{% url 'advertising_campaign_delivery_report' row.campaign.pk %}"
+            >
+              View Proof of Play →
+            </a>
+          </div>
+
+        </article>
+
+      {% endfor %}
+
+    </section>
+
+  {% else %}
+
+    <section class="ambe-empty">
+      <strong>No advertising campaigns yet.</strong>
+
+      <span>
+        Campaign delivery analytics will appear here
+        automatically when AMBE begins purchasing inventory.
+      </span>
+    </section>
+
+  {% endif %}
+
+</section>
+
+{% endblock %}

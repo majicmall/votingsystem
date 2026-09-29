@@ -3919,3 +3919,74 @@ def acknowledge_advertising_play(request):
             ),
         }
     )
+
+
+# ============================================================
+# 009-B3 — AUTHORITATIVE ADVERTISING DELIVERY DASHBOARD
+# ============================================================
+
+@staff_member_required
+def advertising_delivery_dashboard(request):
+    """
+    Staff operations cockpit for authoritative AMBE campaign delivery.
+
+    This view intentionally delegates all delivery accounting to
+    advertising_campaign_delivery_analytics().  Presentation code must
+    never independently reconstruct Proof-of-Play or spend totals.
+    """
+    from ballot.advertising_analytics import (
+        advertising_campaign_delivery_analytics,
+    )
+    from ballot.models import AdvertisingCampaign
+
+    campaigns = list(
+        AdvertisingCampaign.objects
+        .all()
+        .order_by("-created_at", "-pk")
+    )
+
+    campaign_rows = []
+
+    for campaign in campaigns:
+        analytics = advertising_campaign_delivery_analytics(campaign)
+
+        campaign_rows.append({
+            "campaign": campaign,
+            "analytics": analytics,
+        })
+
+    return render(
+        request,
+        "ballot/advertising_delivery_dashboard.html",
+        {
+            "campaign_rows": campaign_rows,
+            "campaign_count": len(campaign_rows),
+        },
+    )
+
+
+@staff_member_required
+def advertising_campaign_delivery_report(request, campaign_id):
+    """
+    Staff drill-down for one campaign's authoritative delivery record.
+    """
+    from ballot.advertising_analytics import (
+        advertising_campaign_delivery_analytics,
+    )
+    from ballot.models import AdvertisingCampaign
+
+    campaign = get_object_or_404(
+        AdvertisingCampaign,
+        pk=campaign_id,
+    )
+
+    analytics = advertising_campaign_delivery_analytics(campaign)
+
+    return render(
+        request,
+        "ballot/advertising_campaign_delivery_report.html",
+        {
+            "campaign": campaign,
+            "analytics": analytics,
+        },
+    )

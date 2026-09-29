@@ -1,0 +1,377 @@
+{% extends "ballot/base.html" %}
+
+{% block title %}{{ campaign.campaign_name }} Delivery Report | ATL’s Hottest{% endblock %}
+
+{% block content %}
+
+<style>
+  .pop-shell {
+    max-width: 1240px;
+    margin: 34px auto 70px;
+  }
+
+  .pop-panel {
+    margin-bottom: 22px;
+    padding: 26px;
+    border: 1px solid rgba(212,175,55,.32);
+    background:
+      linear-gradient(
+        145deg,
+        rgba(20,20,20,.96),
+        rgba(3,3,3,.98)
+      );
+    border-radius: 22px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.35);
+  }
+
+  .pop-eyebrow {
+    margin: 0 0 8px;
+    color: #d9b74b;
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .pop-hero h1 {
+    margin: 4px 0 8px;
+    font-size: clamp(2rem,5vw,3.5rem);
+  }
+
+  .pop-muted {
+    opacity: .68;
+  }
+
+  .pop-verified {
+    display: inline-flex;
+    margin-top: 14px;
+    padding: 8px 13px;
+    border: 1px solid rgba(212,175,55,.48);
+    border-radius: 999px;
+    color: #f0d66c;
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .pop-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .pop-stat {
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.035);
+    border-radius: 14px;
+  }
+
+  .pop-stat span {
+    display: block;
+    margin-bottom: 7px;
+    opacity: .58;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .pop-stat strong {
+    font-size: 1.35rem;
+  }
+
+  .pop-table-wrap {
+    overflow-x: auto;
+  }
+
+  .pop-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .pop-table th,
+  .pop-table td {
+    padding: 13px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .pop-table th {
+    color: #d9b74b;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .pop-back {
+    display: inline-flex;
+    margin-bottom: 18px;
+    color: #e6ca62;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .pop-window {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .pop-window div span {
+    display: block;
+    margin-bottom: 4px;
+    opacity: .55;
+    font-size: .7rem;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1050px) {
+    .pop-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .pop-panel {
+      padding: 20px;
+    }
+
+    .pop-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<section class="pop-shell">
+
+  <a
+    class="pop-back"
+    href="{% url 'advertising_delivery_dashboard' %}"
+  >
+    ← Delivery Command Center
+  </a>
+
+  <section class="pop-panel pop-hero">
+
+    <p class="pop-eyebrow">
+      AMBE · Authoritative Delivery Report
+    </p>
+
+    <h1>{{ campaign.campaign_name }}</h1>
+
+    <p class="pop-muted">
+      {{ campaign.advertiser_name }}
+      · Campaign #{{ campaign.pk }}
+      · {{ campaign.status }}
+    </p>
+
+    <span class="pop-verified">
+      Verified Proof of Play
+    </span>
+
+    <div class="pop-grid">
+
+      <div class="pop-stat">
+        <span>Purchased</span>
+        <strong>{{ analytics.purchased_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Verified Plays</span>
+        <strong>{{ analytics.played_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Delivery</span>
+        <strong>{{ analytics.delivery_percentage }}%</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Media Spend</span>
+        <strong>${{ analytics.media_spend|floatformat:2 }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Delivered Value</span>
+        <strong>
+          ${{ analytics.delivered_media_spend|floatformat:2 }}
+        </strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Outstanding</span>
+        <strong>
+          ${{ analytics.outstanding_media_spend|floatformat:2 }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="pop-panel">
+
+    <p class="pop-eyebrow">Proof-of-Play Window</p>
+    <h2>Verified Delivery Timeline</h2>
+
+    <div class="pop-window">
+      <div>
+        <span>First Verified Play</span>
+        <strong>
+          {% if analytics.first_played_at %}
+            {{ analytics.first_played_at|date:"M j, Y g:i:s A" }}
+          {% else %}
+            Not yet delivered
+          {% endif %}
+        </strong>
+      </div>
+
+      <div>
+        <span>Latest Verified Play</span>
+        <strong>
+          {% if analytics.last_played_at %}
+            {{ analytics.last_played_at|date:"M j, Y g:i:s A" }}
+          {% else %}
+            Not yet delivered
+          {% endif %}
+        </strong>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="pop-panel">
+
+    <p class="pop-eyebrow">Placement Performance</p>
+    <h2>Delivery by Advertising Property</h2>
+
+    <div class="pop-table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th>Placement</th>
+            <th>Purchased</th>
+            <th>Reserved</th>
+            <th>Verified Plays</th>
+            <th>Slots</th>
+            <th>Spend</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in analytics.placement_breakdown %}
+            <tr>
+              <td>{{ row.placement }}</td>
+              <td>{{ row.purchased_appearances }}</td>
+              <td>{{ row.reserved_appearances }}</td>
+              <td>{{ row.played_appearances }}</td>
+              <td>{{ row.slot_count }}</td>
+              <td>${{ row.media_spend|floatformat:2 }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                No purchased placement delivery yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <section class="pop-panel">
+
+    <p class="pop-eyebrow">Creative Performance</p>
+    <h2>Delivery by Creative</h2>
+
+    <div class="pop-table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th>Creative</th>
+            <th>Purchased</th>
+            <th>Reserved</th>
+            <th>Verified Plays</th>
+            <th>Slots</th>
+            <th>Spend</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in analytics.creative_breakdown %}
+            <tr>
+              <td>
+                {% if row.creative_name %}
+                  {{ row.creative_name }}
+                {% else %}
+                  Creative #{{ row.creative_id|default:"—" }}
+                {% endif %}
+              </td>
+              <td>{{ row.purchased_appearances }}</td>
+              <td>{{ row.reserved_appearances }}</td>
+              <td>{{ row.played_appearances }}</td>
+              <td>{{ row.slot_count }}</td>
+              <td>${{ row.media_spend|floatformat:2 }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                No creative delivery yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <section class="pop-panel">
+
+    <p class="pop-eyebrow">Delivery State</p>
+    <h2>Authoritative Appearance Accounting</h2>
+
+    <div class="pop-grid">
+
+      <div class="pop-stat">
+        <span>Reserved</span>
+        <strong>{{ analytics.reserved_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Played</span>
+        <strong>{{ analytics.played_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Outstanding</span>
+        <strong>{{ analytics.outstanding_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Cancelled</span>
+        <strong>{{ analytics.cancelled_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Missed</span>
+        <strong>{{ analytics.missed_appearances }}</strong>
+      </div>
+
+      <div class="pop-stat">
+        <span>Mixed / Incomplete</span>
+        <strong>{{ analytics.mixed_appearances }}</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+</section>
+
+{% endblock %}

@@ -97,6 +97,16 @@ urlpatterns = [
     ),
     path("marketplace/", ballot_views.atls_hottest_marketplace, name="atls_hottest_marketplace"),
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
+    path(
+        "advertise/operations/delivery/",
+        ballot_views.advertising_delivery_dashboard,
+        name="advertising_delivery_dashboard",
+    ),
+    path(
+        "advertise/operations/delivery/<int:campaign_id>/",
+        ballot_views.advertising_campaign_delivery_report,
+        name="advertising_campaign_delivery_report",
+    ),
     path("advertise/click/<int:ad_id>/", ballot_views.billboard_click, name="billboard_click"),
     path(
         "advertise/play/acknowledge/",
