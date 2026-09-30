@@ -1040,6 +1040,14 @@ class AdvertisingCampaign(models.Model):
         db_index=True,
     )
 
+    advertiser_report_enabled = models.BooleanField(
+        default=True,
+        help_text=(
+            "Controls whether the secure advertiser delivery "
+            "report is currently accessible."
+        ),
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

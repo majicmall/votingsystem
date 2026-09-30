@@ -4015,6 +4015,7 @@ def advertising_advertiser_delivery_report(request, token):
     campaign = get_object_or_404(
         AdvertisingCampaign,
         advertiser_report_token=token,
+        advertiser_report_enabled=True,
     )
 
     analytics = advertising_campaign_delivery_analytics(

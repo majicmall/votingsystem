@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.middleware.csrf import get_token
+from django.http import HttpResponseNotAllowed
+from django.contrib import admin, messages
 from django.urls import path, reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
@@ -464,10 +466,16 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
         "allocated_total_display",
         "remaining_budget_display",
         "status",
+        "advertiser_report_status_display",
         "starts_at",
         "ends_at",
     )
-    list_filter = ("status", "starts_at", "ends_at")
+    list_filter = (
+        "status",
+        "advertiser_report_enabled",
+        "starts_at",
+        "ends_at",
+    )
     search_fields = (
         "campaign_name",
         "advertiser_name",
@@ -482,6 +490,8 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "workflow_controls",
+        "advertiser_report_controls",
+        "advertiser_report_token",
         "allocated_total_display",
         "remaining_budget_display",
         "required_minimum_spend_display",
@@ -501,6 +511,19 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             "description": (
                 "Use the primary control below to move the campaign "
                 "directly toward LIVE status."
+            ),
+        }),
+        ("Advertiser Delivery Report", {
+            "fields": (
+                "advertiser_report_controls",
+                "advertiser_report_enabled",
+                "advertiser_report_token",
+            ),
+            "description": (
+                "Operations control for the advertiser's secure "
+                "Proof-of-Play delivery report. Disabling access "
+                "does not delete delivery history or rotate the "
+                "campaign report identity."
             ),
         }),
         ("Contact", {
@@ -548,6 +571,20 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.pause_campaign_view),
                 name="ballot_advertisingcampaign_pause",
             ),
+            path(
+                "<path:object_id>/report/enable/",
+                self.admin_site.admin_view(
+                    self.enable_advertiser_report_view
+                ),
+                name="ballot_advertisingcampaign_report_enable",
+            ),
+            path(
+                "<path:object_id>/report/disable/",
+                self.admin_site.admin_view(
+                    self.disable_advertiser_report_view
+                ),
+                name="ballot_advertisingcampaign_report_disable",
+            ),
         ]
         return custom_urls + urls
 
@@ -592,6 +629,167 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             'ACTIVATE CAMPAIGN →</a>',
             ads_url,
             activate_url,
+        )
+
+    @admin.display(
+        description="Advertiser Report",
+        ordering="advertiser_report_enabled",
+    )
+    def advertiser_report_status_display(self, obj):
+        if obj.advertiser_report_enabled:
+            return format_html(
+                '<strong style="color:#198754;">● ENABLED</strong>'
+            )
+
+        return format_html(
+            '<strong style="color:#8b0000;">● DISABLED</strong>'
+        )
+
+    @admin.display(description="Advertiser Report Control")
+    def advertiser_report_controls(self, obj):
+        if not obj or not obj.pk:
+            return "Save this campaign first."
+
+        report_url = reverse(
+            "advertising_advertiser_delivery_report",
+            kwargs={
+                "token": obj.advertiser_report_token,
+            },
+        )
+
+        if obj.advertiser_report_enabled:
+            disable_url = reverse(
+                "admin:ballot_advertisingcampaign_report_disable",
+                args=[obj.pk],
+            )
+
+            return format_html(
+                '<strong style="color:#198754;font-size:16px;">'
+                '● REPORT ACCESS ENABLED</strong>'
+                '&nbsp;&nbsp;'
+                '<a class="button" href="{}" target="_blank" '
+                'rel="noopener noreferrer">'
+                'OPEN SECURE REPORT</a>'
+                '&nbsp;'
+                '<form method="post" action="{}" '
+                'style="display:inline-block;margin:0;">'
+                '<input type="hidden" name="csrfmiddlewaretoken" '
+                'value="{}">'
+                '<button type="submit" class="button" '
+                'style="background:#8b0000;color:#fff;">'
+                'DISABLE REPORT ACCESS</button>'
+                '</form>',
+                report_url,
+                disable_url,
+                get_token(self._request_for_report_controls),
+            )
+
+        enable_url = reverse(
+            "admin:ballot_advertisingcampaign_report_enable",
+            args=[obj.pk],
+        )
+
+        return format_html(
+            '<strong style="color:#8b0000;font-size:16px;">'
+            '● REPORT ACCESS DISABLED</strong>'
+            '&nbsp;&nbsp;'
+            '<form method="post" action="{}" '
+            'style="display:inline-block;margin:0;">'
+            '<input type="hidden" name="csrfmiddlewaretoken" '
+            'value="{}">'
+            '<button type="submit" class="button" '
+            'style="background:#198754;color:#fff;">'
+            'ENABLE REPORT ACCESS</button>'
+            '</form>',
+            enable_url,
+            get_token(self._request_for_report_controls),
+        )
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        self._request_for_report_controls = request
+        return super().get_form(
+            request,
+            obj=obj,
+            change=change,
+            **kwargs,
+        )
+
+    def enable_advertiser_report_view(self, request, object_id):
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+
+        campaign = get_object_or_404(
+            AdvertisingCampaign,
+            pk=object_id,
+        )
+
+        if not campaign.advertiser_report_enabled:
+            campaign.advertiser_report_enabled = True
+            campaign.save(
+                update_fields=[
+                    "advertiser_report_enabled",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                (
+                    f'Advertiser report access enabled for '
+                    f'"{campaign.campaign_name}".'
+                ),
+            )
+        else:
+            messages.info(
+                request,
+                (
+                    f'Advertiser report access was already enabled '
+                    f'for "{campaign.campaign_name}".'
+                ),
+            )
+
+        return redirect(
+            "admin:ballot_advertisingcampaign_change",
+            campaign.pk,
+        )
+
+    def disable_advertiser_report_view(self, request, object_id):
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+
+        campaign = get_object_or_404(
+            AdvertisingCampaign,
+            pk=object_id,
+        )
+
+        if campaign.advertiser_report_enabled:
+            campaign.advertiser_report_enabled = False
+            campaign.save(
+                update_fields=[
+                    "advertiser_report_enabled",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                (
+                    f'Advertiser report access disabled for '
+                    f'"{campaign.campaign_name}".'
+                ),
+            )
+        else:
+            messages.info(
+                request,
+                (
+                    f'Advertiser report access was already disabled '
+                    f'for "{campaign.campaign_name}".'
+                ),
+            )
+
+        return redirect(
+            "admin:ballot_advertisingcampaign_change",
+            campaign.pk,
         )
 
     def activate_campaign_view(self, request, object_id):
