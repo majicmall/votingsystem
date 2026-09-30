@@ -75,6 +75,78 @@ class AdvertisingDeliveryDashboardTests(TestCase):
             "B3 Advertiser",
         )
 
+    def test_fully_delivered_campaign_renders_completion_badge(self):
+        campaign = AdvertisingCampaign.objects.create(
+            campaign_name="Fully Delivered Campaign",
+            advertiser_name="Completed Advertiser",
+            total_budget="100.00",
+        )
+
+        self.client.force_login(self.staff)
+
+        completed_analytics = {
+            "purchased_appearances": 1,
+            "played_appearances": 1,
+            "delivery_percentage": "100.00",
+            "media_spend": "100.00",
+            "delivered_media_spend": "100.00",
+            "outstanding_media_spend": "0.00",
+            "outstanding_appearances": 0,
+            "is_fully_delivered": True,
+        }
+
+        from unittest.mock import patch
+
+        with patch(
+            "ballot.advertising_analytics.advertising_campaign_delivery_analytics",
+            return_value=completed_analytics,
+        ):
+            response = self.client.get(
+                reverse("advertising_delivery_dashboard")
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "✓ FULLY DELIVERED",
+        )
+
+    def test_incomplete_campaign_does_not_render_completion_badge(self):
+        campaign = AdvertisingCampaign.objects.create(
+            campaign_name="Incomplete Campaign",
+            advertiser_name="Incomplete Advertiser",
+            total_budget="100.00",
+        )
+
+        self.client.force_login(self.staff)
+
+        incomplete_analytics = {
+            "purchased_appearances": 2,
+            "played_appearances": 1,
+            "delivery_percentage": "50.00",
+            "media_spend": "100.00",
+            "delivered_media_spend": "50.00",
+            "outstanding_media_spend": "50.00",
+            "outstanding_appearances": 1,
+            "is_fully_delivered": False,
+        }
+
+        from unittest.mock import patch
+
+        with patch(
+            "ballot.advertising_analytics.advertising_campaign_delivery_analytics",
+            return_value=incomplete_analytics,
+        ):
+            response = self.client.get(
+                reverse("advertising_delivery_dashboard")
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(
+            response,
+            "✓ FULLY DELIVERED",
+        )
+
     def test_campaign_report_requires_staff(self):
         campaign = AdvertisingCampaign.objects.create(
             campaign_name="Protected Campaign",

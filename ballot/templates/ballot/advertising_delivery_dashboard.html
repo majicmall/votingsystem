@@ -255,6 +255,12 @@
             <span class="ambe-status">
               {{ row.campaign.status }}
             </span>
+
+            {% if row.analytics.is_fully_delivered %}
+              <span class="ambe-status">
+                ✓ FULLY DELIVERED
+              </span>
+            {% endif %}
           </div>
 
           <div class="ambe-metrics">
