@@ -3990,3 +3990,46 @@ def advertising_campaign_delivery_report(request, campaign_id):
             "analytics": analytics,
         },
     )
+
+# =========================================================
+# 009-B4
+# Secure Advertiser Verified Proof-of-Play Report
+# =========================================================
+
+def advertising_advertiser_delivery_report(request, token):
+    """
+    Secure advertiser-facing delivery report.
+
+    Access is granted by the campaign's unguessable UUID report
+    token. The report deliberately reuses the authoritative B2
+    delivery analytics service used by Operations reporting.
+    """
+
+    from django.shortcuts import get_object_or_404, render
+
+    from ballot.advertising_analytics import (
+        advertising_campaign_delivery_analytics,
+    )
+    from ballot.models import AdvertisingCampaign
+
+    campaign = get_object_or_404(
+        AdvertisingCampaign,
+        advertiser_report_token=token,
+    )
+
+    analytics = advertising_campaign_delivery_analytics(
+        campaign
+    )
+
+    context = {
+        "campaign": campaign,
+        "analytics": analytics,
+        "report_token": token,
+        "verified_proof_of_play": True,
+    }
+
+    return render(
+        request,
+        "ballot/advertising_advertiser_delivery_report.html",
+        context,
+    )

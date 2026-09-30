@@ -97,6 +97,7 @@ urlpatterns = [
     ),
     path("marketplace/", ballot_views.atls_hottest_marketplace, name="atls_hottest_marketplace"),
     path("advertise/", ballot_views.advertise_command_center, name="advertise_command_center"),
+    path("advertise/report/<uuid:token>/", ballot_views.advertising_advertiser_delivery_report, name="advertising_advertiser_delivery_report"),
     path(
         "advertise/operations/delivery/",
         ballot_views.advertising_delivery_dashboard,

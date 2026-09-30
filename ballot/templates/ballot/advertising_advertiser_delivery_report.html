@@ -1,0 +1,605 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    Verified Campaign Delivery Report | ATL's Hottest
+  </title>
+
+  <style>
+    :root {
+      --black: #050505;
+      --panel: rgba(18, 18, 18, 0.94);
+      --panel-soft: rgba(255, 255, 255, 0.045);
+      --gold: #d8b45a;
+      --gold-bright: #f1d47c;
+      --white: #ffffff;
+      --muted: #b9b9b9;
+      --line: rgba(216, 180, 90, 0.25);
+      --green: #8fe3ad;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(216, 180, 90, 0.12),
+          transparent 34rem
+        ),
+        var(--black);
+      color: var(--white);
+      font-family:
+        Inter,
+        Montserrat,
+        Arial,
+        sans-serif;
+    }
+
+    .report-shell {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 44px 0 72px;
+    }
+
+    .hero,
+    .panel,
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow:
+        0 18px 60px rgba(0, 0, 0, 0.38);
+    }
+
+    .hero {
+      padding: 34px;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      right: -140px;
+      top: -190px;
+      border-radius: 50%;
+      background: rgba(216, 180, 90, 0.13);
+      filter: blur(12px);
+    }
+
+    .eyebrow {
+      color: var(--gold-bright);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 0.98;
+    }
+
+    .hero-copy {
+      max-width: 780px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 20px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(143, 227, 173, 0.09);
+      border: 1px solid rgba(143, 227, 173, 0.35);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 0.86rem;
+    }
+
+    .campaign-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .campaign-item {
+      padding: 15px;
+      border-radius: 14px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 5px;
+    }
+
+    .value {
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .metric {
+      padding: 21px;
+      border-radius: 18px;
+    }
+
+    .metric-number {
+      display: block;
+      margin-top: 7px;
+      color: var(--gold-bright);
+      font-size: clamp(1.5rem, 3vw, 2.35rem);
+      font-weight: 900;
+    }
+
+    .panel {
+      margin-top: 18px;
+      padding: 25px;
+      border-radius: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 6px;
+      font-size: 1.3rem;
+    }
+
+    .panel-intro {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .progress-track {
+      height: 14px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background:
+        linear-gradient(
+          90deg,
+          var(--gold),
+          var(--gold-bright)
+        );
+    }
+
+    .progress-caption {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom:
+        1px solid rgba(255,255,255,0.08);
+    }
+
+    th {
+      color: var(--gold-bright);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    td {
+      color: #ededed;
+    }
+
+    .proof-note {
+      padding: 18px;
+      border-radius: 15px;
+      background: rgba(216, 180, 90, 0.07);
+      border: 1px solid var(--line);
+      color: #e8e8e8;
+      line-height: 1.65;
+    }
+
+    .footer {
+      padding-top: 30px;
+      color: #818181;
+      text-align: center;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 850px) {
+      .metrics {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .campaign-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .report-shell {
+        width: min(100% - 18px, 1180px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        padding: 23px 18px;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 19px 15px;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .report-shell {
+        width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      .panel,
+      .metric {
+        background: white;
+        color: black;
+        box-shadow: none;
+        border-color: #cccccc;
+      }
+
+      .hero-copy,
+      .panel-intro,
+      .progress-caption,
+      .footer,
+      td {
+        color: #333333;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<main class="report-shell">
+
+  <section class="hero">
+    <div class="eyebrow">
+      ATL's Hottest Advertising
+    </div>
+
+    <h1>Verified Campaign Delivery Report</h1>
+
+    <p class="hero-copy">
+      This report summarizes campaign delivery using the
+      authoritative advertising delivery records maintained by
+      ATL's Hottest. Verified plays are recorded only after the
+      delivery acknowledgement process completes successfully.
+    </p>
+
+    <div class="verified">
+      ✓ Authoritative Proof of Play
+    </div>
+
+    <div class="campaign-grid">
+      <div class="campaign-item">
+        <span class="label">Advertiser</span>
+        <span class="value">
+          {{ campaign.advertiser_name }}
+        </span>
+      </div>
+
+      <div class="campaign-item">
+        <span class="label">Campaign</span>
+        <span class="value">
+          {{ campaign.campaign_name }}
+        </span>
+      </div>
+
+      <div class="campaign-item">
+        <span class="label">Campaign Status</span>
+        <span class="value">
+          {{ campaign.get_status_display|default:campaign.status }}
+        </span>
+      </div>
+
+      <div class="campaign-item">
+        <span class="label">Report Verification</span>
+        <span class="value">
+          Secure Campaign Report
+        </span>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="metrics">
+
+    <article class="metric">
+      <span class="label">Purchased Appearances</span>
+      <span class="metric-number">
+        {{ analytics.purchased_appearances|default:0 }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Verified Plays</span>
+      <span class="metric-number">
+        {{ analytics.played_appearances|default:0 }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Outstanding</span>
+      <span class="metric-number">
+        {{ analytics.outstanding_appearances|default:0 }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Delivery</span>
+      <span class="metric-number">
+        {{ analytics.delivery_percentage|default:"0.00" }}%
+      </span>
+    </article>
+
+  </section>
+
+
+  <section class="panel">
+    <h2>Campaign Delivery Progress</h2>
+
+    <p class="panel-intro">
+      Verified delivery compared with purchased campaign
+      appearances.
+    </p>
+
+    <div class="progress-track">
+      <div
+        class="progress-fill"
+        style="width: {{ analytics.delivery_percentage|default:'0' }}%;"
+      ></div>
+    </div>
+
+    <div class="progress-caption">
+      <span>
+        {{ analytics.played_appearances|default:0 }}
+        verified
+      </span>
+
+      <span>
+        {{ analytics.outstanding_appearances|default:0 }}
+        outstanding
+      </span>
+    </div>
+  </section>
+
+
+  <section class="metrics">
+
+    <article class="metric">
+      <span class="label">Campaign Media Spend</span>
+      <span class="metric-number">
+        ${{ analytics.media_spend|default:"0.00" }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Delivered Media Value</span>
+      <span class="metric-number">
+        ${{ analytics.delivered_media_spend|default:"0.00" }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Outstanding Media Value</span>
+      <span class="metric-number">
+        ${{ analytics.outstanding_media_spend|default:"0.00" }}
+      </span>
+    </article>
+
+    <article class="metric">
+      <span class="label">Reserved Appearances</span>
+      <span class="metric-number">
+        {{ analytics.reserved_appearances|default:0 }}
+      </span>
+    </article>
+
+  </section>
+
+
+  <section class="panel">
+    <h2>Verified Delivery Timeline</h2>
+
+    <p class="panel-intro">
+      First and most recent authoritative Proof-of-Play
+      acknowledgements recorded for this campaign.
+    </p>
+
+    <div class="campaign-grid">
+      <div class="campaign-item">
+        <span class="label">First Verified Play</span>
+        <span class="value">
+          {% if analytics.first_played_at %}
+            {{ analytics.first_played_at|date:"M j, Y g:i A T" }}
+          {% else %}
+            No verified plays yet
+          {% endif %}
+        </span>
+      </div>
+
+      <div class="campaign-item">
+        <span class="label">Most Recent Verified Play</span>
+        <span class="value">
+          {% if analytics.last_played_at %}
+            {{ analytics.last_played_at|date:"M j, Y g:i A T" }}
+          {% else %}
+            No verified plays yet
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="panel">
+    <h2>Placement Delivery</h2>
+
+    <p class="panel-intro">
+      Campaign delivery summarized by advertising placement.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Placement</th>
+            <th>Purchased</th>
+            <th>Verified</th>
+            <th>Reserved</th>
+            <th>Media Value</th>
+          </tr>
+        </thead>
+
+        <tbody>
+        {% for row in analytics.placement_breakdown %}
+          <tr>
+            <td>{{ row.placement }}</td>
+            <td>{{ row.purchased_appearances }}</td>
+            <td>{{ row.played_appearances }}</td>
+            <td>{{ row.reserved_appearances }}</td>
+            <td>${{ row.media_spend }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">
+              No purchased placement delivery is recorded yet.
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <section class="panel">
+    <h2>Creative Delivery</h2>
+
+    <p class="panel-intro">
+      Campaign delivery summarized by assigned advertising
+      creative.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Creative</th>
+            <th>Purchased</th>
+            <th>Verified</th>
+            <th>Reserved</th>
+            <th>Media Value</th>
+          </tr>
+        </thead>
+
+        <tbody>
+        {% for row in analytics.creative_breakdown %}
+          <tr>
+            <td>{{ row.creative_name }}</td>
+            <td>{{ row.purchased_appearances }}</td>
+            <td>{{ row.played_appearances }}</td>
+            <td>{{ row.reserved_appearances }}</td>
+            <td>${{ row.media_spend }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">
+              No purchased creative delivery is recorded yet.
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <section class="panel">
+    <h2>About This Proof-of-Play Report</h2>
+
+    <div class="proof-note">
+      A purchased appearance is counted once for each advertising
+      appearance acquired by the campaign. A verified play is
+      counted only after the corresponding delivery reservation
+      completes the server-side acknowledgement process and is
+      recorded as played. Media values shown in this report use
+      the historical campaign spend recorded at the time the
+      advertising inventory was purchased.
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    ATL's Hottest Advertising · Verified Campaign Delivery
+    <br>
+    Secure advertiser report
+  </footer>
+
+</main>
+</body>
+</html>
