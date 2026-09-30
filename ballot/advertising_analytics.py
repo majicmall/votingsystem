@@ -284,6 +284,12 @@ def advertising_campaign_delivery_analytics(campaign):
         0,
     )
 
+    is_fully_delivered = (
+        purchased_appearances > 0
+        and played_appearances == purchased_appearances
+        and outstanding_appearances == 0
+    )
+
     if purchased_appearances:
         delivery_percentage = (
             Decimal(played_appearances)
@@ -351,6 +357,7 @@ def advertising_campaign_delivery_analytics(campaign):
         # Delivery performance.
         "outstanding_appearances": outstanding_appearances,
         "delivery_percentage": delivery_percentage,
+        "is_fully_delivered": is_fully_delivered,
         "delivered_media_spend": delivered_media_spend,
         "outstanding_media_spend": outstanding_media_spend,
 
