@@ -132,15 +132,13 @@ class AdvertisingDeliveryCompletionContractTests(TestCase):
         )
         self.assertTrue(analytics["is_fully_delivered"])
 
-    def test_completion_does_not_mutate_campaign_lifecycle(self):
+    def test_full_delivery_completes_eligible_campaign_lifecycle(self):
         creative = self.make_creative()
 
         reservations = self.purchase(
             creative,
             minutes=5,
         )
-
-        original_status = self.campaign.status
 
         record_advertising_appearance_play(
             appearance_id=reservations[0].appearance_id,
@@ -155,5 +153,5 @@ class AdvertisingDeliveryCompletionContractTests(TestCase):
 
         self.assertEqual(
             self.campaign.status,
-            original_status,
+            AdvertisingCampaign.STATUS_COMPLETED,
         )

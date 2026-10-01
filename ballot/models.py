@@ -6153,6 +6153,20 @@ def record_advertising_appearance_play(
             )
             reservation.played_at = played_at
 
+        # 009-B8 — Campaign lifecycle completion is evaluated only after
+        # authoritative Proof-of-Play has been fully persisted.
+        #
+        # Local import intentionally avoids coupling the model module's import
+        # graph to the lifecycle service at module import time.
+        campaign = first.campaign
+
+        if campaign is not None:
+            from ballot.advertising_lifecycle import (
+                complete_campaign_if_fully_delivered,
+            )
+
+            complete_campaign_if_fully_delivered(campaign)
+
         return {
             "recorded": True,
             "reason": "played",
