@@ -367,6 +367,14 @@ def activate_advertising_campaigns(modeladmin, request, queryset):
     skipped = 0
 
     for campaign in queryset:
+        # 009-B10 — COMPLETED and CANCELLED are terminal lifecycle states.
+        # Ordinary Operations controls must never reopen them.
+        if campaign.status in {
+            AdvertisingCampaign.STATUS_COMPLETED,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        }:
+            continue
+
         campaign.status = AdvertisingCampaign.STATUS_ACTIVE
 
         try:
@@ -435,6 +443,14 @@ def pause_advertising_campaigns(modeladmin, request, queryset):
     paused = 0
 
     for campaign in queryset:
+        # 009-B10 — COMPLETED and CANCELLED are terminal lifecycle states.
+        # They must never move backward into PAUSED.
+        if campaign.status in {
+            AdvertisingCampaign.STATUS_COMPLETED,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        }:
+            continue
+
         with transaction.atomic():
             campaign.status = AdvertisingCampaign.STATUS_PAUSED
             campaign.save(
@@ -597,6 +613,27 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             reverse("admin:ballot_billboardad_changelist")
             + f"?campaign__id__exact={obj.pk}"
         )
+
+        # 009-B10 — terminal lifecycle states are intentionally locked.
+        # Proof-of-Play/reporting remain available elsewhere; ordinary
+        # workflow controls may not reactivate or pause these campaigns.
+        if obj.status == AdvertisingCampaign.STATUS_COMPLETED:
+            return format_html(
+                '<strong style="color:#198754;font-size:16px;">'
+                '✓ CAMPAIGN COMPLETE</strong>'
+                '&nbsp;&nbsp;'
+                '<a class="button" href="{}">VIEW BILLBOARD ADS</a>',
+                ads_url,
+            )
+
+        if obj.status == AdvertisingCampaign.STATUS_CANCELLED:
+            return format_html(
+                '<strong style="color:#8b0000;font-size:16px;">'
+                'CAMPAIGN CANCELLED</strong>'
+                '&nbsp;&nbsp;'
+                '<a class="button" href="{}">VIEW BILLBOARD ADS</a>',
+                ads_url,
+            )
 
         if obj.status == AdvertisingCampaign.STATUS_ACTIVE:
             pause_url = reverse(

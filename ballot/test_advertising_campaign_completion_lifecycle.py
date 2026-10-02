@@ -183,3 +183,225 @@ class AdvertisingCampaignCompletionLifecycleTests(TestCase):
             campaign.status,
             AdvertisingCampaign.STATUS_ACTIVE,
         )
+
+
+class AdvertisingTerminalCampaignAdminProtectionTests(TestCase):
+    """
+    009-B10 — COMPLETED and CANCELLED are terminal campaign states.
+
+    Ordinary Operations/admin workflow controls must never move either
+    terminal state back into ACTIVE or PAUSED.
+    """
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        self.staff = User.objects.create_superuser(
+            username="b10admin",
+            email="b10admin@example.com",
+            password="test-pass-123",
+        )
+
+        self.client.force_login(self.staff)
+
+    def make_campaign(self, status):
+        return AdvertisingCampaign.objects.create(
+            campaign_name=f"B10 {status} Campaign",
+            advertiser_name="B10 Advertiser",
+            total_budget="100.00",
+            status=status,
+        )
+
+    def test_completed_campaign_cannot_be_bulk_activated(self):
+        from ballot.admin import activate_advertising_campaigns
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        request = RequestFactory().post("/")
+        request.user = self.staff
+
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.contrib.sessions.middleware import SessionMiddleware
+
+        SessionMiddleware(lambda request: None).process_request(request)
+        request.session.save()
+        request._messages = FallbackStorage(request)
+
+        activate_advertising_campaigns(
+            admin.site,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        campaign.refresh_from_db()
+
+        self.assertEqual(
+            campaign.status,
+            AdvertisingCampaign.STATUS_COMPLETED,
+        )
+
+    def test_completed_campaign_cannot_be_bulk_paused(self):
+        from ballot.admin import pause_advertising_campaigns
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        request = RequestFactory().post("/")
+        request.user = self.staff
+
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.contrib.sessions.middleware import SessionMiddleware
+
+        SessionMiddleware(lambda request: None).process_request(request)
+        request.session.save()
+        request._messages = FallbackStorage(request)
+
+        pause_advertising_campaigns(
+            admin.site,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        campaign.refresh_from_db()
+
+        self.assertEqual(
+            campaign.status,
+            AdvertisingCampaign.STATUS_COMPLETED,
+        )
+
+    def test_cancelled_campaign_cannot_be_bulk_activated(self):
+        from ballot.admin import activate_advertising_campaigns
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        request = RequestFactory().post("/")
+        request.user = self.staff
+
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.contrib.sessions.middleware import SessionMiddleware
+
+        SessionMiddleware(lambda request: None).process_request(request)
+        request.session.save()
+        request._messages = FallbackStorage(request)
+
+        activate_advertising_campaigns(
+            admin.site,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        campaign.refresh_from_db()
+
+        self.assertEqual(
+            campaign.status,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        )
+
+    def test_cancelled_campaign_cannot_be_bulk_paused(self):
+        from ballot.admin import pause_advertising_campaigns
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        request = RequestFactory().post("/")
+        request.user = self.staff
+
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.contrib.sessions.middleware import SessionMiddleware
+
+        SessionMiddleware(lambda request: None).process_request(request)
+        request.session.save()
+        request._messages = FallbackStorage(request)
+
+        pause_advertising_campaigns(
+            admin.site,
+            request,
+            AdvertisingCampaign.objects.filter(pk=campaign.pk),
+        )
+
+        campaign.refresh_from_db()
+
+        self.assertEqual(
+            campaign.status,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        )
+
+    def test_completed_campaign_admin_control_is_terminal(self):
+        from ballot.admin import AdvertisingCampaignAdmin
+        from django.contrib import admin
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        campaign_admin = AdvertisingCampaignAdmin(
+            AdvertisingCampaign,
+            admin.site,
+        )
+
+        controls = str(
+            campaign_admin.workflow_controls(campaign)
+        )
+
+        self.assertIn(
+            "CAMPAIGN COMPLETE",
+            controls,
+        )
+
+        self.assertNotIn(
+            "ACTIVATE CAMPAIGN",
+            controls,
+        )
+
+        self.assertNotIn(
+            "PAUSE CAMPAIGN",
+            controls,
+        )
+
+    def test_cancelled_campaign_admin_control_is_terminal(self):
+        from ballot.admin import AdvertisingCampaignAdmin
+        from django.contrib import admin
+
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        campaign_admin = AdvertisingCampaignAdmin(
+            AdvertisingCampaign,
+            admin.site,
+        )
+
+        controls = str(
+            campaign_admin.workflow_controls(campaign)
+        )
+
+        self.assertIn(
+            "CAMPAIGN CANCELLED",
+            controls,
+        )
+
+        self.assertNotIn(
+            "ACTIVATE CAMPAIGN",
+            controls,
+        )
+
+        self.assertNotIn(
+            "PAUSE CAMPAIGN",
+            controls,
+        )
