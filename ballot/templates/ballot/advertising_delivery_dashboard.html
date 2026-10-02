@@ -256,7 +256,11 @@
               {{ row.campaign.status }}
             </span>
 
-            {% if row.analytics.is_fully_delivered %}
+            {% if row.campaign.status == "completed" %}
+              <span class="ambe-status">
+                ✓ CAMPAIGN COMPLETE
+              </span>
+            {% elif row.analytics.is_fully_delivered %}
               <span class="ambe-status">
                 ✓ FULLY DELIVERED
               </span>
