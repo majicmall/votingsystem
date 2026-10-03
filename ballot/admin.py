@@ -574,6 +574,27 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
         }),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        """
+        009-B11 — Terminal campaign lifecycle states are immutable through
+        the ordinary Django Admin change form.
+
+        Non-terminal campaigns retain the existing admin behavior.
+        """
+        readonly = list(super().get_readonly_fields(request, obj))
+
+        if (
+            obj is not None
+            and obj.status in {
+                AdvertisingCampaign.STATUS_COMPLETED,
+                AdvertisingCampaign.STATUS_CANCELLED,
+            }
+            and "status" not in readonly
+        ):
+            readonly.append("status")
+
+        return tuple(readonly)
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [

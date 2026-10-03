@@ -405,3 +405,79 @@ class AdvertisingTerminalCampaignAdminProtectionTests(TestCase):
             "PAUSE CAMPAIGN",
             controls,
         )
+
+
+class AdvertisingTerminalCampaignAdminFormProtectionTests(TestCase):
+    """
+    009-B11 — Terminal campaign status must be immutable through the
+    ordinary Django Admin change form.
+
+    COMPLETED and CANCELLED campaigns retain operational visibility,
+    but their lifecycle status may not be manually reopened.
+    """
+
+    def setUp(self):
+        from django.contrib import admin
+
+        from ballot.admin import AdvertisingCampaignAdmin
+
+        self.campaign_admin = AdvertisingCampaignAdmin(
+            AdvertisingCampaign,
+            admin.site,
+        )
+
+    def make_campaign(self, status):
+        return AdvertisingCampaign.objects.create(
+            campaign_name=f"B11 {status} Campaign",
+            advertiser_name="B11 Advertiser",
+            total_budget="100.00",
+            status=status,
+        )
+
+    def test_completed_campaign_status_is_readonly_in_admin(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        readonly = self.campaign_admin.get_readonly_fields(
+            request=None,
+            obj=campaign,
+        )
+
+        self.assertIn("status", readonly)
+
+    def test_cancelled_campaign_status_is_readonly_in_admin(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        readonly = self.campaign_admin.get_readonly_fields(
+            request=None,
+            obj=campaign,
+        )
+
+        self.assertIn("status", readonly)
+
+    def test_active_campaign_status_is_not_terminally_locked(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_ACTIVE
+        )
+
+        readonly = self.campaign_admin.get_readonly_fields(
+            request=None,
+            obj=campaign,
+        )
+
+        self.assertNotIn("status", readonly)
+
+    def test_pending_campaign_status_is_not_terminally_locked(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_PENDING
+        )
+
+        readonly = self.campaign_admin.get_readonly_fields(
+            request=None,
+            obj=campaign,
+        )
+
+        self.assertNotIn("status", readonly)
