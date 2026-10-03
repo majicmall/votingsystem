@@ -9,8 +9,8 @@ class Command(BaseCommand):
     help = "Set ATL's Hottest voting campaign dates and public message."
 
     def handle(self, *args, **options):
-        start = timezone.make_aware(datetime(2026, 10, 4, 0, 0, 0))
-        end = timezone.make_aware(datetime(2026, 11, 22, 23, 59, 59))
+        start = timezone.make_aware(datetime(2026, 10, 14, 0, 0, 0))
+        end = timezone.make_aware(datetime(2026, 12, 1, 23, 59, 59))
 
         # Resolve the target first without activating it. Once the
         # database enforces a single active campaign, activating the
@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 "campaign_start_date": start,
                 "campaign_end_date": end,
                 "is_active_campaign": False,
-                "public_message": "Voting starts October 4, 2026 and ends November 22, 2026. Until then, you may preview the ballot and nominees.",
+                "public_message": "Voting starts October 14, 2026 and ends December 1, 2026. Until then, you may preview the ballot and nominees.",
             },
         )
 
