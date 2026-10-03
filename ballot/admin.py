@@ -858,6 +858,14 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             args=[campaign.pk],
         )
 
+        # 009-B12 — terminal campaigns must not expose ordinary workflow
+        # confirmation routes, even when those URLs are entered manually.
+        if campaign.status in {
+            AdvertisingCampaign.STATUS_COMPLETED,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        }:
+            return redirect(change_url)
+
         if request.method != "POST":
             return render(
                 request,
@@ -897,6 +905,14 @@ class AdvertisingCampaignAdmin(admin.ModelAdmin):
             "admin:ballot_advertisingcampaign_change",
             args=[campaign.pk],
         )
+
+        # 009-B12 — terminal campaigns must not expose ordinary workflow
+        # confirmation routes, even when those URLs are entered manually.
+        if campaign.status in {
+            AdvertisingCampaign.STATUS_COMPLETED,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        }:
+            return redirect(change_url)
 
         if request.method != "POST":
             return render(

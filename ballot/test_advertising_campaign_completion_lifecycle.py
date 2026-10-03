@@ -481,3 +481,115 @@ class AdvertisingTerminalCampaignAdminFormProtectionTests(TestCase):
         )
 
         self.assertNotIn("status", readonly)
+
+
+class AdvertisingTerminalCampaignCustomUrlProtectionTests(TestCase):
+    """
+    009-B12 — Terminal campaigns must not expose ordinary activate/pause
+    confirmation screens through manually entered Django Admin URLs.
+
+    The underlying B10 mutation guards remain authoritative; this contract
+    closes the remaining custom-URL workflow doorway.
+    """
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        self.staff = User.objects.create_superuser(
+            username="b12admin",
+            email="b12admin@example.com",
+            password="test-pass-123",
+        )
+
+        self.client.force_login(self.staff)
+
+    def make_campaign(self, status):
+        return AdvertisingCampaign.objects.create(
+            campaign_name=f"B12 {status} Campaign",
+            advertiser_name="B12 Advertiser",
+            total_budget="100.00",
+            status=status,
+        )
+
+    def admin_url(self, campaign, action):
+        from django.urls import reverse
+
+        return reverse(
+            f"admin:ballot_advertisingcampaign_{action}",
+            args=[campaign.pk],
+        )
+
+    def change_url(self, campaign):
+        from django.urls import reverse
+
+        return reverse(
+            "admin:ballot_advertisingcampaign_change",
+            args=[campaign.pk],
+        )
+
+    def assert_terminal_get_redirects(self, campaign, action):
+        response = self.client.get(
+            self.admin_url(campaign, action),
+        )
+
+        self.assertRedirects(
+            response,
+            self.change_url(campaign),
+        )
+
+    def test_completed_campaign_activate_url_redirects_to_change_page(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        self.assert_terminal_get_redirects(
+            campaign,
+            "activate",
+        )
+
+    def test_completed_campaign_pause_url_redirects_to_change_page(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_COMPLETED
+        )
+
+        self.assert_terminal_get_redirects(
+            campaign,
+            "pause",
+        )
+
+    def test_cancelled_campaign_activate_url_redirects_to_change_page(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        self.assert_terminal_get_redirects(
+            campaign,
+            "activate",
+        )
+
+    def test_cancelled_campaign_pause_url_redirects_to_change_page(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_CANCELLED
+        )
+
+        self.assert_terminal_get_redirects(
+            campaign,
+            "pause",
+        )
+
+    def test_pending_campaign_activate_url_still_renders_confirmation(self):
+        campaign = self.make_campaign(
+            AdvertisingCampaign.STATUS_PENDING
+        )
+
+        response = self.client.get(
+            self.admin_url(campaign, "activate"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "ACTIVATE CAMPAIGN",
+        )
