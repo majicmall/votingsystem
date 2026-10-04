@@ -244,3 +244,40 @@ class AdvertisingCompletedCampaignReportOperationsTests(AdvertisingReportOperati
             self.campaign.status,
             AdvertisingCampaign.STATUS_COMPLETED,
         )
+
+
+class AdvertisingCancelledCampaignReportOperationsTests(AdvertisingReportOperationsTests):
+
+    def setUp(self):
+        super().setUp()
+        self.campaign.status = AdvertisingCampaign.STATUS_CANCELLED
+        self.campaign.save(update_fields=["status", "updated_at"])
+
+    def test_cancelled_campaign_report_can_be_disabled(self):
+        response = self.client.post(self.disable_url())
+
+        self.assertEqual(response.status_code, 302)
+
+        self.campaign.refresh_from_db()
+        self.assertFalse(self.campaign.advertiser_report_enabled)
+        self.assertEqual(
+            self.campaign.status,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        )
+
+    def test_cancelled_campaign_report_can_be_reenabled(self):
+        self.campaign.advertiser_report_enabled = False
+        self.campaign.save(
+            update_fields=["advertiser_report_enabled", "updated_at"]
+        )
+
+        response = self.client.post(self.enable_url())
+
+        self.assertEqual(response.status_code, 302)
+
+        self.campaign.refresh_from_db()
+        self.assertTrue(self.campaign.advertiser_report_enabled)
+        self.assertEqual(
+            self.campaign.status,
+            AdvertisingCampaign.STATUS_CANCELLED,
+        )
