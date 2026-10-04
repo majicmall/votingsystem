@@ -164,3 +164,42 @@ class AdvertisingAdvertiserDeliveryReportTests(TestCase):
             response,
             str(campaign.advertiser_report_token),
         )
+
+    def test_active_campaign_report_does_not_show_terminal_completion_state(self):
+        campaign = self.make_campaign()
+
+        response = self.client.get(
+            reverse(
+                "advertising_advertiser_delivery_report",
+                kwargs={
+                    "token": campaign.advertiser_report_token,
+                },
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(
+            response,
+            "CAMPAIGN COMPLETED",
+        )
+
+    def test_completed_campaign_report_shows_terminal_completion_state(self):
+        campaign = self.make_campaign()
+
+        campaign.status = AdvertisingCampaign.STATUS_COMPLETED
+        campaign.save(update_fields=["status"])
+
+        response = self.client.get(
+            reverse(
+                "advertising_advertiser_delivery_report",
+                kwargs={
+                    "token": campaign.advertiser_report_token,
+                },
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "CAMPAIGN COMPLETED",
+        )

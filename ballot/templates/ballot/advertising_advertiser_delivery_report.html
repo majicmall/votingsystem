@@ -335,6 +335,12 @@
       ✓ Authoritative Proof of Play
     </div>
 
+    {% if campaign.status == "completed" %}
+    <div class="verified">
+      ✓ CAMPAIGN COMPLETED
+    </div>
+    {% endif %}
+
     <div class="campaign-grid">
       <div class="campaign-item">
         <span class="label">Advertiser</span>
