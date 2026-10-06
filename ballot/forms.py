@@ -221,7 +221,7 @@ class SelfNominationCheckInForm(forms.ModelForm):
             "social_link": forms.URLInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "https://instagram.com/yourname",
+                    "placeholder": "https://instagram.com/yourname or https://facebook.com/yourname",
                     "autocomplete": "url",
                 }
             ),
