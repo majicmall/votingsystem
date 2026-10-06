@@ -854,7 +854,7 @@ def self_nomination_checkin(request):
     A Check-In remains pending until ATL's Hottest staff reviews it.
     No official Nominee record is created by this public submission.
     """
-    form = SelfNominationCheckInForm(request.POST)
+    form = SelfNominationCheckInForm(request.POST, request.FILES)
 
     if not form.is_valid():
         messages.error(

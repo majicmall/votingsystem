@@ -2135,6 +2135,21 @@ class SelfNominationCheckIn(models.Model):
         help_text="Social media address used to help ATL's Hottest review this Check-In.",
     )
 
+    phone = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        help_text="Optional phone number for Check-In review or follow-up.",
+    )
+
+    photo = models.ImageField(
+        upload_to="checkins/",
+        blank=True,
+        null=True,
+        validators=[validate_safe_image_upload],
+        help_text="Optional photo or image submitted with this Check-In.",
+    )
+
     categories = models.ManyToManyField(
         Category,
         related_name="self_nomination_checkins",

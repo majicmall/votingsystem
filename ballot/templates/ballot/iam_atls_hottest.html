@@ -268,6 +268,7 @@
   </div>
 
   <form
+    enctype="multipart/form-data"
     class="nomination-form checkin-form"
     method="post"
     action="{% url 'self_nomination_checkin' %}"
@@ -304,6 +305,23 @@
           </div>
         {% endif %}
       </div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.phone.id_for_label }}"
+      >
+        Phone Number (Optional)
+      </label>
+
+      {{ checkin_form.phone }}
+
+      {% if checkin_form.phone.errors %}
+        <div class="field-error">
+          {{ checkin_form.phone.errors }}
+        </div>
+      {% endif %}
     </div>
 
     <div
@@ -361,7 +379,7 @@
         class="field-label"
         for="{{ checkin_form.website.id_for_label }}"
       >
-        Website
+        Website (Optional)
       </label>
 
       {{ checkin_form.website }}
@@ -378,7 +396,7 @@
         class="field-label"
         for="{{ checkin_form.social_link.id_for_label }}"
       >
-        Social Media Address
+        Social Media Address (Optional)
       </label>
 
       {{ checkin_form.social_link }}
@@ -406,10 +424,97 @@
       with your Check-In.
     </div>
 
+    <div style="margin:0 0 24px;">
+      <label
+        class="field-label"
+        for="{{ checkin_form.photo.id_for_label }}"
+      >
+        Photo / Image (Optional)
+      </label>
+
+      {{ checkin_form.photo }}
+
+      <div style="margin-top:8px;font-size:.84rem;opacity:.78;line-height:1.5;">
+        Upload a JPG, PNG, or WEBP image to help ATL’s Hottest review your Check-In and prepare your nominee profile if approved.
+      </div>
+
+      {% if checkin_form.photo.errors %}
+        <div class="field-error">
+          {{ checkin_form.photo.errors }}
+        </div>
+      {% endif %}
+    </div>
+
     <div class="category-select-header">
       <div>
         <h2>Choose Your Categories</h2>
-        <p>
+        <p>Select from one to five categories in which you want to be considered.</p>
+      </div>
+      <span class="nominee-count">Max 5</span>
+    </div>
+
+    {% if checkin_form.categories.errors %}
+      <div class="alert">
+        {{ checkin_form.categories.errors }}
+      </div>
+    {% endif %}
+
+    <div
+      id="checkin-category-limit-message"
+      class="alert"
+      role="alert"
+      aria-live="polite"
+      style="display:none;"
+    >
+      You’ve reached the maximum of 5 categories.
+    </div>
+
+    <div class="genre-category-directory checkin-category-grid">
+      {% for block in genre_blocks %}
+        <section class="category-genre-section">
+          <div class="category-genre-heading">
+            <div>
+              <span class="category-genre-eyebrow">
+                ATL’S HOTTEST GENRE
+              </span>
+              <h3>{{ block.genre }}</h3>
+            </div>
+
+            <span class="category-genre-count">
+              {{ block.categories|length }}
+              Categor{{ block.categories|length|pluralize:"y,ies" }}
+            </span>
+          </div>
+
+          <div class="category-choice-grid">
+            {% for item in block.categories %}
+              <label
+                class="category-choice-card"
+                for="{{ item.checkbox.id_for_label }}"
+              >
+                <span class="category-choice-name">
+                  {{ item.checkbox.choice_label }}
+                </span>
+
+                <span class="category-choice-box">
+                  {{ item.checkbox.tag }}
+                  <span class="fake-check"></span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+
+    <button class="btn primary nomination-submit-btn" type="submit">
+      Submit My Check-In
+    </button>
+  </form>
+</section>
+
+<section class="card" style="margin-top:24px;text-align:center;">
+    <p style="max-width:720px;margin:0 auto 20px;">
       By submitting your Check-In, you agree that ATL’s Hottest may
       process the information you provide to review and administer your
       Check-In. Promotional communications are optional and controlled

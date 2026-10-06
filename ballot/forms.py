@@ -169,16 +169,20 @@ class SelfNominationCheckInForm(forms.ModelForm):
         fields = [
             "name",
             "email",
+            "phone",
             "website",
             "social_link",
+            "photo",
             "communications_consent",
             "categories",
         ]
         labels = {
             "name": "Your Name",
             "email": "Valid Email Address",
-            "website": "Website",
+            "phone": "Phone Number (Optional)",
+            "website": "Website (Optional)",
             "social_link": "Social Media Address",
+            "photo": "Photo (Optional)",
         }
         widgets = {
             "communications_consent": forms.CheckboxInput(
@@ -198,6 +202,13 @@ class SelfNominationCheckInForm(forms.ModelForm):
                     "class": "form-control",
                     "placeholder": "Enter your valid email address",
                     "autocomplete": "email",
+                }
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Phone number (optional)",
+                    "autocomplete": "tel",
                 }
             ),
             "website": forms.URLInput(
