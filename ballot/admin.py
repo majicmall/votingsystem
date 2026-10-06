@@ -26,6 +26,7 @@ from .models import (
     Category,
     NominationCategoryRequest,
     Nominee,
+    SelfNominationCheckIn,
     Vote,
 )
 
@@ -42,6 +43,93 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
     ordering = ("sort_order", "name")
+
+
+@admin.register(SelfNominationCheckIn)
+class SelfNominationCheckInAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "email",
+        "status",
+        "category_summary",
+        "nominee_count",
+        "submitted_at",
+        "reviewed_at",
+    )
+    list_filter = ("status", "categories", "submitted_at")
+    search_fields = (
+        "name",
+        "email",
+        "phone",
+        "website",
+        "social_link",
+    )
+    readonly_fields = (
+        "submitted_at",
+        "reviewed_at",
+        "approved_at",
+        "denied_at",
+        "created_nominees",
+    )
+    filter_horizontal = ("categories",)
+    actions = (
+        "approve_and_prepare_nominees",
+        "deny_selected_checkins",
+    )
+
+    @admin.display(description="Categories")
+    def category_summary(self, obj):
+        return ", ".join(obj.categories.values_list("name", flat=True)) or "—"
+
+    @admin.display(description="Nominees")
+    def nominee_count(self, obj):
+        return obj.created_nominees.count()
+
+    @admin.action(description="Approve selected Check-Ins and prepare nominees")
+    def approve_and_prepare_nominees(self, request, queryset):
+        approved = 0
+        failed = 0
+
+        for checkin in queryset:
+            try:
+                checkin.approve_and_create_nominees()
+            except Exception as exc:
+                failed += 1
+                self.message_user(
+                    request,
+                    f"{checkin.name}: {exc}",
+                    level=messages.ERROR,
+                )
+            else:
+                approved += 1
+
+        if approved:
+            self.message_user(
+                request,
+                f"{approved} Check-In(s) approved and nominee records prepared.",
+                level=messages.SUCCESS,
+            )
+
+        if failed:
+            self.message_user(
+                request,
+                f"{failed} Check-In(s) could not be processed.",
+                level=messages.WARNING,
+            )
+
+    @admin.action(description="Deny selected Check-Ins")
+    def deny_selected_checkins(self, request, queryset):
+        denied = 0
+
+        for checkin in queryset:
+            checkin.mark_denied()
+            denied += 1
+
+        self.message_user(
+            request,
+            f"{denied} Check-In(s) denied.",
+            level=messages.SUCCESS,
+        )
 
 
 class NomineeTrashFilter(admin.SimpleListFilter):

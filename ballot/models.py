@@ -17,7 +17,8 @@ from django.core.exceptions import ValidationError
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
-from django.db import models
+from django.core.files.base import ContentFile
+from django.db import models, transaction
 from django.db.models import Count
 from django.urls import reverse
 from django.utils import timezone
@@ -2237,6 +2238,93 @@ class SelfNominationCheckIn(models.Model):
             raise ValidationError(
                 "An approved Check-In cannot also have a denied timestamp."
             )
+
+    @transaction.atomic
+    def approve_and_create_nominees(self):
+        campaigns = list(
+            VotingCampaign.objects
+            .filter(is_active_campaign=True)
+            .order_by("pk")[:2]
+        )
+
+        if not campaigns:
+            raise RuntimeError(
+                "No active VotingCampaign is configured for this Check-In approval."
+            )
+
+        if len(campaigns) > 1:
+            raise RuntimeError(
+                "Multiple active VotingCampaign records are configured. "
+                "Exactly one active campaign is required for Check-In approval."
+            )
+
+        campaign = campaigns[0]
+        categories = list(self.categories.all())
+
+        if not categories:
+            raise ValidationError(
+                "Check-In must have at least one category before approval."
+            )
+
+        nominees = []
+
+        for category in categories:
+            nominee = Nominee.find_identity_match(
+                category=category,
+                campaign=campaign,
+                name=self.name,
+                contact_email=self.email,
+                social_link=self.social_link,
+                website=self.website,
+            )
+
+            if nominee is None:
+                nominee = Nominee.objects.create(
+                    name=self.name,
+                    category=category,
+                    campaign=campaign,
+                    website=self.website,
+                    social_link=self.social_link,
+                    contact_email=self.email,
+                    approval_status=Nominee.APPROVAL_PENDING,
+                    is_active=True,
+                )
+            else:
+                if self.website:
+                    nominee.website = self.website
+                if self.social_link:
+                    nominee.social_link = self.social_link
+                if self.email:
+                    nominee.contact_email = self.email
+
+                if nominee.approval_status != Nominee.APPROVAL_APPROVED:
+                    nominee.approval_status = Nominee.APPROVAL_PENDING
+
+                nominee.is_active = True
+                nominee.save()
+
+            if self.photo and not nominee.photo:
+                self.photo.open("rb")
+                try:
+                    photo_bytes = self.photo.read()
+                finally:
+                    self.photo.close()
+
+                nominee.photo.save(
+                    Path(self.photo.name).name,
+                    ContentFile(photo_bytes),
+                    save=False,
+                )
+                nominee.photo_submitted_at = self.submitted_at
+                nominee.save(
+                    update_fields=["photo", "photo_submitted_at"]
+                )
+
+            self.created_nominees.add(nominee)
+            nominees.append(nominee)
+
+        self.mark_approved()
+        return nominees
 
     def mark_approved(self):
         now = timezone.now()
