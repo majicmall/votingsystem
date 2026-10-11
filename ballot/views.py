@@ -954,8 +954,8 @@ def nominee_signup(request):
                 )
 
             # If nominee already existed, still keep latest nominator/contact info.
-            nominee.website = form.cleaned_data.get("website", nominee.website)
-            nominee.social_link = form.cleaned_data.get("social_link", nominee.social_link)
+            nominee.website = form.cleaned_data.get("website") or nominee.website
+            nominee.social_link = form.cleaned_data.get("social_link") or nominee.social_link
             nominee.contact_email = form.cleaned_data.get("contact_email", nominee.contact_email)
             nominee.nominator_name = form.cleaned_data.get("nominator_name", nominee.nominator_name)
             nominee.nominator_email = form.cleaned_data.get("nominator_email", nominee.nominator_email)

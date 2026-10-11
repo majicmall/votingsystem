@@ -142,6 +142,18 @@ class NomineeSignupForm(forms.Form):
         help_text="JPG, PNG, or WEBP only. Maximum 10 MB.",
     )
 
+    def clean(self):
+        cleaned = super().clean()
+        website = (cleaned.get("website") or "").strip()
+        social_link = (cleaned.get("social_link") or "").strip()
+
+        if not website and not social_link:
+            message = "Provide at least one website or social media link for nominee verification."
+            self.add_error("website", message)
+            self.add_error("social_link", message)
+
+        return cleaned
+
     def clean_categories(self):
         cats = self.cleaned_data["categories"]
         if cats.count() > 5:
