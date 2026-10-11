@@ -395,6 +395,43 @@ class NomineeAdmin(admin.ModelAdmin):
         self.message_user(request, message)
 
 
+    # Restricted Nominee Approval Team access.
+    def _is_nominee_approval_reviewer(self, request):
+        return (
+            not request.user.is_superuser
+            and request.user.groups.filter(
+                name="Nominee Approval Team"
+            ).exists()
+        )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = super().get_readonly_fields(request, obj)
+        if not self._is_nominee_approval_reviewer(request):
+            return fields
+
+        protected = (
+            "name", "category", "photo", "website",
+            "social_link", "contact_email", "is_active",
+        )
+        return tuple(dict.fromkeys((*fields, *protected)))
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if self._is_nominee_approval_reviewer(request):
+            return {}
+        return actions
+
+    def has_add_permission(self, request):
+        if self._is_nominee_approval_reviewer(request):
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        if self._is_nominee_approval_reviewer(request):
+            return False
+        return super().has_delete_permission(request, obj)
+
+
 @admin.register(Vote)
 class VoteAdmin(admin.ModelAdmin):
     list_display = ("email", "category", "nominee", "created_at", "ip_address")
