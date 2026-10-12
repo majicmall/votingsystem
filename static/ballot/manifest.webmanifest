@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "ATL's Hottest App",
+  "short_name": "ATL's Hottest",
+  "description": "Discover Atlanta's hottest awards, events, entertainment, marketplace experiences, and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "/static/ballot/app_icons/pwa/royal_crown_a_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/ballot/app_icons/pwa/royal_crown_a_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
