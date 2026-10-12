@@ -298,6 +298,7 @@ STORAGES = {
 }
 
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False
+WHITENOISE_MIMETYPES = {".webmanifest": "application/manifest+json"}
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
