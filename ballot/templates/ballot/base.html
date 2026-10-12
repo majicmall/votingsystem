@@ -1587,6 +1587,19 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+<!-- LAUNCH-010: ATL's Hottest App service worker registration -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" })
+      .catch(function (error) {
+        console.warn("ATL's Hottest App service worker:", error);
+      });
+  });
+}
+</script>
+
 </body>
 </html>
 

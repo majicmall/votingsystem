@@ -13,6 +13,15 @@ from ballot import account_compliance
 
 
 urlpatterns = [
+    # LAUNCH-010: ATL's Hottest App service worker
+    path(
+        "sw.js",
+        TemplateView.as_view(
+            template_name="ballot/sw.js",
+            content_type="application/javascript",
+        ),
+        name="app_service_worker",
+    ),
     path("megaverse/", include("megaverse.urls")),
     path(
         "robots.txt",
