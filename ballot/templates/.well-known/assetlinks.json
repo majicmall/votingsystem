@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.atlshottest.app",
+      "sha256_cert_fingerprints": [
+        "44:B4:84:32:B6:5C:97:C9:1D:A8:A6:D0:02:E2:79:88:77:AF:51:52:86:D9:57:EB:51:7B:5A:9E:1A:B0:75:88"
+      ]
+    }
+  }
+]

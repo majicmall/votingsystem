@@ -13,6 +13,15 @@ from ballot import account_compliance
 
 
 urlpatterns = [
+    # LAUNCH-011: Android Digital Asset Links verification
+    path(
+        ".well-known/assetlinks.json",
+        TemplateView.as_view(
+            template_name=".well-known/assetlinks.json",
+            content_type="application/json",
+        ),
+        name="android_assetlinks",
+    ),
     # LAUNCH-010: ATL's Hottest App service worker
     path(
         "sw.js",
