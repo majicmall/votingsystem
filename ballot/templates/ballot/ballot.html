@@ -129,4 +129,169 @@
   </div>
 </section>
 
+
+{% if active_campaign and not voting_open %}
+<style>
+.atl-announcement-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,.85);
+  backdrop-filter: blur(8px);
+}
+.atl-announcement-overlay.is-visible { display: flex; }
+.atl-announcement-card {
+  width: min(100%, 480px);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 30px 24px;
+  border: 1px solid #c6a354;
+  border-radius: 20px;
+  background: linear-gradient(145deg,#191919,#080808);
+  color: white;
+  text-align: center;
+  box-shadow: 0 0 45px rgba(207,167,75,.25);
+}
+.atl-announcement-eyebrow {
+  color: #e9c66c;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.atl-announcement-card h2 {
+  margin: 14px 0 8px;
+  color: white;
+  font-size: clamp(23px,5vw,30px);
+}
+.atl-announcement-card h3 {
+  margin: 0 0 20px;
+  color: #e9c66c;
+  font-size: 21px;
+}
+.atl-announcement-card p {
+  color: #e5e5e5;
+  line-height: 1.65;
+}
+.atl-announcement-dates {
+  margin: 20px 0;
+  padding: 16px 12px;
+  border: 1px solid #70582c;
+  border-radius: 12px;
+  background: #211b10;
+}
+.atl-announcement-dates strong {
+  display: block;
+  color: #f2d482;
+  font-size: clamp(19px,4.5vw,24px);
+}
+.atl-announcement-dates small {
+  display: block;
+  margin-top: 8px;
+  color: #ddd4bf;
+}
+.atl-announcement-dismiss {
+  width: 100%;
+  margin-top: 14px;
+  padding: 15px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg,#b99443,#f4d989,#b99443);
+  color: #111;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.atl-announcement-dismiss:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+</style>
+
+<div id="atl-schedule-announcement"
+     class="atl-announcement-overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="atl-announcement-title"
+     aria-describedby="atl-announcement-description">
+  <div class="atl-announcement-card">
+    <div class="atl-announcement-eyebrow">Official Announcement</div>
+    <h2 id="atl-announcement-title">ATL's Hottest Awards 2026</h2>
+    <h3>Voting Schedule Update</h3>
+
+    <p id="atl-announcement-description">
+      We apologize for any inconvenience. The official voting season
+      has been rescheduled to:
+    </p>
+
+    <div class="atl-announcement-dates">
+      <strong>October 20 – December 1, 2026</strong>
+      <small>Voting begins October 20 at 12:00 AM Eastern</small>
+    </div>
+
+    <p>
+      In the meantime, please explore the ballot and the amazing
+      features of the new <strong>ATL's Hottest Web App!</strong>
+    </p>
+
+    <p>
+      Thank you for your patience, understanding, and continued
+      support of ATL's Hottest Awards!
+    </p>
+
+    <button type="button"
+            id="atl-announcement-dismiss"
+            class="atl-announcement-dismiss">
+      GOT IT — EXPLORE THE APP
+    </button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const key = "atl-voting-schedule-oct20-2026";
+  const overlay = document.getElementById("atl-schedule-announcement");
+  const button = document.getElementById("atl-announcement-dismiss");
+  if (!overlay || !button) return;
+
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem(key) === "dismissed";
+  } catch (e) {}
+
+  if (dismissed) return;
+
+  const previousFocus = document.activeElement;
+  overlay.classList.add("is-visible");
+  button.focus();
+
+  function closeAnnouncement() {
+    overlay.classList.remove("is-visible");
+    try {
+      localStorage.setItem(key, "dismissed");
+    } catch (e) {}
+    if (previousFocus && typeof previousFocus.focus === "function") {
+      previousFocus.focus();
+    }
+  }
+
+  button.addEventListener("click", closeAnnouncement);
+
+  document.addEventListener("keydown", function (event) {
+    if (!overlay.classList.contains("is-visible")) return;
+    if (event.key === "Escape") closeAnnouncement();
+    if (event.key === "Tab") {
+      event.preventDefault();
+      button.focus();
+    }
+  });
+})();
+</script>
+{% endif %}
+
 {% endblock %}
