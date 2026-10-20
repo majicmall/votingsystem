@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Set ATL's Hottest voting campaign dates and public message."
 
     def handle(self, *args, **options):
-        start = timezone.make_aware(datetime(2026, 10, 20, 0, 0, 0))
+        start = timezone.make_aware(datetime(2026, 10, 20, 14, 0, 0))
         end = timezone.make_aware(datetime(2026, 12, 1, 23, 59, 59))
 
         # Resolve the target first without activating it. Once the
