@@ -20,6 +20,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
@@ -236,6 +238,11 @@ def _category_voting_eligible(category, campaign):
 
 
 def _create_vote(email, category, nominee, request):
+    try:
+        validate_email(email)
+    except ValidationError:
+        raise ValueError("Please enter a valid email address.")
+
     campaign = _active_voting_campaign_for_write()
 
     if not _category_voting_eligible(category, campaign):
@@ -1397,6 +1404,12 @@ def submit_final_ballot(request):
 
     if not voter_email:
         messages.error(request, "Please enter your email address before submitting your final ballot.")
+        return redirect("ballot_review")
+
+    try:
+        validate_email(voter_email)
+    except ValidationError:
+        messages.error(request, "Please enter a valid email address.")
         return redirect("ballot_review")
 
     selections = request.session.get("ballot_selections", {})
