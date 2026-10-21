@@ -16,6 +16,100 @@
   </div>
 {% endif %}
 
+{% if voting_open %}
+<style>
+.atl-season-banner {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  margin: 20px auto 28px;
+  padding: clamp(34px, 6vw, 65px) 20px;
+  border: 2px solid #f0c46c;
+  border-radius: 24px;
+  text-align: center;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(218,16,50,.5),transparent 65%),
+    linear-gradient(135deg,#090909,#480916 50%,#080808);
+  box-shadow: 0 0 35px rgba(210,20,55,.32),
+              0 0 28px rgba(255,215,120,.2);
+}
+.atl-season-banner::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 30%,
+    rgba(255,255,255,.1) 50%,transparent 70%);
+  animation:atlSeasonSweep 7s ease-in-out infinite;
+}
+@keyframes atlSeasonSweep {
+  from {transform:translateX(-120%)}
+  to {transform:translateX(120%)}
+}
+.atl-season-banner > * {position:relative;z-index:1}
+.atl-season-banner .season-label {
+  color:#ffe09a;
+  font-weight:800;
+  letter-spacing:2px;
+  font-size:clamp(12px,2vw,15px);
+}
+.atl-season-banner h2 {
+  margin:16px 0;
+  color:white;
+  font-size:clamp(32px,6vw,58px);
+  line-height:1.1;
+  text-shadow:0 0 22px rgba(255,45,70,.5);
+}
+.atl-season-banner .season-subtitle {
+  color:#ffda80;
+  font-size:clamp(18px,3vw,26px);
+  font-weight:800;
+}
+.atl-season-banner .season-note {
+  display:block;
+  margin:14px auto;
+  color:white;
+  font-size:13px;
+  font-weight:700;
+}
+.atl-season-banner .season-vote-btn {
+  display:inline-block;
+  margin-top:15px;
+  padding:18px 42px;
+  border:1px solid #ffe39b;
+  border-radius:12px;
+  background:linear-gradient(120deg,#a8071e,#f12a45,#a8071e);
+  color:white;
+  font-size:clamp(17px,3vw,22px);
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 10px 30px rgba(230,18,55,.45);
+  transition:transform .2s,box-shadow .2s;
+}
+.atl-season-banner .season-vote-btn:hover,
+.atl-season-banner .season-vote-btn:focus-visible {
+  transform:translateY(-3px);
+  box-shadow:0 10px 35px rgba(255,211,104,.45);
+}
+@media(prefers-reduced-motion:reduce) {
+  .atl-season-banner::before {animation:none}
+  .atl-season-banner .season-vote-btn {transition:none}
+}
+</style>
+
+<section id="atl-voting-season-banner" class="atl-season-banner"
+         aria-label="Voting season is open">
+  <div class="season-label">★ ATL'S HOTTEST AWARDS 2026 ★</div>
+  <h2>VOTING SEASON IS OPEN!</h2>
+  <div class="season-subtitle">YOUR VOICE. YOUR VOTE. YOUR ATL.</div>
+  <span class="season-note">NOW OPEN FOR SELECT CATEGORIES</span>
+  <a class="season-vote-btn" href="#atl-voting-genres">
+    ★ VOTE NOW ↓
+  </a>
+</section>
+{% endif %}
+
 <section class="hero small ballot-hero">
   <p class="eyebrow">Official Ballot</p>
   <h1>Choose a Genre</h1>
@@ -38,7 +132,7 @@
 </section>
 
 
-<section class="card ballot-category-section genre-directory">
+<section id="atl-voting-genres" class="card ballot-category-section genre-directory" style="scroll-margin-top:24px;">
 
   <div class="section-title-row">
     <div>

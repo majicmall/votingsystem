@@ -8,37 +8,104 @@
 
 {% block content %}
 
-<div id="atl-technical-notice" role="alert" style="
-  background:linear-gradient(135deg,#1b0808,#080808);
-  border:2px solid #d4af37;
-  border-radius:14px;
-  padding:25px 20px;
-  margin:20px auto;
-  max-width:850px;
-  text-align:center;
+<style>
+.atl-voting-launch {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  max-width: 950px;
+  margin: 24px auto;
+  padding: clamp(30px, 6vw, 65px) 20px;
+  text-align: center;
+  color: white;
+  border: 2px solid #e2b64b;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(205,14,46,.48), transparent 65%),
+    linear-gradient(135deg,#090909,#370713 48%,#080808);
+  box-shadow: 0 0 40px rgba(210,18,49,.3),
+              0 0 35px rgba(255,211,104,.18);
+}
+.atl-voting-launch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg,transparent 30%,
+    rgba(255,255,255,.09) 48%,transparent 62%);
+  animation: atlVotingShine 7s ease-in-out infinite;
+}
+@keyframes atlVotingShine {
+  0%,100% { transform:translateX(-110%); }
+  55% { transform:translateX(110%); }
+}
+.atl-voting-launch > * { position:relative; z-index:1; }
+.atl-voting-launch .launch-eyebrow {
+  color:#ffda80;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-size:clamp(11px,2.5vw,14px);
+}
+.atl-voting-launch h2 {
   color:#fff;
-  box-shadow:0 0 30px rgba(212,175,55,.25);
-">
-  <div style="color:#d4af37;font-weight:800;letter-spacing:2px;">
-    ⚠ IMPORTANT ANNOUNCEMENT
-  </div>
-  <h2 style="color:#fff;margin:15px 0;">
-    We Are Experiencing Technical Difficulties
-  </h2>
-  <p style="font-size:17px;line-height:1.7;">
-    ATL's Hottest Awards voting is temporarily unavailable
-    while our technical team completes important system updates.
-  </p>
-  <p style="line-height:1.7;">
-    Nominations and nominee profiles remain available.
-    We appreciate your patience and understanding as we
-    work to restore voting access.
-  </p>
-  <strong style="color:#d4af37;">
-    ATL's Hottest Awards Association
-  </strong>
-</div>
+  font-size:clamp(29px,6vw,54px);
+  line-height:1.1;
+  margin:18px 0 10px;
+  text-shadow:0 0 22px rgba(255,50,70,.55);
+}
+.atl-voting-launch .launch-gold {
+  color:#ffda80;
+  font-size:clamp(19px,4vw,29px);
+  font-weight:900;
+}
+.atl-voting-launch .launch-select {
+  display:inline-block;
+  margin:16px 0;
+  padding:7px 18px;
+  border-radius:40px;
+  background:#b90d28;
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+.atl-voting-launch .launch-btn {
+  display:inline-block;
+  margin-top:20px;
+  padding:16px 32px;
+  border-radius:12px;
+  border:1px solid #ffe39b;
+  background:linear-gradient(120deg,#a8071e,#f02b45,#a8071e);
+  color:white;
+  font-weight:900;
+  letter-spacing:1px;
+  text-decoration:none;
+  box-shadow:0 8px 30px rgba(230,18,55,.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.atl-voting-launch .launch-btn:hover,
+.atl-voting-launch .launch-btn:focus-visible {
+  transform:translateY(-3px);
+  box-shadow:0 10px 35px rgba(255,211,104,.45);
+}
+@media(prefers-reduced-motion:reduce) {
+  .atl-voting-launch::before { animation:none; }
+  .atl-voting-launch .launch-btn { transition:none; }
+}
+</style>
 
+<section class="atl-voting-launch" aria-label="ATL's Hottest voting announcement">
+  <div class="launch-eyebrow">★ ATL'S HOTTEST AWARDS 2026 ★</div>
+  <h2>VOTING IS UNDERWAY!</h2>
+  <div class="launch-gold">YOUR VOICE. YOUR VOTE. YOUR ATL.</div>
+  <div class="launch-select">FOR SELECT CATEGORIES</div>
+  <p>The spotlight is on your favorite nominees.<br>
+     Make your selections and be part of ATL's hottest celebration!</p>
+  <a class="launch-btn" href="{% url 'ballot' %}">
+    ★ CAST YOUR VOTE NOW →
+  </a>
+</section>
 
 <style>
 /* =========================================================
