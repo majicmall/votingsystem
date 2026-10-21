@@ -218,13 +218,41 @@ def _send_vote_confirmation(email, saved_votes):
         pass
 
 
+
+def _category_voting_eligible(category, campaign):
+    """Check whether a category meets the automatic voting requirements."""
+    if not campaign or not category.is_active or category.voting_hold:
+        return False
+
+    return (
+        Nominee.objects.filter(
+            campaign=campaign,
+            category=category,
+            is_active=True,
+            deleted_at__isnull=True,
+            approval_status=Nominee.APPROVAL_APPROVED,
+        ).count() >= 5
+    )
+
+
 def _create_vote(email, category, nominee, request):
     campaign = _active_voting_campaign_for_write()
+
+    if not _category_voting_eligible(category, campaign):
+        raise ValueError("Voting is not open for this category.")
 
     if nominee.campaign_id != campaign.pk:
         raise ValueError(
             "Nominee does not belong to the active voting campaign."
         )
+
+    if (
+        nominee.category_id != category.pk
+        or not nominee.is_active
+        or nominee.deleted_at is not None
+        or nominee.approval_status != Nominee.APPROVAL_APPROVED
+    ):
+        raise ValueError("This nominee is not eligible to receive votes.")
 
     return Vote.objects.create(
         email=email,
@@ -361,6 +389,7 @@ def submit_votes(request):
                 campaign=voting_campaign,
                 is_active=True,
                 approval_status=Nominee.APPROVAL_APPROVED,
+                deleted_at__isnull=True,
             )
         except (Category.DoesNotExist, Nominee.DoesNotExist):
             errors.append({"category": category_slug, "message": "Invalid nominee selection."})
@@ -371,6 +400,8 @@ def submit_votes(request):
             saved.append({"category": category.name, "nominee": nominee.name})
         except IntegrityError:
             skipped.append({"category": category.name, "message": "Already voted in this category."})
+        except ValueError as exc:
+            errors.append({"category": category.name, "message": str(exc)})
 
     if saved:
         _send_vote_confirmation(email, saved)
@@ -392,7 +423,26 @@ def nominee_detail(request, nominee_id):
         Nominee.objects.select_related("category"),
         id=nominee_id,
         is_active=True,
+        deleted_at__isnull=True,
         approval_status=Nominee.APPROVAL_APPROVED,
+    )
+
+    voting_context = get_voting_status_context()
+    voting_campaign = voting_context.get("active_campaign")
+    category = nominee.category
+
+    category_voting_open = (
+        bool(voting_campaign)
+        and voting_campaign.is_voting_open
+        and nominee.campaign_id == voting_campaign.pk
+        and _category_voting_eligible(category, voting_campaign)
+        and BallotSettings.get_solo().is_active()
+    )
+
+    category_voting_hold = category.voting_hold
+    category_needs_nominees = (
+        not category_voting_hold
+        and not _category_voting_eligible(category, voting_campaign)
     )
 
     nominee_url = f"{django_settings.SITE_URL}{reverse('nominee_detail', kwargs={'nominee_id': nominee.id})}"
@@ -406,8 +456,11 @@ def nominee_detail(request, nominee_id):
         request,
         "ballot/nominee_detail.html",
         {
-            **get_voting_status_context(),
+            **voting_context,
             "nominee": nominee,
+            "category_voting_open": category_voting_open,
+            "category_voting_hold": category_voting_hold,
+            "category_needs_nominees": category_needs_nominees,
             "nominee_url": nominee_url,
             "nominee_image_url": nominee_image_url,
         },
@@ -454,6 +507,7 @@ def vote_nominee(request, nominee_id):
         campaign=voting_campaign,
         is_active=True,
         approval_status=Nominee.APPROVAL_APPROVED,
+        deleted_at__isnull=True,
     )
 
     email = (request.POST.get("email") or "").strip().lower()
@@ -479,6 +533,8 @@ def vote_nominee(request, nominee_id):
             request,
             f"Thank you for your vote. A special message is waiting for you at {email}.",
         )
+    except ValueError as exc:
+        messages.error(request, str(exc))
     except IntegrityError:
         messages.warning(
             request,
@@ -1199,7 +1255,15 @@ def ballot_category_view(request, category_slug):
             category=category,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
+            deleted_at__isnull=True,
         ).order_by("name")
+    )
+
+    category_voting_open = (
+        bool(ballot_campaign)
+        and ballot_campaign.is_voting_open
+        and _category_voting_eligible(category, ballot_campaign)
+        and BallotSettings.get_solo().is_active()
     )
 
     placeholder_count = max(0, 6 - len(nominees))
@@ -1216,6 +1280,9 @@ def ballot_category_view(request, category_slug):
             "placeholder_count": placeholder_count,
             "placeholders": range(placeholder_count),
             "selected_nominee_id": selected_nominee_id,
+            "category_voting_open": category_voting_open,
+            "category_voting_hold": category.voting_hold,
+            "category_needs_nominees": not category.voting_hold and len(nominees) < 5,
         },
     )
 
@@ -1231,6 +1298,11 @@ def select_ballot_nominee(request, category_slug, nominee_id):
     voting_campaign = _active_voting_campaign_for_write()
 
     category = get_object_or_404(Category, slug=category_slug, is_active=True)
+
+    if not _category_voting_eligible(category, voting_campaign):
+        messages.error(request, "Voting is not open for this category yet.")
+        return redirect("ballot_category", category_slug=category.slug)
+
     nominee = get_object_or_404(
         Nominee,
         id=nominee_id,
@@ -1238,6 +1310,7 @@ def select_ballot_nominee(request, category_slug, nominee_id):
         campaign=voting_campaign,
         is_active=True,
         approval_status=Nominee.APPROVAL_APPROVED,
+        deleted_at__isnull=True,
     )
 
     selections = request.session.get("ballot_selections", {})
@@ -1272,6 +1345,9 @@ def ballot_review(request):
     categories = Category.objects.filter(is_active=True).order_by("sort_order", "name")
 
     for category in categories:
+        if not _category_voting_eligible(category, voting_campaign):
+            continue
+
         nominee_id = selections.get(category.slug)
         if not nominee_id:
             continue
@@ -1282,6 +1358,7 @@ def ballot_review(request):
             campaign=voting_campaign,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
+            deleted_at__isnull=True,
         ).first()
 
         if nominee:
@@ -1340,12 +1417,17 @@ def submit_final_ballot(request):
         if not category:
             continue
 
+        if not _category_voting_eligible(category, voting_campaign):
+            unavailable_votes.append(category.name)
+            continue
+
         nominee = Nominee.objects.filter(
             id=nominee_id,
             category=category,
             campaign=voting_campaign,
             is_active=True,
             approval_status=Nominee.APPROVAL_APPROVED,
+            deleted_at__isnull=True,
         ).first()
 
         if not nominee:
@@ -1942,6 +2024,7 @@ def ballot_view(request):
             campaign=ballot_campaign,
             category=category,
             is_active=True,
+            deleted_at__isnull=True,
             approval_status=Nominee.APPROVAL_APPROVED,
         ).count()
 
@@ -1954,6 +2037,7 @@ def ballot_view(request):
                 campaign=ballot_campaign,
                 category=category,
                 is_active=True,
+                deleted_at__isnull=True,
                 approval_status=Nominee.APPROVAL_APPROVED,
             ).first()
 

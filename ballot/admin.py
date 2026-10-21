@@ -38,11 +38,38 @@ class BallotSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "group", "sort_order", "is_active")
-    list_filter = ("group", "is_active")
+    list_display = (
+        "name", "slug", "group", "sort_order",
+        "is_active", "voting_status", "voting_hold",
+    )
+    list_editable = ("voting_hold",)
+    list_filter = ("group", "is_active", "voting_hold")
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
     ordering = ("sort_order", "name")
+    actions = ("enable_category_voting", "disable_category_voting")
+
+    @admin.display(description="Voting Status")
+    def voting_status(self, obj):
+        return "OFF" if obj.voting_hold else "ON"
+
+    @admin.action(description="Enable voting for selected categories")
+    def enable_category_voting(self, request, queryset):
+        count = queryset.update(voting_hold=False)
+        self.message_user(
+            request,
+            f"Voting enabled for {count} selected category/categories.",
+            level=messages.SUCCESS,
+        )
+
+    @admin.action(description="Disable voting for selected categories")
+    def disable_category_voting(self, request, queryset):
+        count = queryset.update(voting_hold=True)
+        self.message_user(
+            request,
+            f"Voting disabled for {count} selected category/categories.",
+            level=messages.SUCCESS,
+        )
 
 
 @admin.register(SelfNominationCheckIn)

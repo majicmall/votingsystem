@@ -248,6 +248,10 @@ class Category(models.Model):
     description = models.TextField(blank=True, default="")
     sort_order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    voting_hold = models.BooleanField(
+        default=False,
+        help_text='Keep voting closed even when this category has at least 5 eligible nominees.',
+    )
 
     objects = CategoryQuerySet.as_manager()
 

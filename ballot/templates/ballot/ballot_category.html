@@ -9,10 +9,18 @@
 
 {% block content %}
 
-{% if active_campaign and not voting_open %}
+{% if not category_voting_open %}
   <div class="voting-preview-notice">
-    <strong>Voting starts October 20, 2026 and ends December 1, 2026.</strong>
-    <span>You may view the current ballot and nominees, but votes cannot be cast until the official voting period begins.</span>
+    {% if category_voting_hold %}
+      <strong>Voting Temporarily Unavailable</strong>
+      <span>Voting for this category is currently on hold. You may continue viewing approved nominees.</span>
+    {% elif category_needs_nominees %}
+      <strong>Voting Opens at 5 Approved Nominees</strong>
+      <span>This category needs at least five approved, active nominees before voting can become available.</span>
+    {% else %}
+      <strong>Voting Is Not Open Yet</strong>
+      <span>This category meets the nominee requirement. Voting will be available when the official voting period is open.</span>
+    {% endif %}
   </div>
 {% endif %}
 
@@ -20,19 +28,25 @@
   <p class="eyebrow">{{ category.group|default:"ATL’s Hottest Category" }}</p>
   <h1>{{ category.name }}</h1>
 
-  {% if voting_open %}
+  {% if category_voting_open %}
     <p>Select one nominee in this category. You can review and change your selections before final submit.</p>
   {% else %}
-    <p>Voting is not active yet. You may preview approved nominees in this category.</p>
+    <p>Voting is not available in this category yet. You may preview approved nominees.</p>
   {% endif %}
 
   <div class="ballot-status-row">
     <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
 
-    {% if voting_open %}
+    {% if category_voting_open %}
       <a class="btn primary" href="{% url 'ballot_review' %}">Review My Votes</a>
     {% else %}
-      <span class="btn disabled-vote-btn">Voting Starts October 20, 2026</span>
+      {% if category_voting_hold %}
+      <span class="btn disabled-vote-btn">Voting Temporarily Unavailable</span>
+    {% elif category_needs_nominees %}
+      <span class="btn disabled-vote-btn">Voting Opens at 5 Approved Nominees</span>
+    {% else %}
+      <span class="btn disabled-vote-btn">Voting Is Not Open Yet</span>
+    {% endif %}
     {% endif %}
   </div>
 </section>
@@ -68,7 +82,7 @@
           </div>
         </a>
 
-        {% if voting_open %}
+        {% if category_voting_open %}
           <form method="post" action="{% url 'select_ballot_nominee' category.slug nominee.id %}" class="select-nominee-form">
             {% csrf_token %}
             <button class="btn primary vote-card-btn" type="submit" name="next_action" value="review">
@@ -80,7 +94,13 @@
           </form>
         {% else %}
           <a class="btn vote-card-btn" href="{% url 'nominee_detail' nominee.id %}">View Nominee</a>
-          <span class="btn disabled-vote-btn">Voting Starts October 20, 2026</span>
+          {% if category_voting_hold %}
+      <span class="btn disabled-vote-btn">Voting Temporarily Unavailable</span>
+    {% elif category_needs_nominees %}
+      <span class="btn disabled-vote-btn">Voting Opens at 5 Approved Nominees</span>
+    {% else %}
+      <span class="btn disabled-vote-btn">Voting Is Not Open Yet</span>
+    {% endif %}
         {% endif %}
       </article>
     {% empty %}
@@ -119,10 +139,16 @@
   <div class="ballot-status-row">
     <a class="btn" href="{% url 'ballot' %}">Back to Categories</a>
 
-    {% if voting_open %}
+    {% if category_voting_open %}
       <a class="btn primary" href="{% url 'ballot_review' %}">Continue to Review</a>
     {% else %}
-      <span class="btn disabled-vote-btn">Voting Starts October 20, 2026</span>
+      {% if category_voting_hold %}
+      <span class="btn disabled-vote-btn">Voting Temporarily Unavailable</span>
+    {% elif category_needs_nominees %}
+      <span class="btn disabled-vote-btn">Voting Opens at 5 Approved Nominees</span>
+    {% else %}
+      <span class="btn disabled-vote-btn">Voting Is Not Open Yet</span>
+    {% endif %}
     {% endif %}
   </div>
 </section>

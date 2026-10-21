@@ -17,7 +17,9 @@ def voting_campaign_status(request):
     except Exception:
         pass
 
+    # SECURITY: If no active campaign exists or lookup fails,
+    # voting must remain closed.
     return {
         "active_campaign": None,
-        "voting_open": True,
+        "voting_open": False,
     }

@@ -144,12 +144,16 @@
         <label class="field-label" for="detail-email">Email address</label>
         <input id="detail-email" name="email" type="email" placeholder="you@example.com" required>
 
-        {% if voting_open %}
+        {% if category_voting_open %}
           <button class="btn primary detail-vote-btn" type="submit">
             Vote for {{ nominee.name }}
           </button>
+        {% elif category_voting_hold %}
+          <span class="btn disabled-vote-btn">Voting Temporarily Unavailable</span>
+        {% elif category_needs_nominees %}
+          <span class="btn disabled-vote-btn">Voting Opens at 5 Approved Nominees</span>
         {% else %}
-          <span class="btn disabled-vote-btn">Voting Not Open Yet</span>
+          <span class="btn disabled-vote-btn">Voting Is Not Open Yet</span>
         {% endif %}
       </form>
 
