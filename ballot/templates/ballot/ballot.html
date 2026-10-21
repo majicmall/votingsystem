@@ -110,6 +110,81 @@
 </section>
 {% endif %}
 
+
+<style>
+.atl-nomination-invite {
+  position: relative;
+  overflow: hidden;
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 28px 22px;
+  text-align: center;
+  border: 1px solid rgba(244,196,91,.65);
+  border-radius: 18px;
+  background: linear-gradient(135deg,#16090d,#350d18 52%,#16090d);
+  box-shadow: 0 12px 35px rgba(0,0,0,.28);
+  color: #fff;
+}
+.atl-nomination-invite h2 {
+  color: #fff;
+  font-size: clamp(1.3rem,3.5vw,2rem);
+  margin: 10px 0;
+}
+.atl-nomination-invite p {
+  color: #f5e8dc;
+}
+.atl-nomination-invite .atl-invite-update {
+  color: #ffd36d;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.atl-invite-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 13px 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#b80f2c,#e43147);
+  border: 1px solid #ffd36d;
+  color: #fff !important;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 5px 20px rgba(205,29,55,.35);
+}
+.atl-invite-btn:hover,
+.atl-invite-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255,211,109,.3);
+}
+.atl-nomination-reminder {
+  margin: 22px auto;
+  padding: 15px;
+  text-align: center;
+  color: #fff;
+  background: #250d15;
+  border: 1px solid rgba(244,196,91,.55);
+  border-radius: 12px;
+}
+.atl-nomination-reminder a {
+  display: inline-block;
+  margin-left: 8px;
+  color: #ffd36d;
+  font-weight: 800;
+}
+@media(max-width:600px) {
+  .atl-nomination-invite {padding:22px 15px}
+  .atl-nomination-reminder a {margin:8px 0 0}
+}
+</style>
+
+<section class="atl-nomination-invite" aria-label="Nomination invitation">
+  <p class="atl-invite-update">★ MORE NOMINEES ARE BEING ADDED! ★</p>
+  <h2>Your Favorite ATL's Hottest Not Listed?</h2>
+  <p>Know someone who deserves recognition? Help us discover more of ATL's Hottest!</p>
+  <a class="atl-invite-btn" href="{% url 'nominee_signup' %}">
+    ★ NOMINATE THEM HERE →
+  </a>
+</section>
+
 <section class="hero small ballot-hero">
   <p class="eyebrow">Official Ballot</p>
   <h1>Choose a Genre</h1>
@@ -202,6 +277,11 @@
 
 </section>
 
+
+<div class="atl-nomination-reminder">
+  <strong>Your Favorite ATL's Hottest Not Listed?</strong>
+  <a href="{% url 'nominee_signup' %}">NOMINATE THEM HERE →</a>
+</div>
 
 <section class="ballot-bottom-actions">
   <div class="ballot-status-row">
