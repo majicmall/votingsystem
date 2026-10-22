@@ -353,6 +353,12 @@ class Nominee(models.Model):
     )
     approved_at = models.DateTimeField(blank=True, null=True)
     rejected_at = models.DateTimeField(blank=True, null=True)
+    approval_notice_sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        editable=False,
+        help_text="When the official nominee approval email was successfully sent.",
+    )
 
     is_active = models.BooleanField(default=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -518,13 +524,32 @@ class Nominee(models.Model):
 
 
     def approve(self):
+        previous_status = (
+            type(self).objects
+            .filter(pk=self.pk)
+            .values_list("approval_status", flat=True)
+            .first()
+        )
+        was_approved = previous_status == self.APPROVAL_APPROVED
+
         self.approval_status = self.APPROVAL_APPROVED
         self.approved_at = timezone.now()
         self.rejected_at = None
         self.is_active = True
         self.save(update_fields=["approval_status", "approved_at", "rejected_at", "is_active", "updated_at"])
 
-        self.send_approval_notice()
+        if not was_approved and self.contact_email:
+            nominee_pk = self.pk
+
+            def send_after_commit():
+                nominee = type(self).objects.get(pk=nominee_pk)
+                if (
+                    nominee.approval_status == self.APPROVAL_APPROVED
+                    and nominee.contact_email
+                ):
+                    nominee.send_approval_notice()
+
+            transaction.on_commit(send_after_commit)
 
     def reject(self):
         self.approval_status = self.APPROVAL_REJECTED
@@ -573,6 +598,10 @@ class Nominee(models.Model):
         if not self.contact_email:
             return None
 
+        # Avoid sending duplicate approval notifications.
+        if self.approval_notice_sent_at:
+            return None
+
         email = self.contact_email.strip().lower()
         User = get_user_model()
 
@@ -616,6 +645,10 @@ class Nominee(models.Model):
             temporary_password=temporary_password if (created or temporary_password) else None,
             account_created=created,
         )
+
+        # Only record success after the email service accepts the message.
+        self.approval_notice_sent_at = timezone.now()
+        self.save(update_fields=["approval_notice_sent_at", "updated_at"])
 
         return user
 

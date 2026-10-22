@@ -241,6 +241,7 @@ class NomineeAdmin(admin.ModelAdmin):
         approval timestamp. Rejected nominees receive a rejection timestamp.
         """
         previous_status = None
+        previous_email = ""
 
         if change and obj.pk:
             previous_status = (
@@ -248,6 +249,13 @@ class NomineeAdmin(admin.ModelAdmin):
                 .filter(pk=obj.pk)
                 .values_list("approval_status", flat=True)
                 .first()
+            )
+            previous_email = (
+                Nominee.objects
+                .filter(pk=obj.pk)
+                .values_list("contact_email", flat=True)
+                .first()
+                or ""
             )
 
         if obj.approval_status == Nominee.APPROVAL_APPROVED:
@@ -263,13 +271,36 @@ class NomineeAdmin(admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
-        # Send the approval notice only when the nominee actually transitions
-        # into Approved status. This avoids duplicate emails on later edits.
-        if (
+        # Notify on approval or when an email is added to an approved nominee.
+        # The model method prevents repeat notifications after a successful send.
+        email_added = (
+            bool((obj.contact_email or "").strip())
+            and not bool(previous_email.strip())
+        )
+
+        newly_approved = (
             obj.approval_status == Nominee.APPROVAL_APPROVED
             and previous_status != Nominee.APPROVAL_APPROVED
+        )
+
+        if (
+            obj.approval_status == Nominee.APPROVAL_APPROVED
+            and obj.contact_email
+            and (newly_approved or email_added)
         ):
-            obj.send_approval_notice()
+            from django.db import transaction
+
+            nominee_pk = obj.pk
+
+            def send_after_commit():
+                nominee = Nominee.objects.get(pk=nominee_pk)
+                if (
+                    nominee.approval_status == Nominee.APPROVAL_APPROVED
+                    and nominee.contact_email
+                ):
+                    nominee.send_approval_notice()
+
+            transaction.on_commit(send_after_commit)
 
     @admin.display(description="Photo")
     def photo_preview(self, obj):
