@@ -240,6 +240,21 @@ class NomineeAdmin(admin.ModelAdmin):
         publishes the nominee by ensuring is_active=True and recording the
         approval timestamp. Rejected nominees receive a rejection timestamp.
         """
+        # Assign the active campaign when a new nominee has none.
+        # Preserve explicitly selected campaigns and existing nominees.
+        if not change and obj.campaign_id is None:
+            from .models import VotingCampaign
+
+            active_campaign = (
+                VotingCampaign.objects
+                .filter(is_active_campaign=True)
+                .order_by("-pk")
+                .first()
+            )
+            if active_campaign is None:
+                raise ValueError("No active voting campaign is configured.")
+            obj.campaign = active_campaign
+
         previous_status = None
         previous_email = ""
 
