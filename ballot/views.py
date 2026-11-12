@@ -979,6 +979,20 @@ def self_nomination_checkin(request):
 
 
 def nominee_signup(request):
+    # Nomination Security Shield: reject automated honeypot submissions.
+    from ballot.nomination_security import nomination_honeypot_triggered
+
+    if nomination_honeypot_triggered(request):
+        from django.http import HttpResponseBadRequest
+        return HttpResponseBadRequest("Invalid nomination submission.")
+
+    # Nomination Security Shield: verify Turnstile before processing submissions.
+    if request.method == "POST":
+        from ballot.nomination_security import verify_nomination_turnstile
+        if not verify_nomination_turnstile(request):
+            from django.http import HttpResponseBadRequest
+            return HttpResponseBadRequest("Nomination verification failed.")
+
     form = NomineeSignupForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
@@ -1111,12 +1125,16 @@ def nominee_signup(request):
 
         return redirect("nomination_thank_you")
 
+    from django.conf import settings
+    from ballot.nomination_security import nomination_turnstile_enabled
     return render(
         request,
         "ballot/nominee_signup.html",
         {
             "form": form,
             "genre_blocks": build_nomination_genre_blocks(form),
+            "nomination_turnstile_enabled": nomination_turnstile_enabled(),
+            "nomination_turnstile_site_key": getattr(settings, "NOMINATION_TURNSTILE_SITE_KEY", ""),
         },
     )
 

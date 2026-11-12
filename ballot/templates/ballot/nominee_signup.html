@@ -338,6 +338,7 @@
         </div>
 
     {% csrf_token %}
+    <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden"><label for="nomination_reference_code">Leave this field blank</label><input type="text" id="nomination_reference_code" name="nomination_reference_code" tabindex="-1" autocomplete="off"></div>
 
     {% if form.non_field_errors %}
       <div class="alert">
@@ -427,6 +428,13 @@
         </section>
       {% endfor %}
     </div>
+
+    {% if nomination_turnstile_enabled %}
+    <div class="nomination-turnstile-verification">
+      <div class="cf-turnstile" data-sitekey="{{ nomination_turnstile_site_key }}"></div>
+    </div>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    {% endif %}
 
     <button class="btn primary nomination-submit-btn" type="submit">
       Submit Nominee
