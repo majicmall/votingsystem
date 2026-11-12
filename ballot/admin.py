@@ -23,6 +23,7 @@ from .models import (
     AssociationMembership,
     AssociationProfile,
     BallotSettings,
+    ArchivedCategory,
     Category,
     NominationCategoryRequest,
     Nominee,
@@ -38,6 +39,12 @@ class BallotSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(
+            name__istartswith="Archived - "
+        )
+
     list_display = (
         "name", "slug", "group", "sort_order",
         "is_active", "voting_status", "voting_hold",
@@ -69,6 +76,19 @@ class CategoryAdmin(admin.ModelAdmin):
             request,
             f"Voting disabled for {count} selected category/categories.",
             level=messages.SUCCESS,
+        )
+
+
+@admin.register(ArchivedCategory)
+class ArchivedCategoryAdmin(CategoryAdmin):
+    """Separate admin list for existing archived categories."""
+
+    list_editable = ()
+    actions = ()
+
+    def get_queryset(self, request):
+        return admin.ModelAdmin.get_queryset(self, request).filter(
+            name__istartswith="Archived - "
         )
 
 

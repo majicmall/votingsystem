@@ -273,6 +273,18 @@ class Category(models.Model):
         return self.nominees.filter(is_active=True).count()
 
 
+
+class ArchivedCategory(Category):
+    """Admin-only view of archived category records."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Archived Category"
+        verbose_name_plural = "Archived Categories"
+        ordering = ["group", "sort_order", "name"]
+
+
+
 # ---------------------------------------------------------------------
 # Nominees
 # ---------------------------------------------------------------------
