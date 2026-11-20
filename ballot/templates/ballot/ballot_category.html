@@ -179,6 +179,10 @@
       <span class="btn disabled-vote-btn">Voting Is Not Open Yet</span>
     {% endif %}
         {% endif %}
+        <a class="btn vote-card-btn nominee-profile-entry-btn"
+           href="{% url 'nominee_detail' nominee.id %}">
+          Click To Enter Profile →
+        </a>
       </article>
     {% empty %}
       <article class="ballot-nominee-card nominee-card placeholder-card">

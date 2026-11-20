@@ -7077,3 +7077,46 @@ header nav a:hover::before,
     width: 100%;
   }
 }
+
+
+/* ATL PROFILE ENTRY BUTTON — 2026 */
+.ballot-category-only-grid .nominee-profile-entry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 20px);
+  min-height: 48px;
+  margin: 4px 10px 14px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: 1px solid #f7d778;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f9dc87 0%, #d9a936 55%, #b78320 100%);
+  color: #171107;
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(212, 164, 48, 0.22);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ballot-category-only-grid .nominee-profile-entry-btn:hover {
+  color: #171107;
+  filter: brightness(1.08);
+  box-shadow: 0 5px 20px rgba(247, 215, 120, 0.38);
+}
+
+.ballot-category-only-grid .nominee-profile-entry-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .ballot-category-only-grid .nominee-profile-entry-btn {
+    width: calc(100% - 24px) !important;
+    min-height: 48px !important;
+    margin: 4px 12px 14px !important;
+  }
+}
